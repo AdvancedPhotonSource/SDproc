@@ -27,6 +27,20 @@ function log(){
         $('#log_add').fadeOut(1000);
     })
 }
+/*
+$(function(){
+    $('#againstE').on('change', function(){
+        $('#meta-form').trigger('change');
+    })
+})
+*/
+
+function hitAgaE(){
+    $('#againstE').bootstrapToggle('toggle')
+    //$('#meta-form').trigger('change');
+}
+
+
 
 
 $(function(){
@@ -35,11 +49,15 @@ $(function(){
         $.post('/save_graph', $(this).serialize(),
         function(){
             nextID = localStorage.getItem('previous2');
-            $.post('/data', { idnext: nextID , plot: 1},
+            var againstE = $('#againstE').val();
+            $.post('/data', { idnext: nextID , plot: 1, againstE: againstE},
             function(data){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#againstE').prop('checked', $('#agaE').val()).change(function(event){
+                    event.preventDefault();
+                });
             })
         });
     });
@@ -50,13 +68,20 @@ $(function(){
     $('#meta-form').on('change', function(event){
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
+        var temp = $('#againstE').prop('checked');
+        $('#agaE').val(temp);
         $.post('/save_graph', $('#meta-form').serialize(),
         function(){
+            var againstE = $('#againstE').prop('checked');
             $.post('/data', { idnext: previous , plot: 1},
             function(data){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#againstE').prop('checked', $('#agaE').val()).change(function(event){
+                    event.preventDefault();
+                alert('DONE')
+                });
             })
         })
     })
@@ -84,6 +109,9 @@ $(function ()
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#againstE').prop('checked', $(data).find('#agaE').val()).change(function(event){
+                    event.preventDefault();
+                })
             })
 
             $.post('/show_comment', { idnext: this.value },
@@ -96,7 +124,6 @@ $(function ()
             var nextID = this.value
             previous = localStorage.getItem('previous2');
             $('#idnum').val(previous);
-            //$('#meta-form').append("<input type='hidden' name='idnum' value='" + previous + "' />");
             $.post( "/save_comment", { idprev: previous, comment: $('#comment').val()},
             function(){
                 $.post('/show_comment', { idnext: nextID },

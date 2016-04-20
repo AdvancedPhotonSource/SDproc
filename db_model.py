@@ -45,6 +45,8 @@ class metaData(db.Model):
     user = db.relationship('User', backref=db.backref('metaData', lazy='dynamic'))
     plot = db.Column(db.String())
 
+    against_E = db.Column(db.Boolean())
+
     energy = db.Column(db.String())
     xtal1A = db.Column(db.String())
     xtal2A = db.Column(db.String())
@@ -85,6 +87,8 @@ class fileFormat(db.Model):
     user = db.relationship('User', backref=db.backref('tempStorage', lazy='dynamic'))
     plot = db.Column(db.String())
     comment = db.Column(db.String())
+
+    against_E = db.Column(db.Boolean())
 
     energy = db.Column(db.String())
     xtal1A = db.Column(db.String())

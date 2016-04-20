@@ -67,20 +67,22 @@
     <br/>
     <br/>
     <br/>
-    {% if user.is_anonymous() %}
-        <p align="right">
-            <a href="/login">Login</a>
-            /
-            <a href="/reg">Register</a>
-        </p>
-    {% else %}
-        <p align="right">Logged in as {{ user.username }}
-            <br/>
-            <a href="/db">Logbook</a>
-            <br/>
-            <a href="/logout">Logout</a>
-        </p>
-    {% endif %}
+    <div class="margin-info">
+        {% if user.is_anonymous() %}
+            <p align="right">
+                <a href="/login">Login</a>
+                /
+                <a href="/reg">Register</a>
+            </p>
+        {% else %}
+            <p align="right">Logged in as {{ user.username }}
+                <br/>
+                <a href="/db">Logbook</a>
+                <br/>
+                <a href="/logout">Logout</a>
+            </p>
+        {% endif %}
+    </div>
     <div class="form-group">
         <div class="row">
             <div class="col-xs-6">
@@ -94,16 +96,20 @@
             </div>
         </div>
         <div class="row">
+            <button class="hiddenbtn" onclick="hitAgaE()">CLICK</button>
+            <div class="bootbtn">
+                <label for="againstE">Plot against Energy</label>
+                <input type="checkbox" id="againstE" data-toggle="toggle">
+            </div>
             <form id="meta-form" method=post action="" remote="true">
                 <input type="hidden" name="idnum" id="idnum">
+                <input type="hidden" name="agaE" id="agaE" value="{{ form.against_E }}">
                 <div class="col-xs-6" id="metaForm_id">
                     <div class="col-xs-6">
-                        <label for="againstE">Plot against Energy</label>
-                        <input type="checkbox" data-toggle="toggle" id="againstE">
                     </div>
                     <div class="col-xs-5">
                         <span class="centerBlock">
-                            <button onclick="log()" class="btn btn-primary btn-sm" id="logbtn">
+                            <button type="button" onclick="log()" class="btn btn-primary btn-sm" id="logbtn">
                                 Add to Logbook
                             </button>
                         </span>

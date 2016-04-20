@@ -12,6 +12,8 @@ from forms import InputForm, CommentForm
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import json
+import math
+import numpy
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -89,14 +91,24 @@ def dataFormat():
 
         format_instance = db.session.query(fileFormat).filter_by(path=fpath).first()
         if format_instance is not None:
+            againstE = format_instance.against_E
             form = populate_from_instance(format_instance)
             columns, bools = splitForm(form)
             used = []
             data, name, unusedpath = readAscii(file_instance.path)
             for i in range(len(bools)):
                 if bools[i].data:
-                    converting = float(columns[i].data)
-                    used.append(int(converting))
+                    if columns[i].data == None:
+                        if i == 1:
+                            energy = energy_xtal(data, unicodeFloat_to_int(columns[2].data), unicodeFloat_to_int(columns[3].data))
+                        elif i == 6:
+                            energy = temp_corr(data, unicodeFloat_to_int(columns[4].data), unicodeFloat_to_int(columns[5].data))
+                        elif i == 8:
+                            signal = signal_normalized(data, unicodeFloat_to_int(columns[7].data), unicodeFloat_to_int(columns[9].data))
+                        else:
+                            norm = norm_factors(data, unicodeFloat_to_int(columns[9]))
+                        continue
+                    used.append(unicodeFloat_to_int(columns[i].data))
             code = plotData(data, used)
             format_instance.plot = code
             db.session.commit()
@@ -118,6 +130,7 @@ def dataFormat():
             format.xtal2T = '15'
             format.norm = '7'
             format.extra = '1'
+            format.against_E = False
 
             used.append(1)
             used.append(11)
@@ -138,6 +151,13 @@ def save_graph():
     form = InputForm(request.form)
     idthis = request.form.get("idnum", type=int)
     if idthis is not None:
+        againstE = request.form.get("agaE", type=str)
+        if againstE == 'true':
+            againstE = True
+        elif againstE == 'false':
+            againstE = False
+        else:
+            print(againstE)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
         fpath = file_instance.path
 
@@ -165,7 +185,7 @@ def save_graph():
         format_instance.nfbool = form.nfbool.data
         format_instance.xbool = form.xbool.data
         format_instance.user = current_user
-
+        format_instance.against_E = againstE
 
         db.session.commit()
     return 'Saved'
@@ -320,6 +340,20 @@ def add_entry():
 
 
 
+
+
+
+
+
+
+
+
+def unicodeFloat_to_int(unicode):
+    convertF = float(unicode)
+    convertI = int(convertF)
+    return convertI
+
+
 def splitForm(form):
     columns = []
     bools = []
@@ -404,6 +438,75 @@ def plotData(data, used):
     code = mpld3.fig_to_html(fig)
     plt.close()
     return code
+
+def energy_xtal(data, a1, a2):
+    energy = []
+    a1Dat = data[a1]
+    a2Dat = data[a2]
+    a1Dat = [float(i) for i in a1Dat]
+    a2Dat = [float(i) for i in a2Dat]
+    hrm_e0 = 14412500.0
+    hrm_bragg1 = 18.4704
+    hrm_bragg2 = 77.5328
+    hrm_tan1 = math.tan(math.radians(hrm_bragg1))
+    hrm_tan2 = math.tan(math.radians(hrm_bragg2))
+
+    a = 1.0e-6 * hrm_e0 / (hrm_tan1 + hrm_tan2)
+    b = a1Dat[0] - a2Dat[0]
+    for i in range(len(a1Dat)):
+        energy.append(a * (a1Dat[i] - a2Dat[i] - b))
+    return energy
+
+def temp_corr(data, t1, t2):
+    energy = []
+    t1Dat = data[t1]
+    t2Dat = data[t2]
+    t1Dat = [float(i) for i in t1Dat]
+    t2Dat = [float(i) for i in t2Dat]
+    hrm_e0 = 14412500.0
+    hrm_bragg1 = 18.4704
+    hrm_bragg2 = 77.5328
+    hrm_tan1 = math.tan(math.radians(hrm_bragg1))
+    hrm_tan2 = math.tan(math.radians(hrm_bragg2))
+    hrm_alpha1 = 2.6e-6
+    hrm_alpha2 = 2.6e-6
+    at1 = hrm_alpha1 * hrm_tan1
+    at2 = hrm_alpha2 * hrm_tan2
+
+    a = - hrm_e0 / (hrm_tan1 + hrm_tan2)
+    b = at1 * t1Dat[0] + at2 * t2Dat[0]
+    for i in range(len(t1Dat)):
+        energy.append(a * (at1 * t1Dat[i] + at2 * t2Dat[i] - b))
+    return energy
+
+def signal_normalized(data, sCol, nCol):
+    signal = []
+    sDat = data[sCol]
+    nDat = data[nCol]
+    sDat = [float(i) for i in sDat]
+    nDat = [float(i) for i in nDat]
+
+    ave = numpy.mean(nDat)
+    for i in range(len(sDat)):
+        signal.append(sDat[i] * ave / nDat[i])
+    return signal
+
+def norm_factors(data, nCol):
+    norm = []
+    nDat = data[nCol]
+    nDat = [float(i) for i in nDat]
+
+    ave = numpy.mean(nDat)
+    for i in range(len(nDat)):
+        norm.append(ave / nDat[i])
+    return norm
+
+
+
+
+
+
+
 
 
 class MetaDataOne:
