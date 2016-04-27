@@ -84,6 +84,7 @@ def dataFormat():
         fig = plt.figure(figsize=(10, 7))
         code = mpld3.fig_to_html(fig)
         plt.clf()
+        againstE = False
     else:
         idthis = request.form.get('idnext', type=int)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
@@ -109,7 +110,7 @@ def dataFormat():
                             norm = norm_factors(data, unicodeFloat_to_int(columns[9]))
                         continue
                     used.append(unicodeFloat_to_int(columns[i].data))
-            code = plotData(data, used)
+            code = plotData(data, used, againstE)
             format_instance.plot = code
             db.session.commit()
             #data.append({'form': format_instance, 'plot': plot, 'id': file_instance.id, 'comment': file_instance.comment, 'columns': columns, 'bools': bools})
@@ -135,14 +136,14 @@ def dataFormat():
             used.append(1)
             used.append(11)
 
-            code = plotData(data, used)
+            code = plotData(data, used, False)
             format.plot = code
             db.session.add(format)
             db.session.commit()
 
             code = format.plot
             form = populate_from_instance(format)
-    return render_template("data_format.html", user=user, code=code, form=form)
+    return render_template("data_format.html", user=user, code=code, form=form, againstE=againstE)
 
 
 @app.route('/save_graph', methods=['GET', 'POST'])
@@ -421,16 +422,19 @@ def readAscii(path):
     return data, name, path
 
 
-def plotData(data, used):
+def plotData(data, used, againstE):
     plt.close()
     fig = plt.figure(figsize=(10, 7))
     xs = []
     ys = []
-    xs = data[0]
+
     for idx, column in enumerate(data):
         for i in used:
-            if (idx + 1) == i and idx != 0:
+            if (idx + 1) == i:
+                xs = range(1, len(data[idx]) + 1)
                 ys = data[idx]
+                if againstE:
+                    xs = data[0]
                 ax = plt.plot(xs, ys)
 
     if not used:

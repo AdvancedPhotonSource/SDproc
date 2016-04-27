@@ -36,8 +36,18 @@ $(function(){
 */
 
 function hitAgaE(){
-    $('#againstE').bootstrapToggle('toggle')
-    //$('#meta-form').trigger('change');
+    var temp = $('#againstE').prop('checked');
+    if (temp == false)
+    {
+        $('#againstE').bootstrapToggle('on');
+    }
+    else
+    {
+        $('#againstE').bootstrapToggle('off');
+    }
+    $('#againstE').promise().done(function(){
+        $('#meta-form').trigger('change');
+    });
 }
 
 
@@ -49,21 +59,32 @@ $(function(){
         $.post('/save_graph', $(this).serialize(),
         function(){
             nextID = localStorage.getItem('previous2');
-            var againstE = $('#againstE').val();
-            $.post('/data', { idnext: nextID , plot: 1, againstE: againstE},
+            $.post('/data', { idnext: nextID , plot: 1},
             function(data){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
-                $('#againstE').prop('checked', $('#agaE').val()).change(function(event){
-                    event.preventDefault();
-                });
+                var hidden = $(data).find('#agaE').val();
+                if (hidden === 'true' || hidden === 'True')
+                {
+                    $('#againstE').prop('checked', true);
+                    $('#againstE').bootstrapToggle('on');
+                    $('#agaE').val(true);
+                }
+                else
+                {
+                    $('#againstE').prop('checked', false);
+                    $('#againstE').bootstrapToggle('off');
+                    $('#agaE').val(false);
+                }
             })
         });
     });
 })
 
-
+//.change(function(event){
+//                    event.preventDefault();
+//                });
 $(function(){
     $('#meta-form').on('change', function(event){
         previous = localStorage.getItem('previous2');
@@ -72,16 +93,20 @@ $(function(){
         $('#agaE').val(temp);
         $.post('/save_graph', $('#meta-form').serialize(),
         function(){
-            var againstE = $('#againstE').prop('checked');
             $.post('/data', { idnext: previous , plot: 1},
             function(data){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
-                $('#againstE').prop('checked', $('#agaE').val()).change(function(event){
-                    event.preventDefault();
-                alert('DONE')
-                });
+                var hidden = $('#agaE').val();
+                if (hidden === 'true' || hidden === 'True')
+                {
+                    $('#againstE').prop('checked', true);
+                }
+                else
+                {
+                    $('#againstE').prop('checked', false);
+                }
             })
         })
     })
@@ -109,9 +134,19 @@ $(function ()
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
-                $('#againstE').prop('checked', $(data).find('#agaE').val()).change(function(event){
-                    event.preventDefault();
-                })
+                var hidden = $(data).find('#agaE').val();
+                if (hidden === 'true' || hidden === 'True')
+                {
+                    $('#againstE').prop('checked', true);
+                    $('#againstE').bootstrapToggle('on');
+                    $('#agaE').val(true);
+                }
+                else
+                {
+                    $('#againstE').prop('checked', false);
+                    $('#againstE').bootstrapToggle('off');
+                    $('#agaE').val(false);
+                }
             })
 
             $.post('/show_comment', { idnext: this.value },
