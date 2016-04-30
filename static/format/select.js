@@ -27,13 +27,6 @@ function log(){
         $('#log_add').fadeOut(1000);
     })
 }
-/*
-$(function(){
-    $('#againstE').on('change', function(){
-        $('#meta-form').trigger('change');
-    })
-})
-*/
 
 function hitAgaE(){
     var temp = $('#againstE').prop('checked');
@@ -49,6 +42,12 @@ function hitAgaE(){
         $('#meta-form').trigger('change');
     });
 }
+
+$(function(){
+    $('#AeListener').click(function(){
+        hitAgaE();
+    });
+})
 
 
 
@@ -82,9 +81,6 @@ $(function(){
     });
 })
 
-//.change(function(event){
-//                    event.preventDefault();
-//                });
 $(function(){
     $('#meta-form').on('change', function(event){
         previous = localStorage.getItem('previous2');
@@ -102,10 +98,12 @@ $(function(){
                 if (hidden === 'true' || hidden === 'True')
                 {
                     $('#againstE').prop('checked', true);
+                    $('#againstE').bootstrapToggle('on');
                 }
                 else
                 {
                     $('#againstE').prop('checked', false);
+                    $('#againstE').bootstrapToggle('off');
                 }
             })
         })

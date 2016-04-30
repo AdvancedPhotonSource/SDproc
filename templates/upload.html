@@ -11,11 +11,10 @@ with context %}
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-    <link href="/static/select/view_output.css" rel="stylesheet">
-    <link href="/static/select/navigator.css" rel="stylesheet">
-    <script type="text/javascript" src="/static/select/add_file.js"></script>
-    <script type="text/javascript" src="/static/select/highlight.js"></script>
-    <script type="text/javascript" src="/static/select/change_comment.js"></script>
+    <link href="/static/upload/view_output.css" rel="stylesheet">
+    <link href="/static/upload/navigator.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/upload/add_file.js"></script>
+    <script type="text/javascript" src="/static/upload/highlight.js"></script>
 </head>
 <body role="document">
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -35,12 +34,12 @@ with context %}
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li>
+                <li class="active">
                     <a href="upload">
                         Manage Files
                     </a>
                 </li>
-                <li class="active">
+                <li>
                     <a href="select">
                         Select Session
                     </a>
@@ -62,18 +61,12 @@ with context %}
 <div class="container data-select" role="main">
     <div class="jumbotron">
         <h1>
-            Please select data
+            Your Files
         </h1>
-
         <p>
-            If the file you are trying to use is not listed then upload it to the database.
+            Upload or delete files to manage your database.
         </p>
         <br/>
-        <form id="fileForm" method="post" enctype="multipart/form-data">
-            <input type="file" name="file">
-            <br/>
-            <input type="submit" value="Upload File" class="btn btn-primary btn-xs" title="Upload selected file to database"/>
-        </form>
     </div>
     <div class="margin-info">
         <p align="right">Logged in as {{ user.username }}
@@ -84,7 +77,7 @@ with context %}
         </p>
     </div>
 </div>
-<script type="text/javascript" src="/static/fileUpload.js"></script>
+<script type="text/javascript" src="/static/upload/fileUpload.js"></script>
 <div class="col-center">
     <div class="row">
         <div class="col-xs-4" id="navTable" style="width:450px; height:auto; overflow:auto; max-height:500px;">
@@ -129,16 +122,29 @@ with context %}
             <br/>
         </div>
         <div class="col-xs-4">
-            <br/>
-            <label for="sel1">Files to be used:</label>
-            <select multiple class="form-control" id="sel1">
-            </select>
-        </div>
-        <div class="col-xs-4">
             <label for="comment">Comment:</label>
             <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
-            <span class="pull-right">
-                <button id="finito" disabled type="submit" class="btn btn-primary btn-lg" onclick="proceed()" title="Advance with all files to be used">
+        </div>
+        <div class="col-xs-4">
+            <br/>
+            <br/>
+            <br/>
+            <form id="fileForm" enctype="multipart/form-data">
+                <span class="centerBlock">
+                    <input type="file" name="file">
+                    <br/>
+                    <span class="centerBlock">
+                        <input onclick="sendfileForm()" value="Upload File" class="btn btn-primary btn-xs" title="Upload selected file to database"/>
+                    </span>
+                </span>
+            </form>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <span class="centerBlock">
+                <button id="finito" type="submit" class="btn btn-primary btn-lg" onclick="proceed()" title="Return to Select Session">
                     Done
                 </button>
             </span>
@@ -146,16 +152,9 @@ with context %}
     </div>
     <br/>
     <div class="row">
-        <div class="col-xs-2">
+        <div class="col-xs-4">
             <span class="centerBlock">
-                <button onclick="moveFile()" class="btn btn-primary btn-xs" title="Add all selected files">
-                    Add File
-                </button>
-            </span>
-        </div>
-        <div class="col-xs-2">
-            <span class="centerBlock">
-                <button onclick="delFile()" class="btn btn-primary btn-xs" title="Remove all selected files from database">
+                <button onclick="delFile()" class="btn btn-primary btn-xs" title="Remove selected file from database">
                     Delete File
                 </button>
             </span>

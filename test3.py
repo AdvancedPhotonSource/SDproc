@@ -7,13 +7,14 @@ import os
 from PyQt4 import QtXml
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from app import app
-from db_model import db, User, metaData, dataFile, fileFormat
+from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles
 from forms import InputForm, CommentForm
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import json
 import math
 import numpy
+from decimal import *
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -66,6 +67,22 @@ def index():
         return redirect(url_for('dataFormat'))
     return render_template('view_output.html', data=data, user=user)
 
+@app.route('/upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    user = current_user
+    data = []
+    files = dataFile.query.order_by('id')
+    for instance in files:
+        fsize = size(instance.path)
+        lastMod = modified(instance.path)
+        temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
+        modname = [instance.name + temp]
+        data.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+    if request.method == 'POST':
+        return redirect(url_for('index'))
+    return render_template('upload.html', data=data, user=user)
+
 
 @app.route('/logout')
 @login_required
@@ -90,27 +107,33 @@ def dataFormat():
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
         fpath = file_instance.path
 
-        format_instance = db.session.query(fileFormat).filter_by(path=fpath).first()
+        format_instance = db.session.query(currentMeta).filter_by(path=fpath).first()
         if format_instance is not None:
             againstE = format_instance.against_E
             form = populate_from_instance(format_instance)
             columns, bools = splitForm(form)
             used = []
+            additional = []
             data, name, unusedpath = readAscii(file_instance.path)
             for i in range(len(bools)):
                 if bools[i].data:
                     if columns[i].data == None:
                         if i == 1:
                             energy = energy_xtal(data, unicodeFloat_to_int(columns[2].data), unicodeFloat_to_int(columns[3].data))
+                            additional.append(energy)
                         elif i == 6:
                             energy = temp_corr(data, unicodeFloat_to_int(columns[4].data), unicodeFloat_to_int(columns[5].data))
+                            additional.append(energy)
                         elif i == 8:
                             signal = signal_normalized(data, unicodeFloat_to_int(columns[7].data), unicodeFloat_to_int(columns[9].data))
+                            additional.append(signal)
                         else:
-                            norm = norm_factors(data, unicodeFloat_to_int(columns[9]))
+                            norm = norm_factors(data, unicodeFloat_to_int(columns[9].data))
+                            additional.append(norm)
                         continue
-                    used.append(unicodeFloat_to_int(columns[i].data))
-            code = plotData(data, used, againstE)
+                    else:
+                        used.append(unicodeFloat_to_int(columns[i].data))
+            code = plotData(data, used, againstE, additional)
             format_instance.plot = code
             db.session.commit()
             #data.append({'form': format_instance, 'plot': plot, 'id': file_instance.id, 'comment': file_instance.comment, 'columns': columns, 'bools': bools})
@@ -118,7 +141,7 @@ def dataFormat():
             data, name, unusedpath = readAscii(file_instance.path)
             used = []
 
-            format = fileFormat()
+            format = currentMeta()
             format.name = file_instance.name
             format.path = file_instance.path
             format.ebool = True
@@ -162,7 +185,7 @@ def save_graph():
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
         fpath = file_instance.path
 
-        format_instance = db.session.query(fileFormat).filter_by(path=fpath).first()
+        format_instance = db.session.query(currentMeta).filter_by(path=fpath).first()
         format_instance.energy = form.energy.data
         format_instance.xtal1A = form.xtal1A.data
         format_instance.xtal2A = form.xtal2A.data
@@ -215,7 +238,7 @@ def sesData():
     data = []
     user = current_user
     if user.is_authenticated():
-        instances = user.metaData.order_by('id').all()
+        instances = user.logBook.order_by('id').all()
         for instance in instances:
             form = populate_from_instance(instance)
             columns, bools = splitForm(form)
@@ -257,7 +280,7 @@ def delete_file():
             instance = db.session.query(dataFile).filter_by(id=idnum).first()
             db.session.delete(instance)
         if table == 'Meta':
-            instance = user.metaData.filter_by(id=idnum).first()
+            instance = user.logBook.filter_by(id=idnum).first()
             db.session.delete(instance)
         db.session.commit()
     return 'Deleted'
@@ -276,7 +299,7 @@ def save_comment():
         if idprev is not None and formatting == 1:
             instance = db.session.query(dataFile).filter_by(id=idprev).first()
             instance.comment = comment
-            format_instance = db.session.query(fileFormat).filter_by(path=instance.path).first()
+            format_instance = db.session.query(currentMeta).filter_by(path=instance.path).first()
             format_instance.comment = comment
             db.session.commit()
     return 'Saved'
@@ -312,9 +335,9 @@ def delete_entry():
     if request.method == 'POST':
         idthis = request.form.get('id', type=int)
         if idthis == -1:
-            user.metaData.delete()
+            user.logBook.delete()
         else:
-            instance = db.session.query(metaData).filter_by(id=idthis).first()
+            instance = db.session.query(logBook).filter_by(id=idthis).first()
             db.session.delete(instance)
         db.session.commit()
     return 'Deleted'
@@ -326,10 +349,10 @@ def add_entry():
     if request.method == 'POST':
         idthis = request.form.get('id', type=int)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-        format_instance = db.session.query(fileFormat).filter_by(path=file_instance.path).first()
+        format_instance = db.session.query(currentMeta).filter_by(path=file_instance.path).first()
         if format_instance != None:
             form = populate_from_instance(format_instance)
-            meta = metaData()
+            meta = logBook()
             form.populate_obj(meta)
             meta.user = user
             meta.plot = format_instance.plot
@@ -396,11 +419,6 @@ def run_once(f):
     return wrapper
 
 
-@run_once
-def setupAllMeta():
-    allMeta = MetaDataAll()
-    return allMeta
-
 
 def readAscii(path):
     count = 0
@@ -422,7 +440,7 @@ def readAscii(path):
     return data, name, path
 
 
-def plotData(data, used, againstE):
+def plotData(data, used, againstE, additional):
     plt.close()
     fig = plt.figure(figsize=(10, 7))
     xs = []
@@ -437,7 +455,15 @@ def plotData(data, used, againstE):
                     xs = data[0]
                 ax = plt.plot(xs, ys)
 
-    if not used:
+    if additional:
+        for i in range(len(additional)):
+            xs = range(1, len(additional[i]) + 1)
+            ys = additional[i]
+            if againstE:
+                xs = data[0]
+            ax = plt.plot(xs, ys)
+
+    if not used and not additional:
         ax = plt.plot(ys, ys)
     code = mpld3.fig_to_html(fig)
     plt.close()
@@ -456,9 +482,9 @@ def energy_xtal(data, a1, a2):
     hrm_tan2 = math.tan(math.radians(hrm_bragg2))
 
     a = 1.0e-6 * hrm_e0 / (hrm_tan1 + hrm_tan2)
-    b = a1Dat[0] - a2Dat[0]
+    b = a1Dat[0] + a2Dat[0]
     for i in range(len(a1Dat)):
-        energy.append(a * (a1Dat[i] - a2Dat[i] - b))
+        energy.append(a * (a1Dat[i] + a2Dat[i] - b))
     return energy
 
 def temp_corr(data, t1, t2):
@@ -504,120 +530,6 @@ def norm_factors(data, nCol):
     for i in range(len(nDat)):
         norm.append(ave / nDat[i])
     return norm
-
-
-
-
-
-
-
-
-
-class MetaDataOne:
-    def __init__(self, checkboxes, columns, name, comment, path):
-        # Information on current state
-        self.checkboxes = checkboxes
-        self.columns = columns
-        self.name = name
-        self.cmnt = comment
-        self.path = path
-
-        # Information stored in list
-        self.info = {}
-        self.storeInfo()
-
-    # Separates information into two lists based on if the box is checked or not
-    def storeInfo(self):
-        columnD = {0: 'energy', 1: 'xtal1A', 2: 'xtal2A', 3: 'xtal1T', 4: 'xtal2T', 5: 'tempCorr', 6: 'signal',
-                   7: 'signalNorm', 8: 'norm', 9: 'normFac', 10: 'extra'}
-
-        for i in range(len(columnD)):
-            if columnD[i] in self.checkboxes:
-                self.info[str(columnD[i])] = [self.columns[columnD[i]], True]
-            else:
-                self.info[str(columnD[i])] = [self.columns[columnD[i]], False]
-
-    def update(self, checkboxes, columns, name, comment, path):
-        # Update all variables with current information from GUI
-        self.checkboxes = checkboxes
-        self.columns = columns
-        self.name = name
-        self.cmnt = comment
-        self.path = path
-
-        self.storeInfo()
-        return self
-
-
-class MetaDataAll:
-    def __init__(self):
-        self.allMeta = []
-
-    # Append current scan object to list of all scan objects
-    def addData(self, oneMeta):
-        self.allMeta.append(oneMeta)
-
-    # Return true if the current scan object has the same file name as a scan object already recorded  NOT NEEDED?
-    def checkDuplicate(self, oneMeta):
-        for i in range(len(self.allMeta)):
-            if self.allMeta[i].name == oneMeta.name:
-                return True
-        return False
-
-    # Replace the duplicate old information with new information  NOT NEEDED?
-    def updateDuplicate(self, oneMeta):
-        for i in range(len(self.allMeta)):
-            if self.allMeta[i].name == oneMeta.name:
-                self.allMeta[i] = oneMeta
-
-    def load(self, xml):
-        n = xml.firstChild()
-        while n:
-            e = n.toElement()
-            if e:
-                name = (e.tagName())
-                print (name)
-            n = n.nextSibling()
-
-    # Converts and returns the list of all scans in xml format
-    def save(self):
-        doc = QtXml.QDomDocument("Test")
-        root = doc.createElement("MetaData")
-
-        doc.appendChild(root)
-
-        for i in range(len(self.allMeta)):
-            scantag = doc.createElement("Scan")
-            root.appendChild(scantag)
-            pathtag = doc.createElement("Path")
-            scantag.appendChild(pathtag)
-            path = doc.createTextNode(self.allMeta[i].path)
-            pathtag.appendChild(path)
-
-            nametag = doc.createElement("Name")
-            scantag.appendChild(nametag)
-            name = doc.createTextNode(self.allMeta[i].name)
-            nametag.appendChild(name)
-
-            cmntag = doc.createElement("Comment")
-            scantag.appendChild(cmntag)
-            cmnt = doc.createTextNode(self.allMeta[i].cmnt)
-            cmntag.appendChild(cmnt)
-
-            for key in self.allMeta[i].info:
-                tempTag = doc.createElement(str(key))
-                scantag.appendChild(tempTag)
-                tempVal = doc.createTextNode(str(self.allMeta[i].info.get(key)[0]))
-                tempTag.appendChild(tempVal)
-                tempAtt = doc.createAttribute("Enabled")
-                if self.allMeta[i].info.get(key)[1]:
-                    tempAtt.setValue("True")
-                else:
-                    tempAtt.setValue("False")
-                tempTag.setAttributeNode(tempAtt)
-
-        xml = doc.toString()
-        return xml
 
 
 if __name__ == '__main__':

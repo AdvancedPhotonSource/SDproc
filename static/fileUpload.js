@@ -101,7 +101,6 @@ function delFile()
                         $('#comment').val('')
                         $(this).remove();
                         localStorage.clear();
-                        $('#finito').prop('disabled', true);
                     }
                 }
             })

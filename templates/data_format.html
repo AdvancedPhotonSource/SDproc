@@ -19,8 +19,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
-    <script type="text/javascript" src="/static/select.js"></script>
-    <link href="/static/teststyle.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/format/select.js"></script>
+    <link href="/static/format/teststyle.css" rel="stylesheet">
     <script type="text/javascript" src="/static/mpld3.v0.2.js"></script>
 
 
@@ -96,10 +96,11 @@
             </div>
         </div>
         <div class="row">
-            <button class="hiddenbtn" onclick="hitAgaE()">CLICK</button>
-            <div class="bootbtn">
-                <label for="againstE">Plot against Energy</label>
+            <div class="bootbtn" id="AeListener">
                 <input type="checkbox" id="againstE" data-toggle="toggle">
+            </div>
+            <div class="bootlbl">
+                <label for="againstE">Plot against Energy</label>
             </div>
             <form id="meta-form" method=post action="" remote="true">
                 <input type="hidden" name="idnum" id="idnum">
@@ -197,6 +198,6 @@
         </span>
     </div>
 </div>
-<script type="text/javascript" src="/static/checkbox.js"></script>
+<script type="text/javascript" src="/static/format/checkbox.js"></script>
 </body>
 </html>
