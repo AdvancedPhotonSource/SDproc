@@ -1,23 +1,23 @@
 __author__ = 'caschmitz'
-from wtforms import Form, FloatField, validators, StringField, PasswordField, BooleanField
+from wtforms import Form, FloatField, validators, StringField, PasswordField, BooleanField, IntegerField
 from db_model import db, User
 import flask.ext.wtf.html5 as html5
 
 class InputForm(Form):
     #####How to split these up to iterate through them seperatly?  Cannot
     # Fields
-    energy = FloatField(label='Energy: ', default=1, validators=[validators.InputRequired()])
-    energyCalc = FloatField(label='Energy Calculated')
-    xtal1A = FloatField(label='Xtal 1 Angle: ', default=2, validators=[validators.InputRequired()])
-    xtal2A = FloatField(label='Xtal 2 Angle: ', default=3, validators=[validators.InputRequired()])
-    xtal1T = FloatField(label='Xtal 1 Temp: ', default=12, validators=[validators.InputRequired()])
-    xtal2T = FloatField(label='Xtal 2 Temp: ', default=15, validators=[validators.InputRequired()])
-    tempCorr = FloatField(label='Temp. corr')
-    signal = FloatField(label='Signal: ', default=11, validators=[validators.InputRequired()])
-    signalNorm = FloatField(label='Signal Normalized')
-    norm = FloatField(label='Norm.: ', default=7, validators=[validators.InputRequired()])
-    normFac = FloatField(label='Norm. Factors')
-    extra = FloatField(label='Extra: ', default=1, validators=[validators.InputRequired()])
+    energy = IntegerField(label='Energy: ', default=1, validators=[validators.InputRequired()])
+    energyCalc = IntegerField(label='Energy Calculated')
+    xtal1A = IntegerField(label='Xtal 1 Angle: ', default=2, validators=[validators.InputRequired()])
+    xtal2A = IntegerField(label='Xtal 2 Angle: ', default=3, validators=[validators.InputRequired()])
+    xtal1T = IntegerField(label='Xtal 1 Temp: ', default=12, validators=[validators.InputRequired()])
+    xtal2T = IntegerField(label='Xtal 2 Temp: ', default=15, validators=[validators.InputRequired()])
+    tempCorr = IntegerField(label='Temp. corr')
+    signal = IntegerField(label='Signal: ', default=11, validators=[validators.InputRequired()])
+    signalNorm = IntegerField(label='Signal Normalized')
+    norm = IntegerField(label='Norm.: ', default=7, validators=[validators.InputRequired()])
+    normFac = IntegerField(label='Norm. Factors')
+    extra = IntegerField(label='Extra: ', default=1, validators=[validators.InputRequired()])
 
     #columns = [energy, energyCalc, xtal1A, xtal2A, xtal1T, xtal2T, tempCorr, signal, signalNorm, norm, normFac, extra]
 

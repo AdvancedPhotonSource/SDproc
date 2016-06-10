@@ -1,24 +1,27 @@
 __author__ = 'caschmitz'
 
-from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response
+from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash
 import matplotlib.pyplot as plt
 import mpld3
 import os
-from PyQt4 import QtXml
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from app import app
-from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles
+from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta
 from forms import InputForm, CommentForm
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import json
 import math
 import numpy
+from sqlalchemy import desc
 from decimal import *
+import matplotlib.patches as mpatches
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 ALLOWED_EXTENSIONS = {'txt', 'mda'}
+usedArgs = []
+current_session = 'None'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -47,6 +50,8 @@ def login():
     if request.method == 'POST' and form.validate():
         user = form.get_user()
         login_user(user)
+        clear_cmeta()
+        clear_rowa_wrapper()
         return redirect(url_for('index'))
     return render_template('login_form.html', form=form, session=session)
 
@@ -56,13 +61,10 @@ def login():
 def index():
     user = current_user
     data = []
-    files = dataFile.query.order_by('id')
-    for instance in files:
-        fsize = size(instance.path)
-        lastMod = modified(instance.path)
-        temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
-        modname = [instance.name + temp]
-        data.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+    sessions = sessionFiles.query.all()
+    for instance in sessions:
+        lastMod = instance.last_used
+        data.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed, 'modified': lastMod})
     if request.method == 'POST':
         return redirect(url_for('dataFormat'))
     return render_template('view_output.html', data=data, user=user)
@@ -95,7 +97,19 @@ def logout():
 @login_required
 def dataFormat():
     user = current_user
+    global current_session
+    thisSession = current_session
     findPlot = request.form.get('plot', type=int)
+    fdata = []
+    userID = str(user.get_id())
+    files = dataFile.query.filter_by(authed=userID)
+    for instance in files:
+        fsize = size(instance.path)
+        lastMod = modified(instance.path)
+        temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
+        modname = [instance.name + temp]
+        fdata.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+
     if findPlot != 1:
         form = InputForm(request.form)
         fig = plt.figure(figsize=(10, 7))
@@ -105,7 +119,11 @@ def dataFormat():
     else:
         idthis = request.form.get('idnext', type=int)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-        fpath = file_instance.path
+        try:
+            fpath = file_instance.path
+        except AttributeError:
+            flash('Please select a file')
+            return redirect(url_for('dataFormat'))
 
         format_instance = db.session.query(currentMeta).filter_by(path=fpath).first()
         if format_instance is not None:
@@ -119,20 +137,20 @@ def dataFormat():
                 if bools[i].data:
                     if columns[i].data == None:
                         if i == 1:
-                            energy = energy_xtal(data, unicodeFloat_to_int(columns[2].data), unicodeFloat_to_int(columns[3].data))
+                            energy = energy_xtal(data, unicode_to_int(columns[2].data), unicode_to_int(columns[3].data))
                             additional.append(energy)
                         elif i == 6:
-                            energy = temp_corr(data, unicodeFloat_to_int(columns[4].data), unicodeFloat_to_int(columns[5].data))
+                            energy = temp_corr(data, unicode_to_int(columns[4].data), unicode_to_int(columns[5].data))
                             additional.append(energy)
                         elif i == 8:
-                            signal = signal_normalized(data, unicodeFloat_to_int(columns[7].data), unicodeFloat_to_int(columns[9].data))
+                            signal = signal_normalized(data, unicode_to_int(columns[7].data), unicode_to_int(columns[9].data))
                             additional.append(signal)
                         else:
-                            norm = norm_factors(data, unicodeFloat_to_int(columns[9].data))
+                            norm = norm_factors(data, unicode_to_int(columns[9].data))
                             additional.append(norm)
                         continue
                     else:
-                        used.append(unicodeFloat_to_int(columns[i].data))
+                        used.append(unicode_to_int(columns[i].data))
             code = plotData(data, used, againstE, additional)
             format_instance.plot = code
             db.session.commit()
@@ -140,33 +158,34 @@ def dataFormat():
         else:
             data, name, unusedpath = readAscii(file_instance.path)
             used = []
-
+            againstE = False
             format = currentMeta()
             format.name = file_instance.name
             format.path = file_instance.path
             format.ebool = True
             format.sbool = True
-            format.energy = '1'
-            format.signal = '11'
-            format.xtal1A = '2'
-            format.xtal2A = '3'
-            format.xtal1T = '12'
-            format.xtal2T = '15'
-            format.norm = '7'
-            format.extra = '1'
+            format.energy = 1
+            format.signal = 11
+            format.xtal1A = 2
+            format.xtal2A = 3
+            format.xtal1T = 12
+            format.xtal2T = 15
+            format.norm = 7
+            format.extra = 1
             format.against_E = False
+            format.file_id = idthis
 
             used.append(1)
             used.append(11)
 
-            code = plotData(data, used, False)
+            code = plotData(data, used, False, None)
             format.plot = code
             db.session.add(format)
             db.session.commit()
 
             code = format.plot
             form = populate_from_instance(format)
-    return render_template("data_format.html", user=user, code=code, form=form, againstE=againstE)
+    return render_template("data_format.html", user=user, code=code, form=form, againstE=againstE, data=fdata, ses=thisSession)
 
 
 @app.route('/save_graph', methods=['GET', 'POST'])
@@ -176,9 +195,9 @@ def save_graph():
     idthis = request.form.get("idnum", type=int)
     if idthis is not None:
         againstE = request.form.get("agaE", type=str)
-        if againstE == 'true':
+        if againstE == 'true' or againstE == 'True':
             againstE = True
-        elif againstE == 'false':
+        elif againstE == 'false' or againstE == 'False':
             againstE = False
         else:
             print(againstE)
@@ -214,23 +233,51 @@ def save_graph():
         db.session.commit()
     return 'Saved'
 
-
-
-
-@app.route('/process', methods=['GET', 'POST'])
+@app.route('/save_ses', methods=['GET', 'POST'])
 @login_required
-def dataProc():
-    form = InputForm(request.form)
-    data = readAscii()
-    used = []
-    session["checkboxes"] = form.bools
-    for field in form.columns:
-        for box in form.bools:
-            if field.name == box.label:
-                used.append(int(field.data))
-    code = plotData(data, used)
-    return render_template("data_process.html", form=form, code=code)
+def saveSession():
+    checked = request.form.get("checked", type=int)
+    namechk = request.form.get("name", type=str)
+    if checked == 0:
+        instance = db.session.query(sessionFiles).filter_by(name=namechk).first()
+        if instance:
+            data = str(instance.id)
+            return data
 
+    session_file = sessionFiles()
+    session_file.user = current_user
+    session_file.authed = current_user.get_id()
+    session_file.name = request.form.get("name", type=str)
+    session_file.comment = request.form.get("comment", type=str)
+    session_file.last_used = getTime()
+    db.session.add(session_file)
+    db.session.commit()
+
+    for instance in db.session.query(currentMeta):
+        form = populate_from_instance(instance)
+        session_instance = sessionMeta()
+        form.populate_obj(session_instance)
+
+        session_instance.file_id = instance.file_id
+        session_instance.path = instance.path
+        session_instance.comment = instance.comment
+        session_instance.against_E = instance.against_E
+        db.session.add(session_instance)
+        db.session.commit()
+
+        session_file_instance = sessionFilesMeta()
+        session_file_instance.sessionFiles_id = session_file.id
+        session_file_instance.sessionMeta_id = session_instance.id
+
+        db.session.add(session_file_instance)
+        db.session.commit()
+    global current_session
+    current_session = session_file.name
+    if checked == 1:
+        return current_session
+    data = ({'status': 'Saved', 'name': current_session})
+    sending = json.dumps(data)
+    return sending
 
 @app.route('/db')
 @login_required
@@ -238,7 +285,7 @@ def sesData():
     data = []
     user = current_user
     if user.is_authenticated():
-        instances = user.logBook.order_by('id').all()
+        instances = user.loggedUser.order_by(desc('id'))
         for instance in instances:
             form = populate_from_instance(instance)
             columns, bools = splitForm(form)
@@ -247,7 +294,7 @@ def sesData():
                 comment = instance.comment
             else:
                 comment = ''
-            data.append({'form': form, 'plot': plot, 'id': instance.id, 'comment': comment, 'columns': columns, 'bools': bools, 'name': instance.name})
+            data.append({'form': form, 'plot': plot, 'id': instance.id, 'comment': comment, 'columns': columns, 'bools': bools, 'name': instance.name, 'time': instance.timestamp, 'ses': instance.session})
     return render_template("session.html", data=data)
 
 @app.route('/addf', methods=['POST'])
@@ -282,6 +329,15 @@ def delete_file():
         if table == 'Meta':
             instance = user.logBook.filter_by(id=idnum).first()
             db.session.delete(instance)
+        if table == 'Session':
+            instance = db.session.query(sessionFiles).filter_by(id=idnum).first()
+            db.session.delete(instance)
+
+            instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=idnum).all()
+            for instance in instances:
+                meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                db.session.delete(meta)
+                db.session.delete(instance)
         db.session.commit()
     return 'Deleted'
 
@@ -298,9 +354,12 @@ def save_comment():
             db.session.commit()
         if idprev is not None and formatting == 1:
             instance = db.session.query(dataFile).filter_by(id=idprev).first()
-            instance.comment = comment
             format_instance = db.session.query(currentMeta).filter_by(path=instance.path).first()
             format_instance.comment = comment
+            db.session.commit()
+        if idprev is not None and formatting == 2:
+            instance = db.session.query(sessionFiles).filter_by(id=idprev).first()
+            instance.comment = comment
             db.session.commit()
     return 'Saved'
 
@@ -310,11 +369,25 @@ def show_comment():
     if request.method == 'POST':
         send_comment = ''
         idnext = request.form.get('idnext', type=int)
-        if idnext is not None:
+        formatting = request.form.get('format', type=int)
+        usingSes = request.form.get('ses', type=int)
+        if idnext is not None and formatting is None:
             instance = db.session.query(dataFile).filter_by(id=idnext).first()
             if instance is not None:
                 send_comment = instance.comment
+        if idnext is not None and formatting == 1:
+            if usingSes != 1:
+                setBaseComment(idnext)
+            instance = db.session.query(dataFile).filter_by(id=idnext).first()
+            format_instance = db.session.query(currentMeta).filter_by(file_id=instance.id).first()
+            if format_instance is not None:
+                send_comment = format_instance.comment
+        if idnext is not None and formatting == 2:
+            instance = db.session.query(sessionFiles).filter_by(id=idnext).first()
+            if instance is not None:
+                send_comment = instance.comment
         return send_comment
+    return 'Holder'
 
 
 @app.route('/make_name', methods=['GET', 'POST'])
@@ -323,10 +396,11 @@ def make_name():
     if request.method == 'POST':
         idthis = request.form.get('id', type=int)
         instance = db.session.query(dataFile).filter_by(id=idthis).first()
-        lastMod = modified(instance.path)
-        temp = lastMod.strftime("%Y-%m-%d %H:%M:%S")
-        modname = str(instance.name) + ' ' + temp
-        return str(modname)
+        #lastMod = modified(instance.path)
+        #temp = lastMod.strftime("%Y-%m-%d %H:%M:%S")
+        #modname = str(instance.name) + ' ' + temp
+        return instance.name
+    return 'Holder'
 
 @app.route('/del_entry', methods=['GET', 'POST'])
 @login_required
@@ -356,25 +430,177 @@ def add_entry():
             form.populate_obj(meta)
             meta.user = user
             meta.plot = format_instance.plot
-            meta.comment = file_instance.comment
+            meta.comment = format_instance.comment
             meta.name = file_instance.name
+            meta.timestamp = getTime()
+            meta.session = current_session
             db.session.add(meta)
             db.session.commit()
     return 'Added'
 
+@app.route('/clear_rowa', methods=['GET', 'POST'])
+@login_required
+def clear_rowa_wrapper():
+    setBaseComment(-1)
+    return 'Cleared'
+
+@app.route('/clear_cmeta', methods=['GET', 'POST'])
+@login_required
+def clear_cmeta():
+    global current_session
+    current_session = 'None'
+    meta = db.metadata
+    for table in (meta.sorted_tables):
+        if table.name == 'current_meta':
+            db.session.execute(table.delete())
+    db.session.commit()
+    return 'Cleared'
+
+@app.route('/clearPart_cmeta', methods=['GET', 'POST'])
+@login_required
+def clearPart_cmeta():
+    idthis = request.form.get('id', type=int)
+    deleting = db.session.query(currentMeta).filter_by(file_id=idthis).first()
+    db.session.delete(deleting)
+    db.session.commit()
+    return 'Cleared'
 
 
+@app.route('/set_ses', methods=['GET', 'POST'])
+@login_required
+def set_ses():
+    if request.method == 'POST':
+        files = []
+        sesID = request.form.get('id', type=int)
+        metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
+        for meta in metas:
+            actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
+            form = populate_from_instance(actualMeta)
+            newCurrent = currentMeta()
+            form.populate_obj(newCurrent)
+            newCurrent.path = actualMeta.path
+            newCurrent.comment = actualMeta.comment
+            newCurrent.against_E = actualMeta.against_E
+            newCurrent.file_id = actualMeta.file_id
+            db.session.add(newCurrent)
+            db.session.commit()
+
+            files.append(newCurrent.file_id)
+        global current_session
+        allSes = db.session.query(sessionFiles).filter_by(id=sesID).first()
+        current_session = allSes.name
+        data = json.dumps(files)
+        return data
+    return 'Set'
+
+@app.route('/close_plots', methods=['GET', 'POST'])
+@login_required
+def close_plots():
+    if request.method == 'POST':
+        plt.close("all")
+    return 'Closed'
+
+@app.route('/process', methods=['GET', 'POST'])
+@login_required
+def process():
+    user = current_user
+    idthis = request.form.get('idnext', type=int)
+    idlist = request.form.get('idList', type=str)
+    max = 'No File Selected'
+    if idthis is not None or idlist is not None:
+        if idlist is None:
+            file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+            try:
+                fid = file_instance.id
+            except AttributeError:
+                flash('Please select a file')
+                return redirect(url_for('process'))
+            format_instance = db.session.query(currentMeta).filter_by(file_id=fid).first()
+            againstE = format_instance.against_E
+            form = populate_from_instance(format_instance)
+            columns, bools = splitForm(form)
+            used = []
+            additional = []
+            legendNames = []
+            data, name, unusedpath = readAscii(file_instance.path)
+            for i in range(len(bools)):
+                if bools[i].data:
+                    if columns[i].data == None:
+                        if i == 1:
+                            energy = energy_xtal(data, unicode_to_int(columns[2].data), unicode_to_int(columns[3].data))
+                            additional.append(energy)
+                            legendNames.append(columns[i].id)
+                        elif i == 6:
+                            energy = temp_corr(data, unicode_to_int(columns[4].data), unicode_to_int(columns[5].data))
+                            additional.append(energy)
+                            legendNames.append(columns[i].id)
+                        elif i == 8:
+                            signal = signal_normalized(data, unicode_to_int(columns[7].data), unicode_to_int(columns[9].data))
+                            additional.append(signal)
+                            legendNames.append(columns[i].id)
+                        else:
+                            norm = norm_factors(data, unicode_to_int(columns[9].data))
+                            additional.append(norm)
+                            legendNames.append(columns[i].id)
+                        continue
+                    else:
+                        used.append(unicode_to_int(columns[i].data))
+                    legendNames.append(columns[i].id)
+            max, xmax, ycords = convert_Numpy(used, data, additional)
+            code = simplePlot(ycords, xmax, againstE, data, file_instance.name, legendNames)
+        if idthis is None:
+            jidlist = json.loads(idlist)
+            alldata = []
+            allxmax = []
+            allycords = []
+            allagainstE = []
+
+            for anID in jidlist:
+                file_instance = db.session.query(dataFile).filter_by(id=anID).first()
+                try:
+                    fid = file_instance.id
+                except AttributeError:
+                    flash('Unable to find file')
+                    return redirect(url_for('process'))
+                format_instance = db.session.query(currentMeta).filter_by(file_id=fid).first()
+                againstE = format_instance.against_E
+                form = populate_from_instance(format_instance)
+                columns, bools = splitForm(form)
+                used = []
+                additional = []
+                data, name, unusedpath = readAscii(file_instance.path)
+                for i in range(len(bools)):
+                    if bools[i].data:
+                        if columns[i].data == None:
+                            if i == 1:
+                                energy = energy_xtal(data, unicode_to_int(columns[2].data), unicode_to_int(columns[3].data))
+                                additional.append(energy)
+                            elif i == 6:
+                                energy = temp_corr(data, unicode_to_int(columns[4].data), unicode_to_int(columns[5].data))
+                                additional.append(energy)
+                            elif i == 8:
+                                signal = signal_normalized(data, unicode_to_int(columns[7].data), unicode_to_int(columns[9].data))
+                                additional.append(signal)
+                            else:
+                                norm = norm_factors(data, unicode_to_int(columns[9].data))
+                                additional.append(norm)
+                            continue
+                        else:
+                            used.append(unicode_to_int(columns[i].data))
+                max, xmax, ycords = convert_Numpy(used, data, additional)
+                alldata.append(data)
+                allxmax.append(xmax)
+                allycords.append(ycords)
+                allagainstE.append(againstE)
+            code = mergePlots(allycords, allxmax, allagainstE, alldata)
+    else:
+        fig = plt.figure(figsize=(10, 7))
+        code = mpld3.fig_to_html(fig)
+    return render_template("data_process.html", user=user, ses=current_session, code=code, max=max)
 
 
-
-
-
-
-
-
-def unicodeFloat_to_int(unicode):
-    convertF = float(unicode)
-    convertI = int(convertF)
+def unicode_to_int(unicode):
+    convertI = int(unicode)
     return convertI
 
 
@@ -382,7 +608,7 @@ def splitForm(form):
     columns = []
     bools = []
     for field in form:
-        if field.type == 'FloatField':
+        if field.type == 'IntegerField':
             columns.append(field)
         else:
             bools.append(field)
@@ -391,6 +617,9 @@ def splitForm(form):
 def modified(path):
     """Returns modified time of this."""
     return datetime.fromtimestamp(os.path.getmtime(path))
+
+def getTime():
+    return datetime.now()
 
 def size(path):
     """A size of this file."""
@@ -418,6 +647,24 @@ def run_once(f):
     wrapper.has_run = False
     return wrapper
 
+def run_once_with_args(f):
+    def wrapper(*args, **kwargs):
+        global usedArgs
+        if not args[0] in usedArgs:
+            if args[0] != -1:
+                usedArgs.append(*args)
+                return f(*args, **kwargs)
+            else:
+                usedArgs = []
+    return wrapper
+
+@run_once_with_args
+def setBaseComment(idnext):
+    file_instance = db.session.query(dataFile).filter_by(id=idnext).first()
+    format_instance = db.session.query(currentMeta).filter_by(path=file_instance.path).first()
+    if format_instance is not None:
+        format_instance.comment = file_instance.comment
+        db.session.commit()
 
 
 def readAscii(path):
@@ -438,6 +685,45 @@ def readAscii(path):
             for i in range(len(line)):
                 data[i].append(line[i])
     return data, name, path
+
+
+def simplePlot(data, xmax, againstE, raw, filename, linenames):
+    plt.close()
+    fig = plt.figure(figsize=(10, 7))
+    count = 0
+    for plot in data:
+        xs = range(1, len(plot) + 1)
+        ys = plot
+        if againstE:
+            xs = raw[0]
+        line = plt.plot(xs, ys)
+        plt.plot(xs[xmax[count]], ys[xmax[count]], '-bD')
+        color = line[0].get_color()
+        patch = mpatches.Patch(color=str(line[0].get_color()), label=filename + ' ' + linenames[count])
+        plt.legend(handles=[patch])
+        count += 1
+    code = mpld3.fig_to_html(fig)
+    plt.close()
+    return code
+
+def mergePlots(allycords, allxmax, allagainstE, alldata):
+    fig = plt.figure(figsize=(10, 7))
+    count1 = 0
+    for oneDat in allycords:
+        count2 = 0
+        for plot in oneDat:
+            xs = range(1, len(plot) + 1)
+            ys = plot
+            if allagainstE[count1]:
+                xs = alldata[count1][0]
+            plt.plot(xs, ys)
+            plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count1][count2]], '-bD')
+            count2 += 1
+        count1 += 1
+    code = mpld3.fig_to_html(fig)
+    plt.close()
+    return code
+
 
 
 def plotData(data, used, againstE, additional):
@@ -468,6 +754,27 @@ def plotData(data, used, againstE, additional):
     code = mpld3.fig_to_html(fig)
     plt.close()
     return code
+
+def convert_Numpy(used, data, additional):
+    toNumpy = []
+
+    if additional:
+        for i in range(len(additional)):
+            dat = additional[i]
+            toNumpy.append(dat)
+
+    for idx, column in enumerate(data):
+        for i in used:
+            if (idx + 1) == i:
+                dat = [float(j) for j in data[i-1]]
+                toNumpy.append(dat)
+    npData = numpy.array(toNumpy)
+    max = []
+    xcord = []
+    for plot in npData:
+        max.append(numpy.amax(plot))
+        xcord.append(numpy.argmax(plot))
+    return max, xcord, toNumpy
 
 def energy_xtal(data, a1, a2):
     energy = []

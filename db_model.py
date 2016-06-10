@@ -2,9 +2,11 @@ __author__ = 'caschmitz'
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import app
+from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
+from sqlalchemy.orm import relationship
+
 
 db = SQLAlchemy(app)
-
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,17 +46,19 @@ class logBook(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('loggedUser', lazy='dynamic'))
     plot = db.Column(db.String())
+    timestamp = db.Column(db.DateTime())
+    session = db.Column(db.String())
 
     against_E = db.Column(db.Boolean())
 
-    energy = db.Column(db.String())
-    xtal1A = db.Column(db.String())
-    xtal2A = db.Column(db.String())
-    xtal1T = db.Column(db.String())
-    xtal2T = db.Column(db.String())
-    signal = db.Column(db.String())
-    norm = db.Column(db.String())
-    extra = db.Column(db.String())
+    energy = db.Column(db.Integer())
+    xtal1A = db.Column(db.Integer())
+    xtal2A = db.Column(db.Integer())
+    xtal1T = db.Column(db.Integer())
+    xtal2T = db.Column(db.Integer())
+    signal = db.Column(db.Integer())
+    norm = db.Column(db.Integer())
+    extra = db.Column(db.Integer())
 
     ebool = db.Column(db.Boolean())
     ecbool = db.Column(db.Boolean())
@@ -88,17 +92,19 @@ class currentMeta(db.Model):
     user = db.relationship('User', backref=db.backref('currentUser', lazy='dynamic'))
     plot = db.Column(db.String())
     comment = db.Column(db.String())
+    file_id = db.Column(db.Integer())
+    session = db.Column(db.String())
 
     against_E = db.Column(db.Boolean())
 
-    energy = db.Column(db.String())
-    xtal1A = db.Column(db.String())
-    xtal2A = db.Column(db.String())
-    xtal1T = db.Column(db.String())
-    xtal2T = db.Column(db.String())
-    signal = db.Column(db.String())
-    norm = db.Column(db.String())
-    extra = db.Column(db.String())
+    energy = db.Column(db.Integer())
+    xtal1A = db.Column(db.Integer())
+    xtal2A = db.Column(db.Integer())
+    xtal1T = db.Column(db.Integer())
+    xtal2T = db.Column(db.Integer())
+    signal = db.Column(db.Integer())
+    norm = db.Column(db.Integer())
+    extra = db.Column(db.Integer())
 
     ebool = db.Column(db.Boolean())
     ecbool = db.Column(db.Boolean())
@@ -115,22 +121,24 @@ class currentMeta(db.Model):
 
 
 class sessionMeta(db.Model):
+    __tablename__ = 'sessionMeta'
     id = db.Column(db.Integer, primary_key=True)
 
     fileName = db.Column(db.String())
     path = db.Column(db.String())
     comment = db.Column(db.String())
+    file_id = db.Column(db.Integer())
 
     against_E = db.Column(db.Boolean())
 
-    energy = db.Column(db.String())
-    xtal1A = db.Column(db.String())
-    xtal2A = db.Column(db.String())
-    xtal1T = db.Column(db.String())
-    xtal2T = db.Column(db.String())
-    signal = db.Column(db.String())
-    norm = db.Column(db.String())
-    extra = db.Column(db.String())
+    energy = db.Column(db.Integer())
+    xtal1A = db.Column(db.Integer())
+    xtal2A = db.Column(db.Integer())
+    xtal1T = db.Column(db.Integer())
+    xtal2T = db.Column(db.Integer())
+    signal = db.Column(db.Integer())
+    norm = db.Column(db.Integer())
+    extra = db.Column(db.Integer())
 
     ebool = db.Column(db.Boolean())
     ecbool = db.Column(db.Boolean())
@@ -147,11 +155,34 @@ class sessionMeta(db.Model):
 
 
 class sessionFiles(db.Model):
+    __tablename__ = 'sessionFiles'
     id = db.Column(db.Integer, primary_key=True)
+    #sessionMeta_id = db.Column(db.ForeignKey('sessionMeta.id'))
+    #sessionMeta = relationship("sessionMeta")
 
     name = db.Column(db.String())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('oldUser', lazy='dynamic'))
     comment = db.Column(db.String())
     authed = db.Column(db.String())
-    sessionMeta_ids = db.Column(db.String())
+    last_used = db.Column(db.DateTime())
+    #sessionMeta_ids = db.Column(db.String())
+
+
+class sessionFilesMeta(db.Model):
+    __tablename__ = 'sessionFilesMeta'
+
+    sessionFilesMeta_id = db.Column(db.Integer, primary_key=True)
+    sessionFiles_id = db.Column(db.ForeignKey('sessionFiles.id'))
+    sessionMeta_id = db.Column(db.ForeignKey('sessionMeta.id'))
+
+    #session_meta = relationship("sessionMeta")
+    #session_files = relationship("sessionFiles", primaryjoin="and_(sessionFiles.id == foreign(sessionFilesMeta.sessionFiles_id), "
+    #                            "sessionFiles.sessionMeta_id == sessionFilesMeta.sessionMeta_id)")
+    #session_files = relationship("sessionFiles")
+    #__table_args__ = (PrimaryKeyConstraint('sessionFilesMeta_id', 'sessionMeta_id'),
+    #                  ForeignKeyConstraint(['sessionFiles_id', 'sessionMeta_id'],
+    #                                       ['sessionFiles.id', 'sessionFiles.sessionMeta_id']),)
+
+    #PrimaryKeyConstraint('sessionFile_ID', 'sessionMeta_ID')
+    #ForeignKeyConstraint(['sessionFile_ID', 'sessionMeta_ID'], ['sessionFiles.id', 'sessionMeta.id'])

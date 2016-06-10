@@ -3,18 +3,15 @@ $( "#fileForm" ).submit(function(event){
     sendfileForm();
 });
 
-$(document).ready(function(){
-    localStorage.clear();
-})
 
 $(window).on('unload', function(){
-    if (localStorage.getItem('previous') === null)
+    if (localStorage.getItem('previous_upload') === null)
     {
         return;
     }
     else
     {
-        previous = localStorage.getItem('previous');
+        previous = localStorage.getItem('previous_upload');
         $.post( "/save_comment", { idprev: previous, comment: $('#comment').val()});
     }
 })
@@ -62,7 +59,7 @@ function delFile()
             $('#navTable').load(location.href+" #navTable>*","");
             $.getScript( "/static/upload/highlight.js" );
             $('#comment').val('')
-            localStorage.removeItem('previous');
+            localStorage.removeItem('previous_upload');
             })
         }
 

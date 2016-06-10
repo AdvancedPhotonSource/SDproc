@@ -159,3 +159,8 @@ address {
   color: #333;
   text-align: right;
 }
+
+.not-active{
+  pointer-events: none;
+  cursor: default;
+}

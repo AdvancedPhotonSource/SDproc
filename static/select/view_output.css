@@ -1,13 +1,14 @@
 .data-row{margin-right:-15px;margin-left:-15px;height:100px}
 .scan-list, .form-control{margin-bottom:20px}
 .col-center{
-    margin: auto;
-    width: 80%;
+    position:relative;
+    left:255px;
+    width: 85%;
     padding: 10px;
 }
 
 td {
-padding: 10px;
+    padding: 10px;
 }
 
 .centerBlock{
@@ -27,4 +28,12 @@ select[multiple].scan-list{
     position: absolute;
     top:60px;
     right:40px;
+}
+
+.stretcher{
+    width:500px;
+}
+
+.deleteStretch{
+    width:200px;
 }

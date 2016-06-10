@@ -4,16 +4,11 @@ $(function()
     rows.on('click', function(e)
     {
         var row = $(this);
-        if((e.ctrlKey || e.metaKey) || e.shiftKey)
-        {
-            row.addClass('highlight');
-        }
-        else
-        {
-            rows.removeClass('highlight');
-            rows.removeClass('lightlight');
-            row.addClass('highlight');
-        }
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        row.addClass('highlight');
+        comment($('td:first', $(row)).attr('id'));
+        $('#finito').prop('disabled', false);
     })
 
     rows.on('mouseenter', function(e)
@@ -36,3 +31,29 @@ $(function()
         return false;
     })
 })
+
+function comment(id)
+{
+        if (localStorage.getItem('previous') === null)
+        {
+            localStorage.setItem('previous', id)
+            $.post('/show_comment', { idnext: id, format: 2},
+            function(data){
+            $('#comment').val(data)
+            })
+        }
+        else
+        {
+            var nextID = id
+            previous = localStorage.getItem('previous');
+            $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2},
+            function(){
+                $.post('/show_comment', { idnext: nextID, format: 2},
+                function(data){
+                    $('#comment').val(data)
+                })
+            //$.getScript( "/static/select/add_file.js" );
+            })
+            localStorage.setItem('previous', id);
+        }
+}

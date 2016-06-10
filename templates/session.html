@@ -48,7 +48,21 @@
                         </table>
                     </td>
                     <td valign="top" width="50%">
-                        <h3>Plot</h3>
+                        <div class="inlinel">
+                            <h3>Plot</h3>
+                        </div>
+                        <div class="inlineSesL">
+                            <h3>Session:</h3>
+                        </div>
+                        <div class="inlineInfo">
+                            {{ post.ses }}
+                        </div>
+                        <div class="inlineStampL">
+                            <h3>Logged:</h3>
+                        </div>
+                        <div class="inlineInfo">
+                            {{ post.time.replace(microsecond=0) }}
+                        </div>
                         {{ post.plot|safe }}
                     </td>
                     <td valign="top" width="60%">

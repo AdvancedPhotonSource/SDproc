@@ -37,3 +37,36 @@ select[multiple].scan-list{
     top:241px;
     z-index: 1;
 }
+
+.highlight{background-color: #2465bf;}
+
+.lightlight{background-color: #7498c9;}
+
+.ssModalFooter{
+    position: relative;
+    height:50px;
+    width:auto;
+}
+
+.ssModalBody{
+    position: relative;
+    height:200px;
+    width:auto;
+}
+
+.columnEdit{
+    border-radius: 10px;
+    border: 1px;
+}
+
+.sessionName{ position:absolute; top: 105px; left:150px; font-weight:bold; border:1px dotted; padding:10px;}
+
+.content-height .ui-dialog-content{
+    height: 80px;
+}
+
+.saveSes{
+    position: relative;
+    left: 180px;
+    bottom: 50px;
+}

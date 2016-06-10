@@ -33,9 +33,9 @@ $(function()
 
 function comment(id)
 {
-        if (localStorage.getItem('previous') === null)
+        if (localStorage.getItem('previous_upload') === null)
         {
-            localStorage.setItem('previous', id)
+            localStorage.setItem('previous_upload', id)
             $.post('/show_comment', { idnext: id },
             function(data){
             $('#comment').val(data)
@@ -44,7 +44,7 @@ function comment(id)
         else
         {
             var nextID = id
-            previous = localStorage.getItem('previous');
+            previous = localStorage.getItem('previous_upload');
             $.post( "/save_comment", { idprev: previous, comment: $('#comment').val()},
             function(){
                 $.post('/show_comment', { idnext: nextID },
@@ -53,6 +53,6 @@ function comment(id)
                 })
             $.getScript( "/static/add_file.js" );
             })
-            localStorage.setItem('previous', id);
+            localStorage.setItem('previous_upload', id);
         }
 }

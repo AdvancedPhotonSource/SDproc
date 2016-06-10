@@ -1,23 +1,32 @@
+{% from "__autoindex__/macros.html" import thead
+with context %}
+
 <!DOCTYPE html>
+<!--This is how you comment-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initialscale=1" name="viewport">
     <title>Scandataproc</title>
 
-    <!-- LOCAL
+    <!--
     <link href="/static/bootstrap.min.css" rel="stylesheet">
     <link href="/static/bootstrap-theme.min.css" rel="stylesheet">
     <script src="/static/jquery-1.4.2.min.js"></script>
     -->
 
+
     <!-- ONLINE -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
     <link href="/static/process/teststyle.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/process/select.js"></script>
     <script type="text/javascript" src="/static/mpld3.v0.2.js"></script>
 
 
@@ -41,41 +50,95 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li>
+                    <a href="upload">
+                        Manage Files
+                    </a>
+                </li>
+                <li>
                     <a href="select">
-                        Data Select
+                        Select Session
                     </a>
                 </li>
                 <li>
                     <a href="data">
-                        Data Formatting
+                        Format
                     </a>
                 </li>
                 <li class="active">
                     <a href="process">
-                        Data Processing
+                        Process
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
-<div class="container option-select" role="main">
+<div class="container data-select" role="main">
     <br/>
     <br/>
     <br/>
+    <div class="margin-info">
+        {% if user.is_anonymous() %}
+            <p align="right">
+                <a href="/login">Login</a>
+                /
+                <a href="/reg">Register</a>
+            </p>
+        {% else %}
+            <p align="right">Logged in as {{ user.username }}
+                <br/>
+                <a href="/db">Logbook</a>
+                <br/>
+                <a href="/logout">Logout</a>
+            </p>
+        {% endif %}
+    </div>
     <div class="row">
+        <div class="sessionName" id="sesName">
+            {{ ses }}
+        </div>
         <div class="col-xs-6">
-            <label for="sel1">Select files to use:</label>
+            <label for="sel1">Select files to view:</label>
             <select multiple class="form-control" id="sel1">
-                <option>/home/phoebus3/CASCHMITZ/Desktop/test/scan0357.txt</option>
-                <option>/home/phoebus3/CASCHMITZ/Desktop/test/scan0196.txt</option>
             </select>
         </div>
         <div class="col-xs-6">
-            {{code|safe}}
+            <label for="comment">Comment:</label>
+            <p id="comment"></p>
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-11">
+                    <span class="centerBlock">
+                        <button type="button" onclick="log()" class="btn btn-primary btn-sm" id="logbtn">
+                            Add to Logbook
+                        </button>
+                    </span>
+                </div>
+                <div class="col-xs-1">
+                    <p id="log_add">
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2">
+                    <h2>Max:</h2>
+                </div>
+                <div class="col-xs-10" id="maxVal">
+                    <span class="pull-left">
+                        <h2>{{ max }}</h2>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6" id="process_plot_spot">
+            <div id="process_plot">
+                {{code|safe}}
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

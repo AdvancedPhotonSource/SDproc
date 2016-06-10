@@ -6,6 +6,9 @@
 .inlinel { float:left; }
 .inliner { float:right; }
 .inline-name { float:left; margin-top: 22px; margin-left:70px;}
+.inlineStampL { float:left; margin-top: 0px; margin-left: 90px;}
+.inlineInfo { float:left; margin-top: 22px; margin-left: 20px;}
+.inlineSesL { float:left; margin-top: 0px; margin-left: 50px;}
 
 .clearBoth { clear:both; }
 
