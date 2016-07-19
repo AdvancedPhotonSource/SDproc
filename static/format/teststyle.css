@@ -68,5 +68,63 @@ select[multiple].scan-list{
 .saveSes{
     position: relative;
     left: 180px;
-    bottom: 50px;
+    bottom: 0px;
+}
+
+.fitBtn{
+    position: relative;
+    left: 510px;
+    bottom: 67px;
+}
+
+.input-group{
+    position: relative;
+    top: 20px;
+    width: 488px;
+    left: 25px;
+}
+
+.HRM-select{
+    position: relative;
+    bottom: 13px;
+    left: 164px;
+}
+
+.doneBtn{
+    position: relative;
+    bottom: 150px;
+    left: 1000px;
+}
+
+.fitMeth{
+    position: relative;
+    left: 425px;
+    bottom: 20px;
+}
+
+.peakWidth{
+    position: relative;
+    width: 380px;
+    top: 34px;
+    left: 25px;
+}
+
+.fitGroup{
+    position: relative;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
+    width: 510px;
+    right: 20px;
+    top: 10px;
+}
+
+.splitInput.input-group input{
+    width: 50%;
+}
+
+body{
+    width: 100%;
+    margin: auto;
 }

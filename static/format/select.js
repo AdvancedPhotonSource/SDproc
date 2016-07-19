@@ -61,6 +61,11 @@ $(document).ready( function() {
     asynchOnLoad()
     if (!localStorage.getItem('previous2') === null)
         localStorage.removeItem("previous2")
+    $('#fitType').text('Fit around max');
+    $('#fitType').append("<span class='caret'></span>");
+    $('#peakLocation').attr('placeholder', 'Peak found automatically');
+    $('#peakLocation').prop('disabled', true);
+    $('#pWInput').prop('disabled', false);
 })
 
 function asynchOnLoad(){
@@ -139,6 +144,9 @@ $(function()
             localStorage.setItem('use_files', JSON.stringify(files));
         }
         $('#fileModal').modal('toggle');
+        $('#sel1 option').prop('selected', false);
+        $('#sel1 option:last').prop('selected', true);
+        $('#sel1').trigger('change');
     })
 
     rows.on('mouseenter', function(e)
@@ -194,10 +202,8 @@ function saveSes(){
                     }, {
                     label: 'No',
                     action: function(dialogItself){
-                        $.post('/save_ses',{name: $('#ssName').val(), comment: $('#ssComment').val(), checked: 1}, function(data){
-                            $('#sesName').html(data);
-                            dialogItself.close();
-                        });
+                        dialogItself.close();
+                        $('#ssModal').modal('show');
                     }
                 }]
             });
@@ -252,7 +258,7 @@ function deleteCmeta(){
                     $(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
                     var result = $.grep(saved_files, function(n,i){
-                        return (n !==sel);
+                        return (n !== String(sel));
                     })
                     localStorage.setItem('use_files', JSON.stringify(result));
                     $("#sel1").trigger('change');
@@ -262,7 +268,7 @@ function deleteCmeta(){
                     $(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
                     var result = $.grep(saved_files, function(n,i){
-                        return (n !==sel);
+                        return (n !== String(sel));
                     })
                     localStorage.setItem('use_files', JSON.stringify(result));
                     $("#sel1").trigger("change");
@@ -272,7 +278,7 @@ function deleteCmeta(){
                     $(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
                     var result = $.grep(saved_files, function(n,i){
-                        return (n !==sel);
+                        return (n !== String(sel));
                     })
                     localStorage.setItem('use_files', JSON.stringify(result));
                 }
@@ -315,6 +321,25 @@ $(function(){
 
 $(function(){
     $('#meta-form').on('change', function(event){
+        if(event.target.id == 'snbool')
+            $('#sbool').removeProp('checked');
+        else if(event.target.id == 'sbool')
+            $('#snbool').removeProp('checked');
+        else if(event.target.id == 'ebool')
+        {
+            $('#ecbool').removeProp('checked');
+            $('#etcbool').removeProp('checked');
+        }
+        else if(event.target.id == 'ecbool')
+        {
+            $('#ebool').removeProp('checked');
+            $('#etcbool').removeProp('checked');
+        }
+        else if(event.target.id == 'etcbool')
+        {
+            $('#ebool').removeProp('checked');
+            $('#ecbool').removeProp('checked');
+        }
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
         var temp = $('#againstE').prop('checked');
@@ -350,6 +375,143 @@ $(function(){
     })
 })
 
+function aroundMax(){
+    $('#fitType').text('Fit around max');
+    $('#fitType').append("<span class='caret'></span>");
+    $('#peakLocation').attr('placeholder', 'Peak found automatically');
+    $('#peakLocation').prop('disabled', true);
+    $('#peakGroup').removeClass('splitInput');
+    $('#localRange').hide();
+}
 
+function atPoint(){
+    $('#fitType').text('Peak at Point');
+    $('#fitType').append("<span class='caret'></span>");
+    $('#peakLocation').attr('placeholder', 'Energy Value');
+    $('#peakLocation').prop('disabled', false);
+    $('#peakGroup').removeClass('splitInput');
+    $('#localRange').hide();
+}
 
+function nearestPeak(){
+    $('#fitType').text('Fit around point');
+    $('#fitType').append("<span class='caret'></span>");
+    $('#peakLocation').attr('placeholder', 'Energy Value');
+    $('#localRange').prop('placeholder', 'Range');
+    $('#peakLocation').prop('disabled', false);
+    $('#peakGroup').addClass('splitInput');
+    $('#localRange').show();
+}
 
+function fitPeak(){
+    previous = localStorage.getItem('previous2');
+    $('#a1bool').removeProp('checked');
+    $('#a2bool').removeProp('checked');
+    $('#t1bool').removeProp('checked');
+    $('#t2bool').removeProp('checked');
+    $('#tcbool').removeProp('checked');
+    $('#nbool').removeProp('checked');
+    $('#nfbool').removeProp('checked');
+    $('#xbool').removeProp('checked');
+    if (!$('#ebool').prop('checked') || !$('#ecbool').prop('checked') || ('#etcbool').prop('checked')){
+        $('#ebool').prop('checked', true);
+    }
+    if (!$('#sbool').prop('checked') || !$('#sncbool').prop('checked')){
+        $('#sbool').prop('checked', true);
+    }
+    if ($('#againstE').prop('checked') == false){
+        $('#againstE').bootstrapToggle('on');
+    }
+    if ($('#fitType').text() == 'Fit around max'){
+        var range = $('#pWInput').val()
+        if ($.isNumeric(range)){
+            $.post('/peakFit', {idnum: previous, fitType: 0, inputRange: range}, function(data){
+                $('#plot_spot').html( $(data).find('#plot_spot').html());
+            });
+        }
+        else{
+            $('#meta-form').trigger('change');
+            alert('Please enter a valid range')
+        }
+    }
+    else if ($('#fitType').text() == 'Peak at Point'){
+        var cord = $('#peakLocation').val()
+        var range = $('#pWInput').val()
+        if ($.isNumeric(cord)){
+            if ($.isNumeric(range)){
+                $.post('/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range}, function(data){
+                $('#plot_spot').html( $(data).find('#plot_spot').html());
+                })
+            }
+            else{
+                $('#meta-form').trigger('change');
+                alert('Please enter a valid range');
+            }
+        }
+        else{
+            $('#meta-form').trigger('change');
+            alert('Please enter a valid point');
+        }
+    }
+    else{
+        var cord = $('#peakLocation').val()
+        var range = $('#pWInput').val()
+        var localRange = $('#localRange').val()
+        if ($.isNumeric(cord)){
+            if ($.isNumeric(range)){
+                if ($.isNumeric(localRange)){
+                    $.post('/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange}, function(data){
+                        $('#plot_spot').html( $(data).find('#plot_spot').html());
+                    })
+                }
+                else{
+                    $('#meta-form').trigger('change');
+                    alert('Please enter a valid peak range');
+                }
+            }
+            else{
+                $('#meta-form').trigger('change');
+                alert('Please enter a valid range');
+            }
+        }
+        else{
+            $('#meta-form').trigger('change');
+            alert('Please enter a valid energy value');
+        }
+    }
+}
+
+$(function (){
+    $('#HRMdd li a').on('click', function(event){
+        var hrm = event.target.text;
+        previous = localStorage.getItem('previous2');
+        if (hrm == 'Fe-inline-1meV'){
+            hrm = '++'
+            $('#HRM').text('Fe-inline-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'Sn-nested-1meV'){
+            hrm = '+-'
+            $('#HRM').text('Sn-nested-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'Eu-nested-1meV'){
+            hrm = '+-'
+            $('#HRM').text('Eu-nested-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'Dy-nested-1meV'){
+            hrm = '+-'
+            $('#HRM').text('Dy-nested-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm = 'IXS-cryo-1meV'){
+            hrm = '++'
+            $('#HRM').text('IXS-cryo-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        $.post('/updateHRM', {idnum: previous, hrm: hrm}, function(){
+            $('#meta-form').trigger('change');
+        })
+    })
+})

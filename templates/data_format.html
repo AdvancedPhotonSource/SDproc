@@ -151,7 +151,7 @@ with context %}
                     </span>
                 </div>
                 <div class="col-xs-6">
-                    <span class="pull-right">
+                    <span class="centerBlock">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </span>
                 </div>
@@ -182,9 +182,6 @@ with context %}
     </div>
     <div class="form-group">
         <div class="row">
-            <div class="sessionName" id="sesName">
-                {{ ses }}
-            </div>
             <div class="col-xs-1">
                 <br/>
                 <button type="button" class="btn btn-primary btn-md" data-toggle="modal" data-target="#fileModal">
@@ -244,6 +241,11 @@ with context %}
                         From xtal angles
                     </div>
                     <div class="row">
+                        {{ form.etcbool }}
+                        <label style="width:300px;">{{ form.energyTempCalc.label }}</label>
+                        From xtal angles & temps
+                    </div>
+                    <div class="row">
                         {{ form.a1bool }}
                         <label style="width:300px;">{{ form.xtal1A.label }}</label>
                         {{ form.xtal1A }}
@@ -300,6 +302,56 @@ with context %}
                 </div>
             </form>
         </div>
+        <div class="fitGroup">
+            <div class="row">
+                <div class="input-group" id="peakGroup">
+                    <div class="input-group-btn">
+                        <button id="fitType" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">Fit around max<span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a onclick="aroundMax()">Fit around max</a></li>
+                            <li><a onclick="nearestPeak()">Fit around point</a></li>
+                            <li><a onclick="atPoint()">Peak at point</a></li>
+                        </ul>
+                    </div>
+                    <input type="text" id="peakLocation" class="form-control" aria-label="...">
+                    <input type="text" class="form-control" id="localRange" style="display: none;">
+                </div>
+            </div>
+            <div class="row">
+                <div class="peakWidth">
+                        <input type="text" id="pWInput" class="form-control" aria-label="..." placeholder="Peak fit range">
+                </div>
+                <div class="fitMeth">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="fitMethod" aria-haspopup="true"
+                            aria-expanded="false">Centroid<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" id="fitMethdd" aria-labelledby="fitMethod">
+                        <li><a>None yet implemented</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row dropup">
+            <span class="fitBtn">
+                <button class="btn btn-primary btn-md" onclick="fitPeak()" title="Apply selected fitting technique to plot">
+                    Fit
+                </button>
+            </span>
+            <div class="HRM-select">
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="HRM" aria-haspopup="true"
+                        aria-expanded="false">Fe-inline-1meV<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="HRMdd" aria-labelledby="HRM">
+                    <li><a>Fe-inline-1meV</a></li>
+                    <li><a>Sn-nested-1meV</a></li>
+                    <li><a>Eu-nested-1meV</a></li>
+                    <li><a>Dy-nested-1meV</a></li>
+                    <li><a>IXS-cryo-1meV</a></li>
+                </ul>
+            </div>
+        </div>
         <div class="row">
             <span class="saveSes">
                 <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#ssModal" title="Save this session so that it can be accessed later">
@@ -310,11 +362,14 @@ with context %}
     </div>
 
     <div class="row">
-        <span class="pull-right">
+        <span class="doneBtn">
             <button onclick="advance()" class="btn btn-primary btn-lg" title="Proceed with files to processing">
                 Done
             </button>
         </span>
+    </div>
+    <div class="sessionName">
+        <b class="sessionText" id="sesName">{{ ses }}</b>
     </div>
 </div>
 <script type="text/javascript" src="/static/format/checkbox.js"></script>

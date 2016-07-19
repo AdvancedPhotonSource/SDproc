@@ -11,6 +11,8 @@ with context %}
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
     <link href="/static/select/view_output.css" rel="stylesheet">
     <link href="/static/select/navigator.css" rel="stylesheet">
     <script type="text/javascript" src="/static/select/add_file.js"></script>
@@ -59,6 +61,52 @@ with context %}
         </div>
     </div>
 </nav>
+<div id="ssModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Share Session With:</h4>
+            </div>
+            <div class="ssModalBody">
+                <div class="col-xs-6">
+                    <br/>
+                    <br/>
+                    <br/>
+                    <label for="ssName">Name:</label>
+                    <input type="text" class="form-control" placeholder="Username" id="ssName">
+                </div>
+                <div class="col-xs-6 nameTable">
+                    <table>
+                        <tbody>
+                            {% if names %}
+                                {% for name in names %}
+                                    <tr>
+                                        <td>{{ name }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                No Users Detected
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="ssModalFooter">
+                <div class="col-xs-6">
+                    <span class="centerBlock">
+                        <button type="button" onclick="shareSes()" class="btn btn-primary btn-default" data-dismiss="modal">Share</button>
+                    </span>
+                </div>
+                <div class="col-xs-6">
+                    <span class="centerBlock">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container data-select" role="main">
     <div class="jumbotron">
         <h1>
@@ -138,12 +186,21 @@ with context %}
     </div>
     <br/>
     <div class="row">
-        <div class="col-xs-2 col-xs-offset-1">
-            <span class="centerBlock">
-                <button onclick="delFile()" class="btn btn-primary btn-xs deleteStretch" title="Remove all selected files from database">
-                    Delete Session
-                </button>
-            </span>
+        <div class="col-xs-3 optionBtns">
+            <div class="col-xs-6">
+                <span class="pull-left">
+                    <button onclick="delFile()" class="btn btn-primary btn-xs deleteStretch" title="Remove all selected sessions from database">
+                        Delete Session
+                    </button>
+                </span>
+            </div>
+            <div class="col-xs-6">
+                <span class="pull-right">
+                    <button onclick="shareSes()" class="btn btn-primary btn-xs deleteStretch" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
+                        Share Session
+                    </button>
+                </span>
+            </div>
         </div>
     </div>
 </div>

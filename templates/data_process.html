@@ -73,6 +73,39 @@ with context %}
         </div>
     </div>
 </nav>
+<div id="ssModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Settings Used to Plot the Sum:</h4>
+            </div>
+            <div class="ssModalBody">
+                <label for="binRad" class="binLabel">Binning</label>
+                <label for="linearRad" class="linLabel">Linear Interpolation</label>
+                <input type="radio" class="linearRad" id='linearRad' name="methodRad" aria-label="...">
+                <div class="input-group">
+                    <span class="input-group-addon">
+                        <input type="radio" id="binRad" name="methodRad" aria-label="...">
+                    </span>
+                    <input type="text" class="form-control" id="binWidth" aria-label="...">
+                </div>
+            </div>
+            <div class="ssModalFooter">
+                <div class="col-xs-6">
+                    <span class="centerBlock">
+                        <button type="button" onclick="saveSettings()" class="btn btn-primary btn-default">Change</button>
+                    </span>
+                </div>
+                <div class="col-xs-6">
+                    <span class="centerBlock">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container data-select" role="main">
     <br/>
     <br/>
@@ -123,19 +156,49 @@ with context %}
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-2">
-                    <h2>Max:</h2>
-                </div>
-                <div class="col-xs-10" id="maxVal">
-                    <span class="pull-left">
-                        <h2>{{ max }}</h2>
-                    </span>
-                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <br/>
+        <br/>
+        <br/>
+        <label for="maxes" class="maxLabel">Maxes:</label>
+        <div class="col-xs-6" id="maxes">
+            <div class="maxdata">
+                {% if data %}
+                    {% for post in data %}
+                        {% for i in range(0, post.filenames|length()) %}
+                            <div class = row">
+                                <div class="col-xs-4">
+                                    <span class="pull-left">
+                                        <p>{{ post.filenames[i] }}:</p>
+                                    </span>
+                                </div>
+                                <div class="col-xs-8" id="maxVal">
+                                    <span class="pull-left">
+                                        <p>{{ post.max[i] }}</p>
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
         <div class="col-xs-6" id="process_plot_spot">
-            <div id="process_plot">
-                {{code|safe}}
+            <span class="pull-right">
+                <div id="process_plot" class="plot">
+                    {{code|safe}}
+                </div>
+            </span>
+            <div class="row">
+                <span class="centerBlock">
+                    <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#ssModal" title="View the settings used to plot the sum">
+                        Sum Settings
+                    </button>
+                </span>
             </div>
         </div>
     </div>

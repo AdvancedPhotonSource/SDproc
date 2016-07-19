@@ -51,6 +51,8 @@ class logBook(db.Model):
 
     against_E = db.Column(db.Boolean())
 
+    hrm = db.Column(db.String())
+
     energy = db.Column(db.Integer())
     xtal1A = db.Column(db.Integer())
     xtal2A = db.Column(db.Integer())
@@ -62,6 +64,7 @@ class logBook(db.Model):
 
     ebool = db.Column(db.Boolean())
     ecbool = db.Column(db.Boolean())
+    etcbool = db.Column(db.Boolean())
     a1bool = db.Column(db.Boolean())
     a2bool = db.Column(db.Boolean())
     t1bool = db.Column(db.Boolean())
@@ -95,6 +98,12 @@ class currentMeta(db.Model):
     file_id = db.Column(db.Integer())
     session = db.Column(db.String())
 
+    fit_type = db.Column(db.String())
+    fit_pos = db.Column(db.Float())
+    fit_range = db.Column(db.Float)
+
+    hrm = db.Column(db.String())
+
     against_E = db.Column(db.Boolean())
 
     energy = db.Column(db.Integer())
@@ -108,6 +117,7 @@ class currentMeta(db.Model):
 
     ebool = db.Column(db.Boolean())
     ecbool = db.Column(db.Boolean())
+    etcbool = db.Column(db.Boolean())
     a1bool = db.Column(db.Boolean())
     a2bool = db.Column(db.Boolean())
     t1bool = db.Column(db.Boolean())
@@ -131,6 +141,8 @@ class sessionMeta(db.Model):
 
     against_E = db.Column(db.Boolean())
 
+    hrm = db.Column(db.String())
+
     energy = db.Column(db.Integer())
     xtal1A = db.Column(db.Integer())
     xtal2A = db.Column(db.Integer())
@@ -142,6 +154,7 @@ class sessionMeta(db.Model):
 
     ebool = db.Column(db.Boolean())
     ecbool = db.Column(db.Boolean())
+    etcbool = db.Column(db.Boolean())
     a1bool = db.Column(db.Boolean())
     a2bool = db.Column(db.Boolean())
     t1bool = db.Column(db.Boolean())

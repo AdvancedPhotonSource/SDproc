@@ -70,3 +70,48 @@ select[multiple].scan-list{
     left: 180px;
     bottom: 50px;
 }
+
+.maxLabel{
+    position: relative;
+    right: 770px;
+    top: 0px;
+}
+
+.legend{
+    position: relative;
+}
+
+.maxdata{
+    position: relative;
+    right:100px;
+}
+
+.plot{
+    position: relative;
+    bottom: 80px;
+}
+
+.input-group{
+    position: relative;
+    left: 200px;
+    top: 40px;
+    width: 230px;
+}
+
+.binLabel{
+    position: relative;
+    top: 70px;
+    left: 130px;
+}
+
+.linearRad{
+    position: relative;
+    top: 30px;
+    left: 16px;
+}
+
+.linLabel{
+    position: relative;
+    top: 27px;
+    right: 8px;
+}

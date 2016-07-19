@@ -6,6 +6,7 @@ $(function (){
             $.post('/process', { idnext: this.value },
             function(data){
                 $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
+                $('#maxes').html( $(data).find('#maxes').html());
                 $('#maxVal').html( $(data).find('#maxVal').html());
             })
 
@@ -20,11 +21,13 @@ $(function (){
             $('#sel1 > option:selected').each(function(){
                 ids.push(this.value);
             })
-            //localStorage.setItem('previous3', this.value);
             var jIds = JSON.stringify(ids);
+            localStorage.setItem('previous3', jIds);
+
             $.post('/process', { idList: jIds },
             function(data){
                 $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
+                $('#maxes').html( $(data).find('#maxes').html());
                 $('#maxVal').html( $(data).find('#maxVal').html());
                 $('#comment').text('');
             });
@@ -35,13 +38,18 @@ $(function (){
 
 $(document).ready( function() {
     asynchOnLoad()
+    $('#linearRad').prop("checked", true)
+    $('#binWidth').val('Input width of bins');
+    $('#binWidth').prop('disabled', true);
     if (!localStorage.getItem('previous3') === null)
-        localStorage.removeItem("previous3")
+        localStorage.removeItem("previous3");
+    if (localStorage.getItem('pltStat') === null)
+        localStorage.setItem('pltStat', 1);
 })
 
 function asynchOnLoad(){
     var deferred = new $.Deferred(), completed = deferred.then(function(){
-        $('#sel1 option:first').prop('selected', true);
+        $('#sel1 option').prop('selected', true);
         $('#sel1').trigger('change');
         return 1;
     });
@@ -85,13 +93,61 @@ $(window).on('unload', function(){
 })
 
 function log(){
-    previous = localStorage.getItem('previous3');
-    $.post('/add_entry', {id : previous},
+    $.post('/add_entry', {process: 1},
     function(){
         $('#log_add').text('Added');
         $('#log_add').fadeOut(1000);
     })
 }
+
+function saveSettings(){
+    if ($('#binRad').is(':checked')){
+        var id = JSON.parse(localStorage.getItem('previous3'));
+        var binWidth = $('#binWidth').val();
+        if ($.isNumeric(binWidth)){
+            if (id.length > 1){
+                var id = JSON.stringify(id);
+                $.post('/process', { idList: id , binWidth: binWidth},
+                    function(data){
+                        $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
+                        $('#maxes').html( $(data).find('#maxes').html());
+                        $('#maxVal').html( $(data).find('#maxVal').html());
+                    })
+                $('#ssModal').modal('hide');
+            }
+            else{
+                $.post('/process', { idnext: id , binWidth: binWidth},
+                    function(data){
+                        $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
+                        $('#maxes').html( $(data).find('#maxes').html());
+                        $('#maxVal').html( $(data).find('#maxVal').html());
+                    })
+                $('#ssModal').modal('hide');
+            }
+        }
+        else
+        {
+            alert('Please enter an bin width')
+        }
+    }
+    else
+    {
+        $('#sel1').trigger('change');
+    }
+}
+
+
+$(function (){
+    $('input[type=radio][name=methodRad]').on('change', function(event){
+        if ($('#binRad').is(':checked')){
+            $('#binWidth').prop('disabled', false);
+        }
+        if ($('#linearRad').is(':checked')){
+            $('#binWidth').prop('disabled', true);
+        }
+    })
+})
+
 
 
 

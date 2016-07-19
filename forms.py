@@ -8,6 +8,7 @@ class InputForm(Form):
     # Fields
     energy = IntegerField(label='Energy: ', default=1, validators=[validators.InputRequired()])
     energyCalc = IntegerField(label='Energy Calculated')
+    energyTempCalc = IntegerField(label='Energy Temp Calculated')
     xtal1A = IntegerField(label='Xtal 1 Angle: ', default=2, validators=[validators.InputRequired()])
     xtal2A = IntegerField(label='Xtal 2 Angle: ', default=3, validators=[validators.InputRequired()])
     xtal1T = IntegerField(label='Xtal 1 Temp: ', default=12, validators=[validators.InputRequired()])
@@ -22,8 +23,9 @@ class InputForm(Form):
     #columns = [energy, energyCalc, xtal1A, xtal2A, xtal1T, xtal2T, tempCorr, signal, signalNorm, norm, normFac, extra]
 
     # Assign labels so that an equality check can still be used between columns and bools
-    ebool = BooleanField(label='energy', default=True)
+    ebool = BooleanField(label='energy', default=False)
     ecbool = BooleanField(label='energyCalc', default=False)
+    etcbool = BooleanField(label='energyTempCalc', default=False)
     a1bool = BooleanField(label='xtal1A', default=False)
     a2bool = BooleanField(label='xtal2A', default=False)
     t1bool = BooleanField(label='xtal1T', default=False)

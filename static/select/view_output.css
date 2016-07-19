@@ -35,5 +35,22 @@ select[multiple].scan-list{
 }
 
 .deleteStretch{
-    width:200px;
+    width:100px;
+}
+
+.optionBtns{
+    position: relative;
+    left: 5%;
+}
+
+.ssModalFooter{
+    position: relative;
+    height:50px;
+    width:auto;
+}
+
+.ssModalBody{
+    position: relative;
+    height:200px;
+    width:auto;
 }
