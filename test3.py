@@ -81,6 +81,7 @@ def upload():
     user = current_user
     data = []
     files = dataFile.query.order_by('id')
+    names = db.session.query(User)
     for instance in files:
         fsize = size(instance.path)
         lastMod = modified(instance.path)
@@ -90,7 +91,7 @@ def upload():
                         'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
     if request.method == 'POST':
         return redirect(url_for('index'))
-    return render_template('upload.html', data=data, user=user)
+    return render_template('upload.html', data=data, user=user, names=names)
 
 
 @app.route('/logout')
@@ -377,7 +378,12 @@ def delete_file():
         user = current_user
         if table == 'File':
             instance = db.session.query(dataFile).filter_by(id=idnum).first()
-            db.session.delete(instance)
+            auths = instance.authed.split(',')
+            auths.remove(str(user.id))
+            if len(auths) == 0:
+                db.session.delete(instance)
+            else:
+                instance.authed = ','.join(auths)
         if table == 'Meta':
             instance = user.logBook.filter_by(id=idnum).first()
             db.session.delete(instance)
@@ -873,6 +879,19 @@ def shareSes():
     toAuth = thisUser.id
     session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
     session_instance.authed = session_instance.authed + ',' + str(toAuth)
+    db.session.commit()
+    return 'Shared'
+
+
+@app.route('/shareFile', methods=['GET', 'POST'])
+@login_required
+def shareFile():
+    idthis = request.form.get('id', type=int)
+    shareUser = request.form.get('toUser', type=str)
+    thisUser = db.session.query(User).filter_by(username=shareUser).first()
+    toAuth = thisUser.id
+    file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+    file_instance.authed = file_instance.authed + ',' + str(toAuth)
     db.session.commit()
     return 'Shared'
 

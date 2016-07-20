@@ -183,7 +183,7 @@ function delFile()
 
 function shareSes(){
         BootstrapDialog.show({
-            title: 'Delete Session?',
+            title: 'Share Session?',
             message: 'Are you sure you want to share this session?',
             buttons: [{
                 label: 'Yes',
