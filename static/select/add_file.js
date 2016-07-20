@@ -7,6 +7,7 @@ $(document).ready(function(){
 
 
     $('#ssName').keyup(function(e){
+
         /* Ignore tab key */
         var code = e.keyCode || e.which;
         if (code == '9') return;
@@ -14,11 +15,13 @@ $(document).ready(function(){
         var input = $(this);
         inputContent = input.val().toLowerCase();
         model = input.parents();
-        table = model.find('.table');
+        table = model.find('#nameTable');
         rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
         /* Dirtiest filter function ever ;) */
         var filteredRows = rows.filter(function(){
-            var value = $(this).find('td').eq(column).text().toLowerCase();
+            var value = $(this).find('td').text().toLowerCase();
             return value.indexOf(inputContent) === -1;
         });
         /* Clean previous no-result if exist */
@@ -29,6 +32,9 @@ $(document).ready(function(){
         /* Prepend no-result row if all rows are filtered */
         if (filteredRows.length === rows.length) {
             table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#ssName').length +'">No result found</td></tr>'));
+        }
+        if (filteredRows.length === rows.length-1){
+            $(table.find('tbody tr:visible').addClass('highlight'))
         }
     });
 });
@@ -43,6 +49,39 @@ $(window).on('unload', function(){
         previous = localStorage.getItem('previous');
         $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2});
     }
+})
+
+$(function()
+{
+    table = $('#nameTable');
+    rows = table.find('tbody tr');
+    rows.on('click', function(e)
+    {
+        var row = $(this);
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        row.addClass('highlight');
+    })
+
+    rows.on('mouseenter', function(e)
+    {
+        var row = $(this);
+        if ($(row).hasClass( "highlight" ))
+        {
+            rows.removeClass('lightlight');
+        }
+        else
+        {
+            rows.removeClass('lightlight');
+            row.addClass('lightlight');
+        }
+    })
+
+    $(document).on('selectstart dragstart', function(e)
+    {
+        e.preventDefault();
+        return false;
+    })
 })
 
 function moveFile()
@@ -143,5 +182,35 @@ function delFile()
 }
 
 function shareSes(){
-
+        BootstrapDialog.show({
+            title: 'Delete Session?',
+            message: 'Are you sure you want to share this session?',
+            buttons: [{
+                label: 'Yes',
+                action: function(dialogItself){
+                        dialogItself.close();
+                        var found = 0;
+                        $("#navTable tr.item").each(function(){
+                        var row = $(this);
+                        if ($(row).hasClass( "highlight" ))
+                        {
+                            found = 1;
+                            var fid = $('td:first', $(row)).attr('id');
+                            var nameTable = $('#nameTable');
+                            var toUser = $.trim($(table.find('tbody tr.highlight')).text())
+                            $.post( "/shareSes", { id: fid, toUser: toUser});
+                        }
+                        });
+                        if (found == 0)
+                        {
+                            alert('No File Selected')
+                        }
+                    }
+                }, {
+                label: 'No',
+                action: function(dialogItself){
+                    dialogItself.close();
+                }
+            }]
+        });
 }

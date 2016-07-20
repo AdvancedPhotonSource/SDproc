@@ -73,16 +73,15 @@ with context %}
                     <br/>
                     <br/>
                     <br/>
-                    <label for="ssName">Name:</label>
                     <input type="text" class="form-control" placeholder="Username" id="ssName">
                 </div>
                 <div class="col-xs-6 nameTable">
-                    <table>
+                    <table id="nameTable">
                         <tbody>
                             {% if names %}
                                 {% for name in names %}
                                     <tr>
-                                        <td>{{ name }}</td>
+                                        <td>{{ name.username }}</td>
                                     </tr>
                                 {% endfor %}
                             {% else %}
@@ -133,7 +132,7 @@ with context %}
 <br/>
 <div class="col-center">
     <div class="row">
-        <div class="col-xs-6" id="navTable" style="width:500px; height:auto; overflow:auto; max-height:500px;">
+        <div class="col-xs-6 navTable" id="navTable">
             <br/>
             <span class="centerBlock">
                 {% block header %}{% endblock %}
@@ -145,27 +144,30 @@ with context %}
                     <tbody>
                         {% if data %}
                             {% for post in data %}
-                                {% if post.authed|int() == user.get_id()|int() %}
-                                  <tr class="item" ondblclick="moveFile()">
-                                    <td class="name" colspan="2" id="{{ post.id }}">
-                                      {%- if post.name == ".." -%}
-                                        Parent folder
-                                      {%- else -%}
-                                        {{ post.name }}
-                                      {%- endif -%}
-                                    </a></td>
-                                    <td class="modified">
-                                      <time datetime="{{ post.modified }}">{{ post.modified }}</time>
-                                    </td>
-                                    <td class="size">
-                                      {% if post.size %}
-                                        {{ post.size }}
-                                      {% else %}
-                                        -
-                                      {% endif %}
-                                    </td>
-                                  </tr>
-                                {% endif %}
+                                {% set auths = post.authed.split(',') %}
+                                {% for aID in auths %}
+                                    {% if aID|int() == user.get_id()|int() %}
+                                      <tr class="item" ondblclick="moveFile()">
+                                        <td class="name" colspan="2" id="{{ post.id }}">
+                                          {%- if post.name == ".." -%}
+                                            Parent folder
+                                          {%- else -%}
+                                            {{ post.name }}
+                                          {%- endif -%}
+                                        </a></td>
+                                        <td class="modified">
+                                          <time datetime="{{ post.modified }}">{{ post.modified }}</time>
+                                        </td>
+                                        <td class="size">
+                                          {% if post.size %}
+                                            {{ post.size }}
+                                          {% else %}
+                                            -
+                                          {% endif %}
+                                        </td>
+                                      </tr>
+                                    {% endif %}
+                                {% endfor %}
                             {% endfor %}
                         {% endif %}
                     </tbody>
@@ -196,7 +198,7 @@ with context %}
             </div>
             <div class="col-xs-6">
                 <span class="pull-right">
-                    <button onclick="shareSes()" class="btn btn-primary btn-xs deleteStretch" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
+                    <button class="btn btn-primary btn-xs deleteStretch" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
                         Share Session
                     </button>
                 </span>

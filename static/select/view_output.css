@@ -54,3 +54,24 @@ select[multiple].scan-list{
     height:200px;
     width:auto;
 }
+
+.nameTable{
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 150px;
+    height: auto;
+    width: 250px;
+    top: 30px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
+}
+
+.navTable{
+    width:500px;
+    height:auto;
+    overflow:auto;
+    max-height:350px;
+}

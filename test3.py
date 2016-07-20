@@ -64,6 +64,7 @@ def index():
     user = current_user
     data = []
     sessions = sessionFiles.query.all()
+    names = db.session.query(User)
     for instance in sessions:
         lastMod = instance.last_used
         data.insert(0,
@@ -71,7 +72,7 @@ def index():
                      'modified': lastMod})
     if request.method == 'POST':
         return redirect(url_for('dataFormat'))
-    return render_template('view_output.html', data=data, user=user)
+    return render_template('view_output.html', data=data, user=user, names=names)
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -382,13 +383,17 @@ def delete_file():
             db.session.delete(instance)
         if table == 'Session':
             instance = db.session.query(sessionFiles).filter_by(id=idnum).first()
-            db.session.delete(instance)
-
-            instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=idnum).all()
-            for instance in instances:
-                meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
-                db.session.delete(meta)
+            auths = instance.authed.split(',')
+            auths.remove(str(user.id))
+            if len(auths) == 0:
                 db.session.delete(instance)
+                instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=idnum).all()
+                for instance in instances:
+                    meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                    db.session.delete(meta)
+                    db.session.delete(instance)
+            else:
+                instance.authed = ','.join(auths)
         db.session.commit()
     return 'Deleted'
 
@@ -857,6 +862,19 @@ def updateHRM():
     format_instance.hrm = hrm
     db.session.commit()
     return 'Updated'
+
+
+@app.route('/shareSes', methods=['GET', 'POST'])
+@login_required
+def shareSes():
+    idthis = request.form.get('id', type=int)
+    shareUser = request.form.get('toUser', type=str)
+    thisUser = db.session.query(User).filter_by(username=shareUser).first()
+    toAuth = thisUser.id
+    session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
+    session_instance.authed = session_instance.authed + ',' + str(toAuth)
+    db.session.commit()
+    return 'Shared'
 
 
 def atMax(ycords, npXcords, xmax, fitRange):
