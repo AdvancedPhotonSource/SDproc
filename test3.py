@@ -712,8 +712,11 @@ def process():
                 inputCord = format_instance.fit_pos
                 fitRange = format_instance.fit_range
                 if fitType == 'AtMax':
+                    temp = xmax[1]
+                    xmax[1] = ycords[0][xmax[1]]
                     npXcords = numpy.array(ycords[0])
                     center = atMax(ycords, npXcords, xmax, fitRange)
+                    xmax[1] = temp
                     moveXcords(ycords, center)
                     format_instance.fit_type = 'AtMax'
                     format_instance.fit_pos = center
@@ -1108,12 +1111,14 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
                 YVals[1] = numpy.array(YVals[1])
                 if numCat[0].size > numCat[1].size:
                     smallerx = numCat[1]
+                    smallery = YVals[1]
                     largerx = numCat[0]
-                    largerYs = 0
+                    largery = YVals[0]
                 else:
                     smallerx = numCat[0]
+                    smallery = YVals[0]
                     largerx = numCat[1]
-                    largerYs = 1
+                    largery = YVals[1]
                 smallLeft = (find_nearest(largerx, smallerx[0]))
                 smallRight = (find_nearest(largerx, smallerx[-1]))
                 largeLeft = (find_nearest(smallerx, largerx[0]))
@@ -1122,44 +1127,89 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
                 smallrightPad = 0
                 largeleftPad = 0
                 largerightPad = 0
+                largeInnerX = []
+                largeInnerY = []
+                smallInnerX = []
+                smallInnerY = []
+                first = 0
+                smallRightPadIndex = 'None'
+                largeRightPadIndex = 'None'
                 for element in largerx:
                     if element < smallLeft:
                         smallleftPad += 1
-                    if element > smallRight:
+                    elif element > smallRight:
+                        if first == 0:
+                            smallRightPadIndex = numpy.where(largerx == element)[0][0]
+                            first = 1
                         smallrightPad += 1
-
+                    else:
+                        largeInnerX.append(element)
+                        atIndex = numpy.where(largerx == element)[0][0]
+                        largeInnerY.append(largery[atIndex])
+                first = 0
                 for element in smallerx:
                     if element < largeLeft:
                         largeleftPad += 1
-                    if element > largeRight:
+                    elif element > largeRight:
+                        if first == 0:
+                            largeRightPadIndex = numpy.where(smallerx == element)[0][0]
+                            first = 1
                         largerightPad += 1
+                    else:
+                        smallInnerX.append(element)
+                        atIndex = numpy.where(smallerx == element)[0][0]
+                        smallInnerY.append(smallery[atIndex])
 
-                middleSize = largerx.size - smallleftPad - smallrightPad
-                rightPadIndex = smallleftPad + middleSize
-                largeInnerX = largerx[smallleftPad:rightPadIndex]
-                largeYs = YVals[largerYs]
-                largeInnerY = largeYs[smallleftPad:rightPadIndex]
+                smallInnerX = numpy.array(smallInnerX)
+                smallInnerY = numpy.array(smallInnerY)
+                largeInnerX = numpy.array(largeInnerX)
+                largeInnerY = numpy.array(largeInnerY)
 
-                smallerY = YVals[not largerYs]
-
-                if largeInnerX.size > smallerx.size:
-                    smallerY = numpy.interp(largeInnerX, smallerx, smallerY)
-                    smallPadx = numpy.concatenate((largerx[:smallleftPad], largeInnerX, largerx[rightPadIndex:]))
-                elif largeInnerX.size < smallerx.size:
-                    largeInnerY = numpy.interp(smallerx, largeInnerX, largeInnerY)
-                    smallPadx = numpy.concatenate((largerx[:smallleftPad], smallerx, largerx[rightPadIndex:]))
-                    largerx = numpy.concatenate((largerx[:smallleftPad], smallerx, largerx[rightPadIndex:]))
+                if largeInnerX.size > smallInnerX.size:
+                    smallInnerY = numpy.interp(largeInnerX, smallInnerX, smallInnerY)
+                    adjLargex = largerx
+                    if largeRightPadIndex != 'None':
+                        adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX, smallerx[largeRightPadIndex:]))
+                        smallery = numpy.concatenate((smallery[:largeleftPad], smallInnerY, smallery[largeRightPadIndex:]))
+                    else:
+                        adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX))
+                        smallery = numpy.concatenate((smallery[:largeleftPad], smallInnerY))
+                elif largeInnerX.size < smallInnerX.size:
+                    adjSmallx = smallerx
+                    largeInnerY = numpy.interp(smallInnerX, largeInnerX, largeInnerY)
+                    if smallRightPadIndex != 'None':
+                        adjLargex = numpy.concatenate((largerx[:smallleftPad], smallInnerX, largerx[smallRightPadIndex:]))
+                        largery = numpy.concatenate((largery[:smallleftPad], largeInnerY, largery[smallRightPadIndex:]))
+                    else:
+                        adjLargex = numpy.concatenate((largerx[:smallleftPad], smallInnerX))
+                        largery = numpy.concatenate((largery[:smallleftPad], largeInnerY))
                 else:
-                    smallPadx = numpy.concatenate((largerx[:smallleftPad], smallerx, largerx[rightPadIndex:]))
+                    if smallRightPadIndex != 'None':
+                        adjLargex = numpy.concatenate((largerx[:smallleftPad], largeInnerX, largerx[smallRightPadIndex:]))
+                    else:
+                        adjLargex = numpy.concatenate((largerx[:smallleftPad], largeInnerX))
+                    if largeRightPadIndex != 'None':
+                        adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX, smallerx[largeRightPadIndex:]))
+                    else:
+                        adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX))
 
-                smallPady = numpy.pad(smallerY, (smallleftPad, smallrightPad), 'constant', constant_values=(0, 0))
-                largePady = numpy.pad(largeYs, (largeleftPad, largerightPad), 'constant', constant_values=(0, 0))
+                smallPady = numpy.pad(smallery, (smallleftPad, smallrightPad), 'constant', constant_values=(0, 0))
+                largePady = numpy.pad(largery, (largeleftPad, largerightPad), 'constant', constant_values=(0, 0))
+
+                if largeRightPadIndex != 'None':
+                    largePadx = numpy.concatenate((smallerx[:largeleftPad], adjLargex, smallerx[largeRightPadIndex:]))
+                else:
+                    largePadx = numpy.concatenate((smallerx[:largeleftPad], adjLargex))
+                if smallRightPadIndex != 'None':
+                    smallPadx = numpy.concatenate((largerx[:smallleftPad], adjSmallx, largerx[smallRightPadIndex:]))
+                else:
+                    smallPadx = numpy.concatenate((largerx[:smallleftPad], adjSmallx))
 
                 small = numpy.array((smallPadx, smallPady))
-                large = numpy.array((largerx, largePady))
+                large = numpy.array((largePadx, largePady))
                 ySummed = numpy.add(small[1], large[1])
-                sum2D = numpy.array((largerx, ySummed))
-                sumNumpyStep = largerx.tolist()
+                sum2D = numpy.array((largePadx, ySummed))
+                sumNumpyStep = largePadx.tolist()
                 YValsStep = ySummed.tolist()
                 sumNumpy = []
                 YVals = []
@@ -1168,17 +1218,17 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
 
         sum2Dymax = numpy.amax(sum2D)
         sum2Dxmax = numpy.ndarray.argmax(sum2D)
-        line = ax.plot(largerx, ySummed, color='k', alpha=0, label='Sum of selected')
+        line = ax.plot(largePadx, ySummed, color='k', alpha=0, label='Sum of selected')
         lines.append(line[0])
 
-        point = ax.plot(sum2D[0][sum2Dxmax - largerx.size], sum2Dymax, '-bD')
+        point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
         labels.append('Sum of selected')
         lines.append(point[0])
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
     plt.close()
-    return code, sum2D[0][sum2Dxmax - largerx.size], sum2Dymax
+    return code, sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax
 
 
 def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNames, pltLeg, binWidth):
