@@ -66,6 +66,7 @@ $(document).ready( function() {
     $('#peakLocation').attr('placeholder', 'Peak found automatically');
     $('#peakLocation').prop('disabled', true);
     $('#pWInput').prop('disabled', false);
+    $('#logbtn').prop('disabled', false);
 })
 
 function asynchOnLoad(){
@@ -218,6 +219,7 @@ function log(){
     function(){
         $('#log_add').text('Added');
         $('#log_add').fadeOut(1000);
+        $('#logbtn').prop('disabled', true);
     })
 }
 
@@ -316,6 +318,7 @@ $(function(){
                 }
             })
         });
+        $('#logbtn').prop('disabled', false);
     });
 })
 
@@ -364,6 +367,7 @@ $(function(){
                 }
             })
         })
+        $('#logbtn').prop('disabled', false);
     })
 })
 

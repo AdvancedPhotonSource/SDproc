@@ -1326,7 +1326,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         point = ax.plot(sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, '-bD')
         labels.append('Sum of selected')
         lines.append(point[0])
-        mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, nameID, 1, css))
+        mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
     plt.close()

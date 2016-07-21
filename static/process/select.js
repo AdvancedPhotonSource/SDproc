@@ -39,8 +39,9 @@ $(function (){
 $(document).ready( function() {
     asynchOnLoad()
     $('#linearRad').prop("checked", true)
-    $('#binWidth').val('Input width of bins');
+    $('#binWidth').attr('placeholder', 'Input width of bins');
     $('#binWidth').prop('disabled', true);
+    $('#logbtn').prop('disabled', false);
     if (!localStorage.getItem('previous3') === null)
         localStorage.removeItem("previous3");
     if (localStorage.getItem('pltStat') === null)
@@ -97,6 +98,7 @@ function log(){
     function(){
         $('#log_add').text('Added');
         $('#log_add').fadeOut(1000);
+        $('#logbtn').prop('disabled', true);
     })
 }
 
@@ -124,10 +126,11 @@ function saveSettings(){
                     })
                 $('#ssModal').modal('hide');
             }
+            $('#logbtn').prop('disabled', false);
         }
         else
         {
-            alert('Please enter an bin width')
+            alert('Please enter a bin width')
         }
     }
     else
