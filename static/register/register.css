@@ -1,20 +1,16 @@
-.data-row{margin-right:-15px;margin-left:-15px;height:100px}
-.scan-list, .form-control{margin-bottom:20px}
-.col-center{
-    margin: auto;
-    width: 30%;
+td {
     padding: 10px;
 }
 
-td {
-padding: 10px;
+.regInputs{
+    display: inline-block;
 }
 
-.centerBlock{
-            display: table;
-            margin: 0 auto;
-            }
+.regBtn{
+    text-align: center;
+    padding-top: 40px;
+}
 
-select[multiple].scan-list{
-    padding: 0 24px
+.regStretch{
+    width: 300px;
 }
