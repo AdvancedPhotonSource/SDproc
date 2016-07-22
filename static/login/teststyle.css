@@ -1,39 +1,26 @@
-.data-row{margin-right:-15px;margin-left:-15px;height:100px}
-.scan-list, .form-control{margin-bottom:20px}
-.col-center{
-    margin: auto;
-    width: 20%;
-    padding: 10px;
+.loginInputs{
+    display: inline-block;
 }
 
 td {
-padding: 10px;
+    padding: 10px;
 }
 
-.centerBlock{
-            display: table;
-            margin: 0 auto;
-            }
-
-select[multiple].scan-list{
-    padding: 0 24px
+.loginBtns{
+    display: inline-block;
+    text-align: center;
+    padding-top: 10px;
 }
 
-.margin-info{
-    position: absolute;
-    top:60px;
-    right:40px;
+.floatClear {
+    clear: both;
 }
 
-.bootbtn{
-    position: absolute;
-    left: 550px;
-    z-index: 1;
+.loginBtn{
+    float: left;
+    margin-right: 100px;
 }
 
-.bootlbl{
-    position: absolute;
-    left: 398px;
-    top:241px;
-    z-index: 1;
+.regBtn{
+    float: left;
 }
