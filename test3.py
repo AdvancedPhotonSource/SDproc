@@ -147,7 +147,8 @@ def dataFormat():
             addLabels = []
             normLabels = []
             labels = []
-            data, name, unusedpath = readAscii(file_instance.path)
+            #data, name, unusedpath = readAscii(file_instance.path)
+            data, name, unusedpath = readMdaAscii(file_instance.path)
             for i in range(len(bools)):
                 if bools[i].data:
                     if columns[i].data == None:
@@ -187,7 +188,8 @@ def dataFormat():
             format_instance.plot = code
             db.session.commit()
         else:
-            data, name, unusedpath = readAscii(file_instance.path)
+            #data, name, unusedpath = readAscii(file_instance.path)
+            data, name, unusedpath = readMdaAscii(file_instance.path)
             used = []
             againstE = False
             format = currentMeta()
@@ -206,7 +208,7 @@ def dataFormat():
             format.against_E = False
             format.fit_type = 'AtMax'
             format.fit_pos = 0
-            format.fit_range = 0
+            format.fit_range = 3
             format.file_id = idthis
             format.hrm = '++'
 
@@ -622,7 +624,8 @@ def process():
             legendNames = []
             endmax = []
             allFileNames = []
-            data, name, unusedpath = readAscii(file_instance.path)
+            #data, name, unusedpath = readAscii(file_instance.path)
+            data, name, unusedpath = readMdaAscii(file_instance.path)
             if bools[1].data:
                 energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
                                      format_instance.hrm)
@@ -687,7 +690,8 @@ def process():
                 againstE = format_instance.against_E
                 form = populate_from_instance(format_instance)
                 columns, bools = splitForm(form)
-                data, name, unusedpath = readAscii(file_instance.path)
+                #data, name, unusedpath = readAscii(file_instance.path)
+                data, name, unusedpath = readMdaAscii(file_instance.path)
                 if bools[1].data:
                     energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
                                          format_instance.hrm)
@@ -767,7 +771,8 @@ def peak_at_max():
     localRange = request.form.get('localRange', type=float)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     format_instance = db.session.query(currentMeta).filter_by(file_id=idthis).first()
-    data, name, unusedpath = readAscii(file_instance.path)
+    #data, name, unusedpath = readAscii(file_instance.path)
+    data, name, unusedpath = readMdaAscii(file_instance.path)
     form = populate_from_instance(format_instance)
     columns, bools = splitForm(form)
     used = []
@@ -1031,6 +1036,26 @@ def readAscii(path):
     return data, name, path
 
 
+def readMdaAscii(path):
+    count = 0
+    name = path.split("/")
+    name = name[-1]
+    with open(path) as f:
+        for line in f:
+            line = line.rstrip()
+            if line.startswith("#"):
+                continue
+            if len(line) == 0:
+                continue
+            line = line.split(" ")
+            if count == 0:
+                data = [[] for x in xrange(len(line))]
+            count += 1
+            for i in range(len(line)):
+                data[i].append(line[i])
+    return data, name, path
+
+
 def simplePlot(data, xmax, filename, linenames, legend, sized):
     plt.close()
     fig = plt.figure(figsize=(10, 7))
@@ -1083,7 +1108,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
             xs = range(1, len(plot) + 1)
             ys = plot
             if allagainstE[count1]:
-                xs = alldata[count1][0]
+                xs = alldata[count1][1]
             plt.plot(xs, ys)
             plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
             count2 += 1
@@ -1249,7 +1274,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
             xs = range(1, len(plot) + 1)
             ys = plot
             if allagainstE[count1]:
-                xs = alldata[count1][0]
+                xs = alldata[count1][1]
             plt.plot(xs, ys)
             plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
             count2 += 1
@@ -1354,7 +1379,7 @@ def plotData(data, used, againstE, additional, lineNames):
                 xs = range(1, len(data[idx]) + 1)
                 ys = data[idx]
                 if againstE:
-                    xs = data[0]
+                    xs = data[1]
                 line = ax.plot(xs, ys, alpha=0, label=lineNames[0][count])
                 lines.append(line[0])
                 lines.append(line[0])
@@ -1366,7 +1391,7 @@ def plotData(data, used, againstE, additional, lineNames):
             xs = range(1, len(additional[i]) + 1)
             ys = additional[i]
             if againstE:
-                xs = data[0]
+                xs = data[1]
             line = ax.plot(xs, ys, alpha=0, label=lineNames[1][i])
             lines.append(line[0])
             lines.append(line[0])
