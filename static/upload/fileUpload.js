@@ -63,7 +63,13 @@ function resetForm()
 
 function sendfileForm()
 {
-    var formData = new FormData($('#fileForm')[0]);
+    var formData = new FormData();
+    var fileData = $('input[type="file"]')[0].files;
+    for (var i = 0; i < fileData.length; i++){
+        formData.append("file_"+i, fileData[i]);
+    }
+    formData.append('formatType', $.trim($('#formatType').text()))
+    formData.append('formatDelim', $('#formatDelim').val())
     $.ajax({
         url: '/addf',
         type: 'POST',

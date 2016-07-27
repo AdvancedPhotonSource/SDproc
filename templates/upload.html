@@ -85,16 +85,40 @@ with context %}
                     </table>
                 </div>
             </div>
-            <div class="ssModalFooter">
-                <div class="col-xs-6">
-                    <span class="centerBlock">
-                        <button type="button" onclick="shareFile()" class="btn btn-primary btn-default" data-dismiss="modal">Share</button>
-                    </span>
+            <div class="text-center">
+                <div class="ssModalFooter">
+                    <button type="button" onclick="shareFile()" class="btn btn-primary btn-default ssShareBtn" data-dismiss="modal">Share</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
-                <div class="col-xs-6">
-                    <span class="centerBlock">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </span>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="formatModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Format File:</h4>
+            </div>
+            <div class="formatModalBody text-center">
+                <div class="input-group formatG" id="formatGroup">
+                    <div class="input-group-btn">
+                        <button id="formatType" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">txt<span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a onclick="txtFile()">txt</a></li>
+                            <li><a onclick="mdaFile()">mda</a></li>
+                        </ul>
+                    </div>
+                    <input type="text" id="formatDelim" class="form-control" aria-label="..." placeholder="Delimiter">
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="formatModalFooter">
+                    <button type="button" onclick="sendfileForm()" class="btn btn-primary btn-default ssShareBtn" data-dismiss="modal">Upload</button>
+                    <button type="button" class="btn btn-default formatCloseBtn" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -119,8 +143,8 @@ with context %}
         <div class="text-center">
             <div class="uploadGroup">
                 <form id="fileForm" enctype="multipart/form-data">
-                    <input type="file" name="file" class="browseBtn">
-                    <input onclick="sendfileForm()" value="Upload File" class="btn btn-primary btn-xs upBtn" title="Upload selected file to database"/>
+                    <input type="file" name="file" class="browseBtn" multiple>
+                    <input data-toggle="modal" data-target="#formatModal" value="Upload File" class="btn btn-primary btn-xs upBtn" title="Upload selected file to database"/>
                 </form>
             </div>
         </div>
@@ -171,17 +195,15 @@ with context %}
                 </table>
                 {% endblock %}
                 <br/>
-                <div class="row">
-                    <div class="text-center">
-                        <div class="fileManageGroup">
-                            <button onclick="delFile()" class="btn btn-primary btn-xs delBtn" title="Remove selected file from database">
-                                Delete File
-                            </button>
-                            <button class="btn btn-primary btn-xs shareBtn" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
-                                Share File
-                            </button>
-                        </div>
-                    </div>
+            </div>
+            <div class="text-center">
+                <div class="fileManageGroup">
+                    <button onclick="delFile()" class="btn btn-primary btn-xs delBtn" title="Remove selected file from database">
+                        Delete File
+                    </button>
+                    <button class="btn btn-primary btn-xs shareBtn" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
+                        Share File
+                    </button>
                 </div>
             </div>
         </div>

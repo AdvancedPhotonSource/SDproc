@@ -355,19 +355,22 @@ def sesData():
 @login_required
 def addFile():
     if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            pathfilename = filename + str(datetime.now())
-            file.save(os.path.join(app.config['UPLOAD_DIR'], pathfilename))
-
-            dfile = dataFile()
-            dfile.name = filename
-            dfile.path = '/home/phoebus/CASCHMITZ/Desktop/dataDir/' + pathfilename
-            dfile.comment = ''
-            dfile.authed = current_user.get_id()
-            db.session.add(dfile)
-            db.session.commit()
+        temp1 = request.files.listvalues()
+        for file in temp1:
+            file = file[0]
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                pathfilename = filename + str(datetime.now())
+                file.save(os.path.join(app.config['UPLOAD_DIR'], pathfilename))
+                dfile = dataFile()
+                dfile.name = filename
+                dfile.delim = request.form[0]
+                dfile.type = request.form[1]
+                dfile.path = '/home/phoebus/CASCHMITZ/Desktop/dataDir/' + pathfilename
+                dfile.comment = ''
+                dfile.authed = current_user.get_id()
+                db.session.add(dfile)
+                db.session.commit()
     return 'Added'
 
 

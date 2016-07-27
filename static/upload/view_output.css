@@ -89,6 +89,7 @@ td {
 
 .fileManageGroup{
     display: inline-block;
+    margin-top: 20px;
 }
 
 .delBtn{
@@ -119,4 +120,19 @@ td {
 
 .alwaysFloat{
     float: left;
+}
+
+.ssShareBtn{
+    margin-right: 300px;
+}
+
+.formatCloseBtn{
+    margin-bottom: 20px;
+}
+
+.formatG{
+    width: 80%;
+    margin-left: 10%;
+    margin-bottom: 20px;
+    margin-top: 20px;
 }
