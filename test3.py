@@ -149,6 +149,7 @@ def dataFormat():
             labels = []
             #data, name, unusedpath = readAscii(file_instance.path)
             data, name, unusedpath = readMdaAscii(file_instance.path)
+            etype = data[columns[0].data - 1]
             for i in range(len(bools)):
                 if bools[i].data:
                     if columns[i].data == None:
@@ -157,6 +158,7 @@ def dataFormat():
                                                  unicode_to_int(columns[4].data - 1), format_instance.hrm)
                             additional.append(energy)
                             addLabels.append('Energy')
+                            etype = energy
                         elif i == 2:
                             energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
                                                       unicode_to_int(columns[4].data - 1),
@@ -164,6 +166,7 @@ def dataFormat():
                                                       unicode_to_int(columns[6].data - 1), format_instance.hrm)
                             additional.append(energy)
                             addLabels.append('Energy')
+                            etype = energy
                         elif i == 7:
                             energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
                                                unicode_to_int(columns[6].data - 1), format_instance.hrm)
@@ -184,12 +187,13 @@ def dataFormat():
                         normLabels.append(str(columns[i].label.text)[:-2])
             labels.append(normLabels)
             labels.append(addLabels)
-            code = plotData(data, used, againstE, additional, labels)
+            code = plotData(data, used, againstE, additional, labels, etype)
             format_instance.plot = code
             db.session.commit()
         else:
             #data, name, unusedpath = readAscii(file_instance.path)
             data, name, unusedpath = readMdaAscii(file_instance.path)
+            etype = data[1]
             used = []
             againstE = False
             format = currentMeta()
@@ -216,7 +220,7 @@ def dataFormat():
             used.append(11)
             labels = []
             labels.append(['Signal'])
-            code = plotData(data, used, False, None, labels)
+            code = plotData(data, used, False, None, labels, etype)
             format.plot = code
             db.session.add(format)
             db.session.commit()
@@ -782,7 +786,8 @@ def peak_at_max():
     additional = []
     legendNames = []
     if bools[1].data:
-        energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1))
+        energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
+                             unicode_to_int(columns[4].data - 1), format_instance.hrm)
         additional.append(energy)
         legendNames.append(columns[1].id)
     elif bools[2].data:
@@ -924,7 +929,6 @@ def atMax(ycords, npXcords, xmax, fitRange):
 
 def moveXcords(data, max):
     data[0] = numpy.subtract(data[0], max)
-    data[0] = numpy.multiply(data[0], 1000000)
     return data
 
 
@@ -1072,13 +1076,13 @@ def simplePlot(data, xmax, filename, linenames, legend, sized):
     nameID = str(uuid.uuid4())
     if legend == 0:
         fig, ax = plt.subplots()
-        xs = data[0]
+        xs = numpy.multiply(data[0], 1000000)
         ys = data[1]
         plt.plot(xs, ys)
         plt.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
     else:
         fig, ax = plt.subplots()
-        xs = data[0]
+        xs = numpy.multiply(data[0], 1000000)
         ys = data[1]
         line = ax.plot(xs, ys, alpha=0, label=filename + ' ' + linenames[0])
         lines.append(line[0])
@@ -1361,7 +1365,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
     return code, sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax
 
 
-def plotData(data, used, againstE, additional, lineNames):
+def plotData(data, used, againstE, additional, lineNames, eType):
     plt.close()
     fig = plt.figure(figsize=(10, 7))
     css = """
@@ -1381,8 +1385,10 @@ def plotData(data, used, againstE, additional, lineNames):
             if (idx + 1) == i:
                 xs = range(1, len(data[idx]) + 1)
                 ys = data[idx]
+
                 if againstE:
-                    xs = data[1]
+                    xs = [float(x) for x in eType]
+                    xs = numpy.multiply(xs, 1000000)
                 line = ax.plot(xs, ys, alpha=0, label=lineNames[0][count])
                 lines.append(line[0])
                 lines.append(line[0])
@@ -1392,9 +1398,11 @@ def plotData(data, used, againstE, additional, lineNames):
     if additional:
         for i in range(len(additional)):
             xs = range(1, len(additional[i]) + 1)
+
             ys = additional[i]
             if againstE:
-                xs = data[1]
+                xs = [float(x) for x in eType]
+                xs = numpy.multiply(xs, 1000000)
             line = ax.plot(xs, ys, alpha=0, label=lineNames[1][i])
             lines.append(line[0])
             lines.append(line[0])

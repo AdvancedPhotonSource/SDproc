@@ -417,10 +417,10 @@ function fitPeak(){
     $('#nbool').removeProp('checked');
     $('#nfbool').removeProp('checked');
     $('#xbool').removeProp('checked');
-    if (!$('#ebool').prop('checked') || !$('#ecbool').prop('checked') || ('#etcbool').prop('checked')){
+    if (!$('#ebool').prop('checked') && !$('#ecbool').prop('checked') && !$('#etcbool').prop('checked')){
         $('#ebool').prop('checked', true);
     }
-    if (!$('#sbool').prop('checked') || !$('#sncbool').prop('checked')){
+    if (!$('#sbool').prop('checked') && !$('#sncbool').prop('checked')){
         $('#sbool').prop('checked', true);
     }
     if ($('#againstE').prop('checked') == false){
