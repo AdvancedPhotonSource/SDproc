@@ -292,6 +292,22 @@ with context %}
                     <div id="plot">
                         {{code|safe}}
                     </div>
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <span class="pull-right">
+                                <button onclick="outputFile()" class="btn btn-primary btn-md" title="Display or save output file">
+                                    Output
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-xs-6">
+                            <span class="pull-left">
+                                <button onclick="advance()" class="btn btn-primary btn-lg" title="Proceed with files to processing">
+                                    Process
+                                </button>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -352,14 +368,6 @@ with context %}
                 </button>
             </span>
         </div>
-    </div>
-
-    <div class="row">
-        <span class="doneBtn">
-            <button onclick="advance()" class="btn btn-primary btn-lg" title="Proceed with files to processing">
-                Done
-            </button>
-        </span>
     </div>
     <div class="sessionName">
         <b class="sessionText" id="sesName">{{ ses }}</b>

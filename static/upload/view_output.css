@@ -112,7 +112,7 @@ td {
     margin-top: 50px;
 }
 
-@media (min-width: 1000px){
+@media (min-width: 1020px){
     .floatL{
         float: left;
     }
@@ -135,4 +135,9 @@ td {
     margin-left: 10%;
     margin-bottom: 20px;
     margin-top: 20px;
+}
+
+.navFiltInput{
+    width: 40%;
+    margin-left: 30%;
 }
