@@ -15,6 +15,7 @@ import math
 import numpy
 import uuid
 from sqlalchemy import desc
+import mda
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -147,8 +148,10 @@ def dataFormat():
             addLabels = []
             normLabels = []
             labels = []
-            #data, name, unusedpath = readAscii(file_instance.path)
-            data, name, unusedpath = readMdaAscii(file_instance.path)
+            if str(file_instance.type) == 'mda':
+                data, name, unusedpath = readMda(file_instance.path)
+            else:
+                data, name, unusedpath = readMdaAscii(file_instance.path)
             etype = data[columns[0].data - 1]
             for i in range(len(bools)):
                 if bools[i].data:
@@ -191,8 +194,10 @@ def dataFormat():
             format_instance.plot = code
             db.session.commit()
         else:
-            #data, name, unusedpath = readAscii(file_instance.path)
-            data, name, unusedpath = readMdaAscii(file_instance.path)
+            if str(file_instance.type) == 'mda':
+                data, name, unusedpath = readMda(file_instance.path)
+            else:
+                data, name, unusedpath = readMdaAscii(file_instance.path)
             etype = data[1]
             used = []
             againstE = False
@@ -368,8 +373,9 @@ def addFile():
                 file.save(os.path.join(app.config['UPLOAD_DIR'], pathfilename))
                 dfile = dataFile()
                 dfile.name = filename
-                dfile.delim = request.form[0]
-                dfile.type = request.form[1]
+                sideVals = request.form.listvalues()
+                dfile.delim = sideVals[0][0]
+                dfile.type = sideVals[1][0]
                 dfile.path = '/home/phoebus/CASCHMITZ/Desktop/dataDir/' + pathfilename
                 dfile.comment = ''
                 dfile.authed = current_user.get_id()
@@ -631,8 +637,10 @@ def process():
             legendNames = []
             endmax = []
             allFileNames = []
-            #data, name, unusedpath = readAscii(file_instance.path)
-            data, name, unusedpath = readMdaAscii(file_instance.path)
+            if str(file_instance.type) == 'mda':
+                data, name, unusedpath = readMda(file_instance.path)
+            else:
+                data, name, unusedpath = readMdaAscii(file_instance.path)
             if bools[1].data:
                 energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
                                      format_instance.hrm)
@@ -697,8 +705,10 @@ def process():
                 againstE = format_instance.against_E
                 form = populate_from_instance(format_instance)
                 columns, bools = splitForm(form)
-                #data, name, unusedpath = readAscii(file_instance.path)
-                data, name, unusedpath = readMdaAscii(file_instance.path)
+                if str(file_instance.type) == 'mda':
+                    data, name, unusedpath = readMda(file_instance.path)
+                else:
+                    data, name, unusedpath = readMdaAscii(file_instance.path)
                 if bools[1].data:
                     energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
                                          format_instance.hrm)
@@ -778,8 +788,10 @@ def peak_at_max():
     localRange = request.form.get('localRange', type=float)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     format_instance = db.session.query(currentMeta).filter_by(file_id=idthis).first()
-    #data, name, unusedpath = readAscii(file_instance.path)
-    data, name, unusedpath = readMdaAscii(file_instance.path)
+    if str(file_instance.type) == 'mda':
+        data, name, unusedpath = readMda(file_instance.path)
+    else:
+        data, name, unusedpath = readMdaAscii(file_instance.path)
     form = populate_from_instance(format_instance)
     columns, bools = splitForm(form)
     used = []
@@ -1061,6 +1073,19 @@ def readMdaAscii(path):
             for i in range(len(line)):
                 data[i].append(line[i])
     return data, name, path
+
+
+def readMda(path):
+    name = path.split("/")
+    name = name[-1]
+    endData = []
+    mdaData = mda.readMDA(path, 1, 0, 0)
+    for column in mdaData[1].p:
+        endData.append(column.data)
+    for column in mdaData[1].d:
+        endData.append(column.data)
+    return endData, name, path
+
 
 
 def simplePlot(data, xmax, filename, linenames, legend, sized):

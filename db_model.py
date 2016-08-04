@@ -84,6 +84,8 @@ class dataFile(db.Model):
     path = db.Column(db.String())
     comment = db.Column(db.String())
     authed = db.Column(db.String())
+    delim = db.Column(db.String())
+    type = db.Column(db.String())
 
 
 class currentMeta(db.Model):

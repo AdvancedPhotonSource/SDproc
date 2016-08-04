@@ -96,17 +96,17 @@ function resetForm()
 
 function sendfileForm()
 {
-    var formData = new FormData();
+    var fFormData = new FormData();
     var fileData = $('input[type="file"]')[0].files;
     for (var i = 0; i < fileData.length; i++){
-        formData.append("file_"+i, fileData[i]);
+        fFormData.append("file_"+i, fileData[i]);
     }
-    formData.append('formatType', $.trim($('#formatType').text()))
-    formData.append('formatDelim', $('#formatDelim').val())
+    fFormData.append('formatType', $.trim($('#formatType').text()))
+    fFormData.append('formatDelim', $('#formatDelim').val())
     $.ajax({
         url: '/addf',
         type: 'POST',
-        data: formData,
+        data: fFormData,
         contentType: false,
         cache: false,
         processData: false,
@@ -229,3 +229,15 @@ $(function()
         return false;
     })
 })
+
+function txtFile()
+{
+    $('#formatType').text('txt')
+    $('#formatType').append("<span class='caret'></span>");
+}
+
+function mdaFile()
+{
+    $('#formatType').text('mda')
+    $('#formatType').append("<span class='caret'></span>");
+}
