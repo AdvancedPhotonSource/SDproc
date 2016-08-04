@@ -6,7 +6,7 @@
     <title>Scandataproc</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="/static/bootstrap-theme.min.js">
+    <link rel="stylesheet" href="/static/bootstrap-theme.min.css">
     <link rel="stylesheet" href="/static/bootstrap.min.css">
     <link href="/static/register/register.css" rel="stylesheet">
 </head>
@@ -63,8 +63,11 @@
     <div class="text-center">
         <div class="regInputs">
             <table>
+                {% set counter = 0 %}
                 {% for field in form %}
-                    <tr>
+                    {% if counter == 0 or counter == 3 or counter == 5 %}
+                        <tr>
+                    {% endif %}
                         <td>{{ field.label }}</td>
                         <td>{{ field(size=20) }}</td>
                         <td>
@@ -76,14 +79,17 @@
                             </ul>
                             {% endif %}
                         </td>
-                    </tr>
+                    {% if counter == 2 or counter == 4 or counter == 6 %}
+                        </tr>
+                    {% endif %}
+                    {% set counter = counter + 1 %}
                 {% endfor %}
             </table>
         </div>
     </div>
     <div class="text-center">
         <div class="regBtn">
-            <input type="submit" class="btn btn-primary btn-lg regStretch" value="Register">
+            <input type="submit" class="btn btn-primary btn-lg regStretch" value="Request Account">
         </div>
     </div>
 </form>
