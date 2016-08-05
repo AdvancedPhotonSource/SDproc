@@ -487,7 +487,7 @@ def make_name():
         # temp = lastMod.strftime("%Y-%m-%d %H:%M:%S")
         # modname = str(instance.name) + ' ' + temp
         return instance.name
-    return 'Holder'
+    return 'Made'
 
 
 @app.route('/del_entry', methods=['GET', 'POST'])
@@ -677,6 +677,7 @@ def process():
                 temp = xmax[1]
                 xmax[1] = ycords[0][xmax[1]]
                 npXcords = numpy.array(ycords[0])
+                npXcords = numpy.multiply(npXcords, 1000000)
                 center = atMax(ycords, npXcords, xmax, fitRange)
                 xmax[1] = temp
                 moveXcords(ycords, center)
@@ -685,6 +686,7 @@ def process():
                 format_instance.fit_range = fitRange
                 db.session.commit()
             else:
+                ycords[0] = numpy.multiply(ycords[0], 1000000)
                 moveXcords(ycords, inputCord)
             endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
             allFileNames.append(file_instance.name)
@@ -827,6 +829,7 @@ def peak_at_max():
         legendNames.append(columns[8].id)
     max, xmax, ycords = convert_Numpy(used, data, additional)
     npXcords = numpy.array(ycords[0])
+    npXcords = numpy.multiply(npXcords, 1000000)
     npYcords = numpy.array(ycords[1])
     if fitType == 0:
         leftBound = (find_nearest(npXcords, npXcords[xmax[1]] - (fitRange / 2)))
@@ -1107,13 +1110,13 @@ def simplePlot(data, xmax, filename, linenames, legend, sized):
     nameID = str(uuid.uuid4())
     if legend == 0:
         fig, ax = plt.subplots()
-        xs = numpy.multiply(data[0], 1000000)
+        xs = data[0]
         ys = data[1]
         plt.plot(xs, ys)
         plt.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
     else:
         fig, ax = plt.subplots()
-        xs = numpy.multiply(data[0], 1000000)
+        xs = data[0]
         ys = data[1]
         line = ax.plot(xs, ys, alpha=0, label=filename + ' ' + linenames[0])
         lines.append(line[0])
@@ -1147,6 +1150,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
             ys = plot
             if allagainstE[count1]:
                 xs = alldata[count1][1]
+                xs = numpy.multiply(xs, 1000000)
             plt.plot(xs, ys)
             plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
             count2 += 1
@@ -1154,6 +1158,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         fig, ax = plt.subplots()
         for oneDat in allycords:
             xs = oneDat[0]
+            xs = numpy.multiply(xs, 1000000)
             ys = oneDat[1]
             line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1] + ' ' + allLegendNames[count1])
             lines.append(line[0])
@@ -1281,10 +1286,12 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
 
         sum2Dymax = numpy.amax(sum2D)
         sum2Dxmax = numpy.ndarray.argmax(sum2D)
+        largePadx = numpy.multiply(largePadx, 1000000)
         line = ax.plot(largePadx, ySummed, color='k', alpha=0, label='Sum of selected')
         lines.append(line[0])
 
-        point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
+        sum2D = numpy.multiply(sum2D, 1000000)
+        point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD', url='SUMMAXID')
         labels.append('Sum of selected')
         lines.append(point[0])
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
@@ -1634,8 +1641,21 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                 obj.lineNum = i;
                 var outer = point.parent.baseaxes[0][0].children[1];
                 var points = outer.getElementsByTagName("g");
-                points[3-i].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                points[3-i].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                if (typeof InstallTrigger !== 'undefined'){
+                    //Firefox
+                    points[i-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                    points[i-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                }
+                else if (!!window.chrome && !!window.chrome.webstore){
+                    //Chrome
+                    points[3-i].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                    points[3-i].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                }
+                else{
+                    //implement more if needed
+                    points[i-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                    points[i-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                }
 
                labels.push(obj);
             }
@@ -1699,14 +1719,43 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                 if(d.visible == true){
                     var outer = d.line2.parent.baseaxes[0][0].children[1];
                     var points = outer.getElementsByTagName("g");
-                    points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 1, 'important');
-                    points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 1, 'important');
+
+                    if (typeof InstallTrigger !== 'undefined'){
+                        //Firefox
+                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                    }
+                    else if (!!window.chrome && !!window.chrome.webstore){
+                        //Chrome
+                        points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                        points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                    }
+                    else{
+                        //implement more if needed
+                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                    }
+
                 }
                 else{
                     var outer = d.line2.parent.baseaxes[0][0].children[1];
                     var points = outer.getElementsByTagName("g");
-                    points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                    points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 0, 'important');
+
+                    if (typeof InstallTrigger !== 'undefined'){
+                        //Firefox
+                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                    }
+                    else if (!!window.chrome && !!window.chrome.webstore){
+                        //Chrome
+                        points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                        points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                    }
+                    else{
+                        //implement more if needed
+                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                    }
                 }
             }
         };
