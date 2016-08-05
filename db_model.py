@@ -141,6 +141,10 @@ class sessionMeta(db.Model):
     comment = db.Column(db.String())
     file_id = db.Column(db.Integer())
 
+    fit_type = db.Column(db.String())
+    fit_pos = db.Column(db.Float())
+    fit_range = db.Column(db.Float)
+
     against_E = db.Column(db.Boolean())
 
     hrm = db.Column(db.String())

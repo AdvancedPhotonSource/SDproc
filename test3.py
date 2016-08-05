@@ -312,6 +312,9 @@ def saveSession():
         session_instance.path = instance.path
         session_instance.comment = instance.comment
         session_instance.against_E = instance.against_E
+        session_instance.fit_type = instance.fit_type
+        session_instance.fit_pos = instance.fit_pos
+        session_instance.fit_range = instance.fit_range
         db.session.add(session_instance)
         db.session.commit()
 
@@ -589,6 +592,9 @@ def set_ses():
             newCurrent.comment = actualMeta.comment
             newCurrent.against_E = actualMeta.against_E
             newCurrent.file_id = actualMeta.file_id
+            newCurrent.fit_type = actualMeta.fit_type
+            newCurrent.fit_pos = actualMeta.fit_pos
+            newCurrent.fit_range = actualMeta.fit_range
             db.session.add(newCurrent)
             db.session.commit()
 
@@ -1623,13 +1629,14 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                 line = mpld3.get_element(this.props.line_ids[(i * 2) - 2], this.fig);
                 obj.line1 = line
                 point = mpld3.get_element(this.props.line_ids[(i * 2) - 1], this.fig);
-                var outer = point.parent.baseaxes[0][0].children[1];
-                var points = outer.getElementsByTagName("g");
-                points[i-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                points[i-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
                 obj.line2 = point;
                 obj.visible = false;
                 obj.lineNum = i;
+                var outer = point.parent.baseaxes[0][0].children[1];
+                var points = outer.getElementsByTagName("g");
+                points[3-i].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                points[3-i].firstChild.style.setProperty('fill-opacity', 0, 'important');
+
                labels.push(obj);
             }
             var ax = this.fig.axes[0];
@@ -1692,14 +1699,14 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                 if(d.visible == true){
                     var outer = d.line2.parent.baseaxes[0][0].children[1];
                     var points = outer.getElementsByTagName("g");
-                    points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
-                    points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                    points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                    points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 1, 'important');
                 }
                 else{
                     var outer = d.line2.parent.baseaxes[0][0].children[1];
                     var points = outer.getElementsByTagName("g");
-                    points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                    points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                    points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                    points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 0, 'important');
                 }
             }
         };
@@ -1709,6 +1716,7 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
         self.css_ = css or ""
 
         self.lines = lines
+
         self.dict_ = {"type": "interactive_legend",
                       "line_ids": [mpld3.utils.get_id(line) for line in lines],
                       "labels": labels,

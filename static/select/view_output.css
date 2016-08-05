@@ -82,3 +82,8 @@ select[multiple].scan-list{
     left: 30%;
     top: 3%;
 }
+
+.navFiltInput{
+    width: 10%;
+    margin-left: 13%;
+}
