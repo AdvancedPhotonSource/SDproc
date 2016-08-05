@@ -59,6 +59,14 @@ def login():
     return render_template('login_form.html', form=form, session=session)
 
 
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin():
+    if current_user.isAdmin == 0:
+        return redirect(url_for('index'))
+    return render_template('admin.html', user=current_user)
+
+
 @app.route('/select', methods=['GET', 'POST'])
 @login_required
 def index():
@@ -1291,7 +1299,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         lines.append(line[0])
 
         sum2D = numpy.multiply(sum2D, 1000000)
-        point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD', url='SUMMAXID')
+        point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
         labels.append('Sum of selected')
         lines.append(point[0])
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
@@ -1733,7 +1741,7 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                     else{
                         //implement more if needed
                         points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
-                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                        points[d.lineNum-1].firstChild.style.setProperty('fill-opbacity', 1, 'important');
                     }
 
                 }

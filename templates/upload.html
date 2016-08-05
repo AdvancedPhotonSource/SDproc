@@ -36,6 +36,13 @@ with context %}
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
+                {% if user.isAdmin == 1 %}
+                <li>
+                    <a href="admin">
+                        Admin
+                    </a>
+                </li>
+                {% endif %}
                 <li class="active">
                     <a href="upload">
                         Manage Files

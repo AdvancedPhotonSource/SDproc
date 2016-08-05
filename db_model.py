@@ -13,7 +13,10 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True)
     pwhash = db.Column(db.String())
     email = db.Column(db.String(120), nullable=True)
-    notify = db.Column(db.Boolean())
+    fullName = db.Column(db.String())
+    institution = db.Column(db.String())
+    reason = db.Column(db.String())
+    isAdmin = db.Column(db.Integer())
 
     def __repr__(self):
         return '<User %r>' % (self.username)
@@ -194,14 +197,3 @@ class sessionFilesMeta(db.Model):
     sessionFilesMeta_id = db.Column(db.Integer, primary_key=True)
     sessionFiles_id = db.Column(db.ForeignKey('sessionFiles.id'))
     sessionMeta_id = db.Column(db.ForeignKey('sessionMeta.id'))
-
-    #session_meta = relationship("sessionMeta")
-    #session_files = relationship("sessionFiles", primaryjoin="and_(sessionFiles.id == foreign(sessionFilesMeta.sessionFiles_id), "
-    #                            "sessionFiles.sessionMeta_id == sessionFilesMeta.sessionMeta_id)")
-    #session_files = relationship("sessionFiles")
-    #__table_args__ = (PrimaryKeyConstraint('sessionFilesMeta_id', 'sessionMeta_id'),
-    #                  ForeignKeyConstraint(['sessionFiles_id', 'sessionMeta_id'],
-    #                                       ['sessionFiles.id', 'sessionFiles.sessionMeta_id']),)
-
-    #PrimaryKeyConstraint('sessionFile_ID', 'sessionMeta_ID')
-    #ForeignKeyConstraint(['sessionFile_ID', 'sessionMeta_ID'], ['sessionFiles.id', 'sessionMeta.id'])
