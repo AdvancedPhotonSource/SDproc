@@ -64,8 +64,48 @@ def login():
 def admin():
     if current_user.isAdmin == 0:
         return redirect(url_for('index'))
-    return render_template('admin.html', user=current_user)
+    names = db.session.query(User)
+    sesData = []
+    fileData = []
+    sessions = sessionFiles.query.all()
+    for instance in sessions:
+        lastMod = instance.last_used
+        sesData.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed,
+                        'modified': lastMod})
+    files = dataFile.query.order_by('id')
+    for instance in files:
+        fsize = size(instance.path)
+        lastMod = modified(instance.path)
+        temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
+        modname = [instance.name + temp]
+        fileData.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
+                        'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+    return render_template('admin.html', user=current_user, fileData=fileData, sesData=sesData, names=names)
 
+
+@app.route('/getInfo', methods=['GET', 'POST'])
+@login_required
+def getInfo():
+    table = request.form.get('table', type=str)
+    id = request.form.get('id', type=int)
+    fileUsers = []
+    targetID = []
+    sessionUsers = []
+    if table == 'File':
+        file_instance = db.session.query(dataFile).filter_by(id=id).first()
+        names = file_instance.authed.split(',')
+        for name in names:
+            user = db.session.query(User).filter_by(id=name).first()
+            fileUsers.insert(0, {'fUser': user})
+    if table == 'User':
+        targetID = ({'targetID': id})
+    if table == 'Session':
+        session_instance = db.session.query(sessionFiles).filter_by(id=id).first()
+        names = session_instance.authed.split(',')
+        for name in names:
+            user = db.session.query(User).filter_by(id=name).first()
+            sessionUsers.insert(0, {'sUser': user})
+    return render_template('admin.html', user=current_user, fileUsers=fileUsers, targetID=targetID, sessionUsers=sessionUsers)
 
 @app.route('/select', methods=['GET', 'POST'])
 @login_required
