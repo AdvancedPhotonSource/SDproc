@@ -89,6 +89,118 @@ $(document).ready( function() {
             table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#sessionFilt').length +'">No result found</td></tr>'));
         }
     });
+
+    $('#fileUserFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#fileNameTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#fileUserFilt').length +'">No result found</td></tr>'));
+        }
+    });
+
+   $('#userFileFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#userFileTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#userFileFilt').length +'">No result found</td></tr>'));
+        }
+    });
+
+   $('#userSessionFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#userSessionTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#userSessionFilt').length +'">No result found</td></tr>'));
+        }
+    });
+
+   $('#sessionUserFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#sessionUserTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#sessionUserFilt').length +'">No result found</td></tr>'));
+        }
+    });
 })
 
 $(function()
@@ -96,6 +208,7 @@ $(function()
     var rows = $('tr.item')
     rows.on('click', function(e)
     {
+        $(rows).unbind('click')
         var row = $(this);
         var id = $('td:first', $(row)).attr('id');
         rows.removeClass('highlight');
@@ -104,19 +217,30 @@ $(function()
         if (row.parents('#fileTable').length){
             $('#fileModal').load('/getInfo'+" #fileModal>*",{ id: id, table: "File"}, function(){
                 $('#fileModal').modal('show');
+                $.getScript( "/static/admin/admin.js", function(event){
+                    $(rows).bind('click');
+                    Files()
+                });
             });
         }
         if (row.parents('#nameTable').length){
-            $.post( "/getInfo", { id: id, table: "User"}, function(data){
-                $('#UserModal').html(data);
-            })
-            $('#userModal').modal('show');
+            $('#userModal').load('/getInfo'+" #userModal>*",{ id: id, table: "User"}, function(){
+                $('#userModal').modal('show');
+                $.getScript( "/static/admin/admin.js", function(event){
+                    $(rows).bind('click');
+                    Users()
+                });
+            });
         }
         if (row.parents('#sessionTable').length){
-            $.post( "/getInfo", { id: id, table: "Session"}, function(data){
-                $('#sessionModal').html(data);
-            })
-            $('#sessionModal').modal('show');
+            $('#sessionModal').load('/getInfo'+" #sessionModal>*",{ id: id, table: "Session"}, function(){
+                $('#sessionModal').modal('show');
+                $('script[src="/static/admin/admin.js"]').remove()
+                $.getScript( "/static/admin/admin.js", function(event){
+                    $(rows).bind('click');
+                    Sessions()
+                });
+            });
         }
     })
     rows.on('mouseenter', function(e)
@@ -144,22 +268,31 @@ $(function()
 
 function Users(){
     $('#fileNav').hide();
+    $('#fileFilt').hide();
     $('#sessionNav').hide();
+    $('#sessionFilt').hide();
     $('#userNav').show();
+    $('#userFilt').show();
     clearHighlight();
 }
 
 function Files(){
     $('#userNav').hide();
+    $('#userFilt').hide();
     $('#sessionNav').hide();
+    $('#sessionFilt').hide();
     $('#fileNav').show();
+    $('#fileFilt').show();
     clearHighlight();
 }
 
 function Sessions(){
     $('#userNav').hide();
+    $('#userFilt').hide();
     $('#fileNav').hide();
+    $('#fileFilt').hide();
     $('#sessionNav').show();
+    $('#sessionFilt').show();
     clearHighlight();
 }
 

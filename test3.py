@@ -89,7 +89,8 @@ def getInfo():
     table = request.form.get('table', type=str)
     id = request.form.get('id', type=int)
     fileUsers = []
-    targetID = []
+    userFiles = []
+    userSessions = []
     sessionUsers = []
     if table == 'File':
         file_instance = db.session.query(dataFile).filter_by(id=id).first()
@@ -98,14 +99,29 @@ def getInfo():
             user = db.session.query(User).filter_by(id=name).first()
             fileUsers.insert(0, {'fUser': user})
     if table == 'User':
-        targetID = ({'targetID': id})
+        files = dataFile.query.all()
+        for instance in files:
+            fsize = size(instance.path)
+            lastMod = modified(instance.path)
+            temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
+            modname = [instance.name + temp]
+            userFiles.insert(0,
+                         {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
+                          'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+
+        sessions = sessionFiles.query.all()
+        for instance in sessions:
+            lastMod = instance.last_used
+            userSessions.insert(0,
+                        {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
+                         'authed': instance.authed, 'modified': lastMod})
     if table == 'Session':
         session_instance = db.session.query(sessionFiles).filter_by(id=id).first()
         names = session_instance.authed.split(',')
         for name in names:
             user = db.session.query(User).filter_by(id=name).first()
             sessionUsers.insert(0, {'sUser': user})
-    return render_template('admin.html', user=current_user, fileUsers=fileUsers, targetID=targetID, sessionUsers=sessionUsers)
+    return render_template('admin.html', user=current_user, fileUsers=fileUsers, userFiles=userFiles, userSessions=userSessions, sessionUsers=sessionUsers)
 
 @app.route('/select', methods=['GET', 'POST'])
 @login_required
@@ -160,7 +176,7 @@ def dataFormat():
     fdata = []
     nameID = str(uuid.uuid4())
     userID = str(user.get_id())
-    files = dataFile.query.filter_by(authed=userID)
+    files = dataFile.query.all()
     for instance in files:
         fsize = size(instance.path)
         lastMod = modified(instance.path)

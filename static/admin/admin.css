@@ -38,3 +38,111 @@
 .highlight{background-color: #2465bf;}
 
 .lightlight{background-color: #7498c9;}
+
+.modFiltInput{
+    width: 20%;
+}
+
+.userFileTable{
+    width: 100%;
+    height:auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height:350px;
+    margin-right: 10px;
+    margin-left: 27px;
+    float: left;
+}
+
+.userSessionTable{
+    width: 100%;
+    height:auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height:350px;
+    margin-right: 10px;
+    margin-left: 10px;
+    float: left;
+}
+
+.fileNameTable{
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 75%;
+    height: auto;
+    width: 30%;
+    left: 35%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
+}
+
+.sessionUserTable{
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 75%;
+    height: auto;
+    width: 30%;
+    left: 35%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
+}
+
+.userFileFilt{
+    margin-top: 30px;
+    margin-left: 100px;
+    margin-bottom: 6px;
+}
+
+.userSessionFilt{
+    margin-top: -40px;
+    margin-left: 370px;
+}
+
+.addS{
+    margin-right: 30px;
+    margin-left: 40px;
+}
+.addF{
+    margin-right: 50px;
+    margin-left: 70px;
+}
+
+.doubleGroupF{
+    margin-top: 10px;
+    float: left;
+}
+
+.doubleGroupS{
+    margin-top: 10px;
+    float: left;
+}
+
+.closeBtn{
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.filtInput{
+    margin-top: -50px;
+    margin-bottom: 50px;
+}
+
+.singularFilt{
+    display: inline-block;
+    margin-top: 30px;
+    margin-bottom: 6px;
+}
+
+.singleAdd{
+    margin-right: 20px;
+}
+
+.singleGroup{
+    margin-top: 10px;
+}
