@@ -6,7 +6,7 @@ import mpld3
 import os
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from app import app
-from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta
+from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta, notification
 from forms import InputForm, CommentForm
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -37,12 +37,20 @@ def register():
         user = User()
         form.populate_obj(user)
         user.set_password(form.password.data)
+        user.approved = 0
 
         db.session.add(user)
+
+        notif = notification()
+        notif.originUser = user.username
+        notif.type = 'Create Account'
+        notif.timestamp = getTime()
+
+        db.session.add(notif)
+
         db.session.commit()
 
-        login_user(user)
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
 
@@ -52,10 +60,17 @@ def login():
     form = login_form(request.form)
     if request.method == 'POST' and form.validate():
         user = form.get_user()
-        login_user(user)
-        clear_cmeta()
-        clear_rowa_wrapper()
-        return redirect(url_for('index'))
+        if user.approved == 1:
+            login_user(user)
+            clear_cmeta()
+            clear_rowa_wrapper()
+            return redirect(url_for('index'))
+        if user.approved == 2:
+            refusePrompt = "Your account has been frozen"
+            return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
+        if user.approved == 0:
+            refusePrompt = "Wait for an admin to approve your account"
+            return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
     return render_template('login_form.html', form=form, session=session)
 
 
@@ -67,21 +82,58 @@ def admin():
     names = db.session.query(User)
     sesData = []
     fileData = []
+    notifData = []
     sessions = sessionFiles.query.all()
     for instance in sessions:
         lastMod = instance.last_used
-        sesData.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed,
-                        'modified': lastMod})
+        sesData.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
+                           'authed': instance.authed,
+                           'modified': lastMod})
     files = dataFile.query.order_by('id')
     for instance in files:
         fsize = size(instance.path)
         lastMod = modified(instance.path)
         temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
         modname = [instance.name + temp]
-        fileData.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
-                        'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
-    return render_template('admin.html', user=current_user, fileData=fileData, sesData=sesData, names=names)
+        fileData.insert(0,
+                        {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
+                         'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
+    notifications = notification.query.order_by('id')
+    for instance in notifications:
+        userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
+        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
+                             'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
+                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
+                             'reason': userInfo.reason})
+    return render_template('admin.html', user=current_user, fileData=fileData, sesData=sesData,
+                           names=names, notifications=notifData)
+
+
+@app.route('/freeze', methods=['GET', 'POST'])
+@login_required
+def freeze():
+    user = request.form.get('user', type=str)
+    freeze = request.form.get('freeze', type=int)
+    user_instance = db.session.query(User).filter_by(username=user)
+    if freeze == 1:
+        user_instance.approved = 2
+    else:
+        user_instance.approved = 1
+    db.session.commit()
+    return 'Updated'
+
+
+@app.route('/notifInfo', methods=['GET', 'POST'])
+@login_required
+def notifInfo():
+    notifID = request.form.get('id', type=int)
+    notifInfo = db.session.query(notification).filter_by(id=notifID)
+    userInfo = db.session.query(User).filter_by(username=notifInfo.originUser).first()
+    userData = {'username': userInfo.username, 'email': userInfo.email,
+                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
+                             'reason': userInfo.reason}
+    return render_template('admin.html', user=current_user, userProf=userData)
 
 @app.route('/getInfo', methods=['GET', 'POST'])
 @login_required
@@ -106,22 +158,66 @@ def getInfo():
             temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
             modname = [instance.name + temp]
             userFiles.insert(0,
-                         {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
-                          'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+                             {'name': instance.name, 'path': instance.path, 'id': instance.id,
+                              'comment': instance.comment,
+                              'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
         sessions = sessionFiles.query.all()
         for instance in sessions:
             lastMod = instance.last_used
             userSessions.insert(0,
-                        {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
-                         'authed': instance.authed, 'modified': lastMod})
+                                {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
+                                 'authed': instance.authed, 'modified': lastMod})
     if table == 'Session':
         session_instance = db.session.query(sessionFiles).filter_by(id=id).first()
         names = session_instance.authed.split(',')
         for name in names:
             user = db.session.query(User).filter_by(id=name).first()
             sessionUsers.insert(0, {'sUser': user})
-    return render_template('admin.html', user=current_user, fileUsers=fileUsers, userFiles=userFiles, userSessions=userSessions, sessionUsers=sessionUsers)
+    return render_template('admin.html', user=current_user, fileUsers=fileUsers, userFiles=userFiles,
+                           userSessions=userSessions, sessionUsers=sessionUsers)
+
+
+@app.route('/removeThing', methods=['GET', 'POST'])
+@login_required
+def removeThing():
+    if request.method == 'POST':
+        thing = request.form.get('id', type=str)
+        location = request.form.get('from', type=str)
+        table = request.form.get('table', type=str)
+        user = request.form.get('user', type=str)
+        if thing != None:
+            user = db.session.query(User).filter_by(username=location).first()
+            if table == '#userFileTable':
+                instance = db.session.query(dataFile).filter_by(id=thing).first()
+                auths = instance.authed.split(',')
+                auths.remove(str(user.id))
+                if len(auths) == 0:
+                    db.session.delete(instance)
+                else:
+                    instance.authed = ','.join(auths)
+            if table == '#userSessionTable':
+                instance = db.session.query(sessionFiles).filter_by(id=thing).first()
+                auths = instance.authed.split(',')
+                auths.remove(str(user.id))
+                if len(auths) == 0:
+                    db.session.delete(instance)
+                    instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=thing).all()
+                    for instance in instances:
+                        meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                        db.session.delete(meta)
+                        db.session.delete(instance)
+                    else:
+                        instance.authed = ','.join(auths)
+        else:
+            user = db.session.query(User).filter_by(username=user).first()
+            if table == '#fileNameTable':
+                temp = 'inprogress'
+            if table == '#sessionUserTable':
+                temp = 'inprogress'
+        db.session.commit()
+    return 'Removed'
+
 
 @app.route('/select', methods=['GET', 'POST'])
 @login_required
@@ -456,6 +552,7 @@ def addFile():
 def delete_file():
     if request.method == 'POST':
         idnum = request.form.get('id', type=int)
+        delUser = request.form.get('delUser', type=str)
         table = request.form.get('table', type=str)
         user = current_user
         if table == 'File':
@@ -482,6 +579,9 @@ def delete_file():
                     db.session.delete(instance)
             else:
                 instance.authed = ','.join(auths)
+        if table == 'User':
+            instance = db.session.query(User).filter_by(username=delUser).first()
+            db.session.delete(instance)
         db.session.commit()
     return 'Deleted'
 
@@ -1160,7 +1260,6 @@ def readMda(path):
     return endData, name, path
 
 
-
 def simplePlot(data, xmax, filename, linenames, legend, sized):
     plt.close()
     fig = plt.figure(figsize=(10, 7))
@@ -1301,8 +1400,10 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
                     smallInnerY = numpy.interp(largeInnerX, smallInnerX, smallInnerY)
                     adjLargex = largerx
                     if largeRightPadIndex != 'None':
-                        adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX, smallerx[largeRightPadIndex:]))
-                        smallery = numpy.concatenate((smallery[:largeleftPad], smallInnerY, smallery[largeRightPadIndex:]))
+                        adjSmallx = numpy.concatenate(
+                            (smallerx[:largeleftPad], largeInnerX, smallerx[largeRightPadIndex:]))
+                        smallery = numpy.concatenate(
+                            (smallery[:largeleftPad], smallInnerY, smallery[largeRightPadIndex:]))
                     else:
                         adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX))
                         smallery = numpy.concatenate((smallery[:largeleftPad], smallInnerY))
@@ -1310,18 +1411,21 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
                     adjSmallx = smallerx
                     largeInnerY = numpy.interp(smallInnerX, largeInnerX, largeInnerY)
                     if smallRightPadIndex != 'None':
-                        adjLargex = numpy.concatenate((largerx[:smallleftPad], smallInnerX, largerx[smallRightPadIndex:]))
+                        adjLargex = numpy.concatenate(
+                            (largerx[:smallleftPad], smallInnerX, largerx[smallRightPadIndex:]))
                         largery = numpy.concatenate((largery[:smallleftPad], largeInnerY, largery[smallRightPadIndex:]))
                     else:
                         adjLargex = numpy.concatenate((largerx[:smallleftPad], smallInnerX))
                         largery = numpy.concatenate((largery[:smallleftPad], largeInnerY))
                 else:
                     if smallRightPadIndex != 'None':
-                        adjLargex = numpy.concatenate((largerx[:smallleftPad], largeInnerX, largerx[smallRightPadIndex:]))
+                        adjLargex = numpy.concatenate(
+                            (largerx[:smallleftPad], largeInnerX, largerx[smallRightPadIndex:]))
                     else:
                         adjLargex = numpy.concatenate((largerx[:smallleftPad], largeInnerX))
                     if largeRightPadIndex != 'None':
-                        adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX, smallerx[largeRightPadIndex:]))
+                        adjSmallx = numpy.concatenate(
+                            (smallerx[:largeleftPad], largeInnerX, smallerx[largeRightPadIndex:]))
                     else:
                         adjSmallx = numpy.concatenate((smallerx[:largeleftPad], largeInnerX))
 

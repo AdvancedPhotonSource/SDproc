@@ -146,3 +146,25 @@
 .singleGroup{
     margin-top: 10px;
 }
+
+.clearFloat{
+    clear: both;
+}
+
+.notifications{
+    margin-left: 20%;
+    margin-top: -6%;
+}
+
+.delUser{
+    margin-top: -5%;
+}
+
+.freezeChk{
+    margin-left: 70%;
+    margin-top: -5%;
+}
+
+.noneDet{
+    margin-left: 5%;
+}

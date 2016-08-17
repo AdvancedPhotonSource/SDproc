@@ -203,43 +203,70 @@ $(document).ready( function() {
     });
 })
 
+function setupRows(){
+    var rows = $('tr.item')
+    rows.on('click', function(e){
+        var row = $(this);
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        row.addClass('highlight');
+    })
+    rows.on('mouseenter', function(e)
+    {
+        var row = $(this);
+        if ($(row).hasClass( "highlight" ))
+        {
+            rows.removeClass('lightlight');
+        }
+        else
+        {
+            rows.removeClass('lightlight');
+            row.addClass('lightlight');
+        }
+    })
+
+    $(document).on('selectstart dragstart', function(e)
+    {
+        e.preventDefault();
+        return false;
+    })
+}
+
 $(function()
 {
     var rows = $('tr.item')
     rows.on('click', function(e)
     {
-        $(rows).unbind('click')
         var row = $(this);
         var id = $('td:first', $(row)).attr('id');
         rows.removeClass('highlight');
         rows.removeClass('lightlight');
         row.addClass('highlight');
         if (row.parents('#fileTable').length){
-            $('#fileModal').load('/getInfo'+" #fileModal>*",{ id: id, table: "File"}, function(){
+            $('#fileModal').load('/getInfo'+" #fileModal>*",{ id: id, table: "File"}, function(data){
                 $('#fileModal').modal('show');
-                $.getScript( "/static/admin/admin.js", function(event){
-                    $(rows).bind('click');
-                    Files()
-                });
+                Files()
+                $('#fileTitle').text((row[0].innerText).slice(0, (row[0].innerText).indexOf(" ")) + ' Information');
+                localStorage.setItem('location', id);
+                setupRows()
             });
         }
         if (row.parents('#nameTable').length){
             $('#userModal').load('/getInfo'+" #userModal>*",{ id: id, table: "User"}, function(){
                 $('#userModal').modal('show');
-                $.getScript( "/static/admin/admin.js", function(event){
-                    $(rows).bind('click');
-                    Users()
-                });
+                Users()
+                $('#userTitle').text(row[0].innerText + ' Information');
+                localStorage.setItem('location', row[0].innerText);
+                setupRows()
             });
         }
         if (row.parents('#sessionTable').length){
             $('#sessionModal').load('/getInfo'+" #sessionModal>*",{ id: id, table: "Session"}, function(){
                 $('#sessionModal').modal('show');
-                $('script[src="/static/admin/admin.js"]').remove()
-                $.getScript( "/static/admin/admin.js", function(event){
-                    $(rows).bind('click');
-                    Sessions()
-                });
+                Sessions()
+                $('#sessionTitle').text((row[0].innerText).slice(0, (row[0].innerText).indexOf(" ")) + ' Information');
+                localStorage.setItem('location', id);
+                setupRows()
             });
         }
     })
@@ -300,4 +327,95 @@ function clearHighlight(){
     var rows = $('tr.item');
     rows.removeClass("highlight")
     rows.removeClass("lightlight")
+}
+
+function addThing(button){
+    if (button.outerText == 'Add File'){
+        alert('Add File');
+    }
+    else if(button.outerText == 'Add Session'){
+        alert('Add Session');
+    }
+    else{
+        alert('Add User');
+    }
+}
+
+function removeThing(button){
+    var found = 0;
+    if ($(button).parents('#userFileID').length){
+        var tableType = "#userFileTable";
+        var origin = localStorage.getItem('location');
+    }
+    else if ($(button).parents('#userSessionID').length){
+        var tableType = "#userSessionTable";
+        var origin = localStorage.getItem('location');
+    }
+    else if ($(button).parents('#fileUserID').length){
+        var tableType = "#fileNameTable";
+        var origin = localStorage.getItem('location');
+    }
+    else{
+        var tableType = "#sessionUserTable";
+        var origin = localStorage.getItem('location');
+
+    }
+    $(tableType + " tr.item").each(function(){
+    var row = $(this);
+    if ($(row).hasClass( "highlight" ))
+    {
+        found = 1;
+        var fid = $('td:first', $(row)).attr('id');
+        var user = row[0].innerText
+        $.post( "/removeThing", { id: fid, from: origin, table: tableType, user: user}, function(){
+            $(tableType).load("/getInfo "+ tableType + ">*", {id: fid, table: 'User'}, function(){
+                $('#basePage').load("/admin #basePage>*");
+                $.getScript( "/static/admin/admin.js" );
+            });
+        });
+    }
+    });
+    if (found == 0)
+    {
+        alert('No File Selected')
+    }
+}
+
+function showInfo(notifID){
+    $('#notifModal').load('/notifInfo'+" #notifModal>*", { id: notifID})
+}
+
+function delUser(){
+    BootstrapDialog.show({
+        title: 'Delete User?',
+        message: 'Are you sure you want to delete this User?\n\nThis is a dangerous action.',
+        buttons: [{
+            label: 'Yes',
+            action: function(dialogItself){
+                    dialogItself.close();
+                    user = localStorage.getItem('location')
+                    $.post("/delete", { delUser: user, table: 'User'}, function(){
+                        $('#userModal').modal('hide');
+                        $('#basePage').load("/admin #basePage>*");
+                        $.getScript("/static/admin/admin.js");
+                    })
+                }
+            }, {
+            label: 'No',
+            action: function(dialogItself){
+                dialogItself.close();
+            }
+        }]
+    });
+}
+
+function freezeUser(box){
+    if (box.checked == false){
+        freeze = 0;
+    }
+    else{
+        freeze = 1;
+    }
+    user = localStorage.getItem('location')
+    $.post('/freeze', {'user': user, freeze: freeze})
 }

@@ -65,14 +65,45 @@ with context %}
         </div>
     </div>
 </nav>
+<div id="notifModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="notifTitle">Profile:</h4>
+            </div>
+            <div class="notifModalBody" id="notifID">
+                <div class="notifTable">
+                    <table id="notifTable">
+                        <tbody>
+                            {% if userProf %}
+                                <tr>
+                                    <td>{{ userProf.username }}</td>
+                                    <td>{{ userProf.institution }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ userProf.fullName }}</td>
+                                    <td>{{ userProf.reason }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ userProf.email }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="fileModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">File Information:</h4>
+                <h4 class="modal-title" id="fileTitle">File Information:</h4>
             </div>
-            <div class="fileModalBody">
+            <div class="fileModalBody" id="fileUserID">
                 <div class="text-center">
                     <input type="text" class="form-control modFiltInput singularFilt" placeholder="Username" id="fileUserFilt">
                 </div>
@@ -93,8 +124,8 @@ with context %}
                 </div>
                 <div class="row">
                     <div class="text-center singleGroup">
-                        <button type="button" class="btn btn-sm btn-primary singleAdd" onclick="addFileUser()">Add User</button>
-                        <button type="button" class="btn btn-sm btn-primary" onclick="remFileUser()">Remove User</button>
+                        <button type="button" class="btn btn-sm btn-primary singleAdd" onclick="addThing(this)">Add User</button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="removeThing(this)">Remove User</button>
                     </div>
                 </div>
             </div>
@@ -111,11 +142,24 @@ with context %}
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">User Information:</h4>
+                <h4 class="modal-title" id="userTitle">User Information:</h4>
+                <div class="text-center delUser">
+                    <button type="button" class="btn btn-danger" onclick="delUser()">Delete User</button>
+                </div>
+                {% if user.approved == 0 %}
+                    <div class="freezeChk">
+                        Awaiting Approval
+                    </div>
+                {% else %}
+                    <div class="freezeChk">
+                        <label for="Freeze">Freeze User</label>
+                        <input type="checkbox" onclick="freezeUser(this)" id="Freeze">
+                    </div>
+                {% endif %}
             </div>
             <div class="fileModalBody">
                 <input type="text" class="form-control modFiltInput userFileFilt" placeholder="File Name" id="userFileFilt">
-                <div class="outerFileTable col-xs-6">
+                <div class="outerFileTable col-xs-6" id="userFileID">
                     <div class="userFileTable">
                         <table id="userFileTable">
                             <tbody>
@@ -147,7 +191,11 @@ with context %}
                                         {% endfor %}
                                     {% endfor %}
                                 {% else %}
-                                    No Users Detected
+                                <tr>
+                                    <td>
+                                        No Files Detected
+                                    </td>
+                                </tr>
                                 {% endif %}
                             </tbody>
                         </table>
@@ -155,14 +203,14 @@ with context %}
                     <div class="row">
                         <div class="text-center">
                             <div class="doubleGroupF">
-                                <button type="button" class="btn btn-sm btn-primary addF" onclick="addUserFile()">Add File</button>
-                                <button type="button" class="btn btn-sm btn-primary remF" onclick="remUserFile()">Remove File</button>
+                                <button type="button" class="btn btn-sm btn-primary addF" onclick="addThing(this)">Add File</button>
+                                <button type="button" class="btn btn-sm btn-primary remF" onclick="removeThing(this)">Remove File</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <input type="text" class="form-control modFiltInput userSessionFilt" placeholder="Session Name" id="userSessionFilt">
-                <div class="outerSessionTable col-xs-6">
+                <div class="outerSessionTable col-xs-6" id="userSessionID">
                     <div class="userSessionTable">
                         <table id="userSessionTable">
                             <tbody>
@@ -194,7 +242,11 @@ with context %}
                                         {% endfor %}
                                     {% endfor %}
                                 {% else %}
-                                    No Users Detected
+                                    <tr>
+                                        <td>
+                                            No Sessions Detected
+                                        </td>
+                                    </tr>
                                 {% endif %}
                             </tbody>
                         </table>
@@ -202,29 +254,30 @@ with context %}
                     <div class="row">
                         <div class="text-center">
                             <div class="doubleGroupS">
-                                <button type="button" class="btn btn-sm btn-primary addS" onclick="addUserFile()">Add Session</button>
-                                <button type="button" class="btn btn-sm btn-primary remS" onclick="remUserFile()">Remove Session</button>
+                                <button type="button" class="btn btn-sm btn-primary addS" onclick="addThing(this)">Add Session</button>
+                                <button type="button" class="btn btn-sm btn-primary remS" onclick="removeThing(this)">Remove Session</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                 <div class="text-center">
-                    <div class="ssModalFooter">
+            <br class="clearBoth"/>
+            <div class="ssModalFooter">
+                <div class="row">
+                    <div class="text-center">
                         <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
                     </div>
-                 </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 <div id="sessionModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" id="sessionUserID">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Session Information:</h4>
+                <h4 class="modal-title" id="sessionTitle">Session Information:</h4>
             </div>
             <div class="fileModalBody">
                 <div class="text-center">
@@ -248,8 +301,9 @@ with context %}
             </div>
             <div class="row">
                 <div class="text-center singleGroup">
-                    <button type="button" class="btn btn-sm btn-primary singleAdd" onclick="addSessionUser()">Add User</button>
-                    <button type="button" class="btn btn-sm btn-primary" onclick="remSessionUser()">Remove User</button>
+                    <button type="button" class="btn btn-sm btn-primary singleAdd" onclick="addThing(this)">Add User</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="removeThing(this)">Remove User</button>
+                    <br class="clearBoth"/>
                 </div>
             </div>
             <div class="text-center">
@@ -264,113 +318,127 @@ with context %}
 <br/>
 <br/>
 <br/>
-<div class="text-center">
-    <div class="navGroup">
-        <div class="buttonGroup">
-            <div class="btn-group" role="group" aria-label="...">
-                <button type="button" class="btn btn-default" onclick="Users()">Users</button>
-                <button type="button" class="btn btn-default" onclick="Files()">Files</button>
-                <button type="button" class="btn btn-default" onclick="Sessions()">Sessions</button>
+<div id="basePage">
+    <div class="text-center">
+        <div class="navGroup">
+            <div class="buttonGroup">
+                <div class="btn-group" role="group" aria-label="...">
+                    <button type="button" class="btn btn-default" onclick="Users()">Users</button>
+                    <button type="button" class="btn btn-default" onclick="Files()">Files</button>
+                    <button type="button" class="btn btn-default" onclick="Sessions()">Sessions</button>
+                </div>
             </div>
-        </div>
-        <input type="text" class="form-control filtInput" placeholder="File Name" id="fileFilt">
-        <div class="fileNav" id="fileNav">
-            <table id="fileTable">
-                <thead>
-                    {{ thead() }}
-                </thead>
-                <tbody>
-                    {% if fileData %}
-                        {% for post in fileData %}
-                          <tr class="item">
-                            <td class="name" colspan="2" id="{{ post.id }}">
-                              {%- if post.name == ".." -%}
-                                Parent folder
-                              {%- else -%}
-                                {{ post.name }}
-                              {%- endif -%}
-                            </td>
-                            <td class="modified">
-                              <time datetime="{{ post.modified }}">{{ post.modified }}</time>
-                            </td>
-                            <td class="size">
-                              {% if post.size %}
-                                {{ post.size }}
-                              {% else %}
-                                -
-                              {% endif %}
-                            </td>
-                          </tr>
-                        {% endfor %}
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-        <input type="text" class="form-control filtInput" placeholder="Username" id="userFilt">
-        <div class="userNav" id="userNav">
-            <div class="nameTable">
-                <table id="nameTable">
+            <input type="text" class="form-control filtInput" placeholder="File Name" id="fileFilt">
+            <div class="fileNav" id="fileNav">
+                <table id="fileTable">
+                    <thead>
+                        {{ thead() }}
+                    </thead>
                     <tbody>
-                        {% if names %}
-                            {% for name in names %}
-                                <tr class="item">
-                                    <td>{{ name.username }}</td>
-                                </tr>
+                        {% if fileData %}
+                            {% for post in fileData %}
+                              <tr class="item">
+                                <td class="name" colspan="2" id="{{ post.id }}">
+                                  {%- if post.name == ".." -%}
+                                    Parent folder
+                                  {%- else -%}
+                                    {{ post.name }}
+                                  {%- endif -%}
+                                </td>
+                                <td class="modified">
+                                  <time datetime="{{ post.modified }}">{{ post.modified }}</time>
+                                </td>
+                                <td class="size">
+                                  {% if post.size %}
+                                    {{ post.size }}
+                                  {% else %}
+                                    -
+                                  {% endif %}
+                                </td>
+                              </tr>
                             {% endfor %}
-                        {% else %}
-                            No Users Detected
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <input type="text" class="form-control filtInput" placeholder="Username" id="userFilt">
+            <div class="userNav" id="userNav">
+                <div class="nameTable">
+                    <table id="nameTable">
+                        <tbody>
+                            {% if names %}
+                                {% for name in names %}
+                                    <tr class="item">
+                                        <td>{{ name.username }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                No Users Detected
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <input type="text" class="form-control filtInput" placeholder="Session Name" id="sessionFilt">
+            <div class="sessionNav" id="sessionNav">
+                <table id="sessionTable">
+                    <thead>
+                        {{ thead() }}
+                    </thead>
+                    <tbody>
+                        {% if sesData %}
+                            {% for post in sesData %}
+                              <tr class="item">
+                                <td class="name" colspan="2" id="{{ post.id }}">
+                                  {%- if post.name == ".." -%}
+                                    Parent folder
+                                  {%- else -%}
+                                    {{ post.name }}
+                                  {%- endif -%}
+                                </td>
+                                <td class="modified">
+                                  <time datetime="{{ post.modified }}">{{ post.modified }}</time>
+                                </td>
+                                <td class="size">
+                                  {% if post.size %}
+                                    {{ post.size }}
+                                  {% else %}
+                                    -
+                                  {% endif %}
+                                </td>
+                              </tr>
+                            {% endfor %}
                         {% endif %}
                     </tbody>
                 </table>
             </div>
         </div>
-        <input type="text" class="form-control filtInput" placeholder="Session Name" id="sessionFilt">
-        <div class="sessionNav" id="sessionNav">
-            <table id="sessionTable">
-                <thead>
-                    {{ thead() }}
-                </thead>
-                <tbody>
-                    {% if sesData %}
-                        {% for post in sesData %}
-                          <tr class="item">
-                            <td class="name" colspan="2" id="{{ post.id }}">
-                              {%- if post.name == ".." -%}
-                                Parent folder
-                              {%- else -%}
-                                {{ post.name }}
-                              {%- endif -%}
-                            </td>
-                            <td class="modified">
-                              <time datetime="{{ post.modified }}">{{ post.modified }}</time>
-                            </td>
-                            <td class="size">
-                              {% if post.size %}
-                                {{ post.size }}
-                              {% else %}
-                                -
-                              {% endif %}
-                            </td>
-                          </tr>
-                        {% endfor %}
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
     </div>
 </div>
 <div class="text-center">
     <div class="notifications">
+        <h3>Notifications:</h3>
         <table>
             <tbody>
                 {% if notifications %}
                     {% for task in notifications %}
                         <tr class="item">
-                            <td class="name" colspan="2" id="task.id">
+                            <td class="name" colspan="2" id="{{ task.id }}">
                                 {{ task.type }}
+                            </td>
+                            <td>
+                                {{ task.name }}
+                            </td>
+                            <td>
+                                <button class="btn btn-default" onclick="showInfo({{ task.id }})">Info</button>
+                            </td>
+                            <td>
+                                {{ task.time }}
                             </td>
                         </tr>
                     {% endfor %}
+                {% else %}
+                    No Notifications
                 {% endif %}
             </tbody>
         </table>

@@ -16,6 +16,9 @@ class User(db.Model):
     fullName = db.Column(db.String())
     institution = db.Column(db.String())
     reason = db.Column(db.String())
+
+    approved = db.Column(db.Integer())
+
     isAdmin = db.Column(db.Integer())
 
     def __repr__(self):
@@ -38,6 +41,14 @@ class User(db.Model):
 
     def get_id(self):
         return self.id
+
+
+class notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    originUser = db.Column(db.String())
+    type = db.Column(db.String())
+    timestamp = db.Column(db.DateTime())
 
 
 class logBook(db.Model):
