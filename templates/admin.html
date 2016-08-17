@@ -65,6 +65,176 @@ with context %}
         </div>
     </div>
 </nav>
+<div id="nestedFileModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Files:</h4>
+            </div>
+            <div class="text-center">
+                <input type="text" class="form-control modFiltInput singularFilt" placeholder="File Name" id="nestedFileFilt">
+            </div>
+            <div class="text-center">
+                <div class="fileModalBody">
+                    <div class="userFileTable nestedTable" id="nestedFileNav">
+                        <table id="nestedFileTable">
+                            <thead>
+                                {{ thead() }}
+                            </thead>
+                            <tbody>
+                                {% if fileData %}
+                                    {% for post in fileData %}
+                                      <tr class="item" onclick="addThing(this)">
+                                        <td class="name" colspan="2" id="{{ post.id }}">
+                                          {%- if post.name == ".." -%}
+                                            Parent folder
+                                          {%- else -%}
+                                            {{ post.name }}
+                                          {%- endif -%}
+                                        </td>
+                                        <td class="modified">
+                                          <time datetime="{{ post.modified }}">{{ post.modified }}</time>
+                                        </td>
+                                        <td class="size">
+                                          {% if post.size %}
+                                            {{ post.size }}
+                                          {% else %}
+                                            -
+                                          {% endif %}
+                                        </td>
+                                      </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="nestedSessionModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Sessions:</h4>
+            </div>
+            <div class="text-center">
+                <input type="text" class="form-control modFiltInput singularFilt" placeholder="File Name" id="nestedSessionFilt">
+            </div>
+            <div class="text-center">
+                <div class="notifModalBody">
+                    <div class="userFileTable nestedTable" id="nestedSessionNav">
+                    <table id="nestedSessionTable">
+                        <thead>
+                            {{ thead() }}
+                        </thead>
+                        <tbody>
+                            {% if sesData %}
+                                {% for post in sesData %}
+                                  <tr class="item" onclick="addThing(this)">
+                                    <td class="name" colspan="2" id="{{ post.id }}">
+                                      {%- if post.name == ".." -%}
+                                        Parent folder
+                                      {%- else -%}
+                                        {{ post.name }}
+                                      {%- endif -%}
+                                    </td>
+                                    <td class="modified">
+                                      <time datetime="{{ post.modified }}">{{ post.modified }}</time>
+                                    </td>
+                                    <td class="size">
+                                      {% if post.size %}
+                                        {{ post.size }}
+                                      {% else %}
+                                        -
+                                      {% endif %}
+                                    </td>
+                                  </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="nestedSUserModal" class="modal fade nested" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Users:</h4>
+            </div>
+            <div class="text-center">
+                <input type="text" class="form-control modFiltInput singularFilt" placeholder="File Name" id="nestedSUserFilt">
+            </div>
+            <div class="fileModalBody">
+                <div class="fileNameTable" id="nestedSUserNav">
+                    <table id="nestedSUserTable">
+                        <tbody>
+                            {% if names %}
+                                {% for name in names %}
+                                    <tr class="item" onclick="addThing(this)">
+                                        <td>{{ name.username }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                No Users Detected
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="nestedFUserModal" class="modal fade nested" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Users:</h4>
+            </div>
+            <div class="text-center">
+                <input type="text" class="form-control modFiltInput singularFilt" placeholder="File Name" id="nestedFUserFilt">
+            </div>
+            <div class="fileModalBody">
+                <div class="fileNameTable" id="nestedFUserNav">
+                    <table id="nestedFUserTable">
+                        <tbody>
+                            {% if names %}
+                                {% for name in names %}
+                                    <tr class="item" onclick="addThing(this)">
+                                        <td>{{ name.username }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                No Users Detected
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="notifModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -73,30 +243,34 @@ with context %}
                 <h4 class="modal-title" id="notifTitle">Profile:</h4>
             </div>
             <div class="notifModalBody" id="notifID">
-                <div class="notifTable">
+                <div class="notifTable text-center">
                     <table id="notifTable">
-                        <tbody>
+                        <tbody class="notifBod">
                             {% if userProf %}
                                 <tr>
-                                    <td>{{ userProf.username }}</td>
-                                    <td>{{ userProf.institution }}</td>
+                                    <td><b class="pull-left">Username:</b>{{ userProf.username }}</td>
+                                    <td><b class="pull-left">Institution:</b>{{ userProf.institution }}</td>
                                 </tr>
                                 <tr>
-                                    <td>{{ userProf.fullName }}</td>
-                                    <td>{{ userProf.reason }}</td>
+                                    <td><b class="pull-left">Full Name:</b>{{ userProf.fullName }}</td>
+                                    <td><b class="pull-left">Reason:</b>{{ userProf.reason }}</td>
                                 </tr>
                                 <tr>
-                                    <td>{{ userProf.email }}</td>
+                                    <td><b class="pull-left">Email:</b>{{ userProf.email }}</td>
+                                    <td></td>
                                 </tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
             </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
-<div id="fileModal" class="modal fade" role="dialog">
+<div id="fileModal" class="modal fade outer" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -124,7 +298,7 @@ with context %}
                 </div>
                 <div class="row">
                     <div class="text-center singleGroup">
-                        <button type="button" class="btn btn-sm btn-primary singleAdd" onclick="addThing(this)">Add User</button>
+                        <button type="button" class="btn btn-sm btn-primary singleAdd" data-toggle="modal" data-target="#nestedFUserModal" data-dismiss="modal">Add User</button>
                         <button type="button" class="btn btn-sm btn-primary" onclick="removeThing(this)">Remove User</button>
                     </div>
                 </div>
@@ -153,7 +327,11 @@ with context %}
                 {% else %}
                     <div class="freezeChk">
                         <label for="Freeze">Freeze User</label>
-                        <input type="checkbox" onclick="freezeUser(this)" id="Freeze">
+                        {% if freeze == 2 %}
+                            <input type="checkbox" onclick="freezeUser(this)" id="Freeze" checked>
+                        {% else %}
+                            <input type="checkbox" onclick="freezeUser(this)" id="Freeze">
+                        {% endif %}
                     </div>
                 {% endif %}
             </div>
@@ -203,7 +381,7 @@ with context %}
                     <div class="row">
                         <div class="text-center">
                             <div class="doubleGroupF">
-                                <button type="button" class="btn btn-sm btn-primary addF" onclick="addThing(this)">Add File</button>
+                                <button type="button" class="btn btn-sm btn-primary addF" data-toggle="modal" data-target="#nestedFileModal" data-dismiss="modal">Add File</button>
                                 <button type="button" class="btn btn-sm btn-primary remF" onclick="removeThing(this)">Remove File</button>
                             </div>
                         </div>
@@ -254,7 +432,7 @@ with context %}
                     <div class="row">
                         <div class="text-center">
                             <div class="doubleGroupS">
-                                <button type="button" class="btn btn-sm btn-primary addS" onclick="addThing(this)">Add Session</button>
+                                <button type="button" class="btn btn-sm btn-primary addS" data-toggle="modal" data-target="#nestedSessionModal" data-dismiss="modal">Add Session</button>
                                 <button type="button" class="btn btn-sm btn-primary remS" onclick="removeThing(this)">Remove Session</button>
                             </div>
                         </div>
@@ -301,7 +479,7 @@ with context %}
             </div>
             <div class="row">
                 <div class="text-center singleGroup">
-                    <button type="button" class="btn btn-sm btn-primary singleAdd" onclick="addThing(this)">Add User</button>
+                    <button type="button" class="btn btn-sm btn-primary singleAdd" data-toggle="modal" data-target="#nestedSUserModal" data-dismiss="modal">Add User</button>
                     <button type="button" class="btn btn-sm btn-primary" onclick="removeThing(this)">Remove User</button>
                     <br class="clearBoth"/>
                 </div>
@@ -318,6 +496,41 @@ with context %}
 <br/>
 <br/>
 <br/>
+<div class="text-center">
+    <div class="notifications" id="notifications">
+        <h3>Notifications:</h3>
+        <table>
+            <tbody>
+                {% if notifications %}
+                    {% for task in notifications %}
+                        <tr class="item notifTR">
+                            <td class="name" colspan="2" id="{{ task.id }}">
+                                {{ task.type }}
+                            </td>
+                            <td>
+                                {{ task.name }}
+                            </td>
+                            <td>
+                                <button class="btn btn-default" onclick="showInfo({{ task.id }})">Info</button>
+                            </td>
+                            <td>
+                                {{ task.time }}
+                            </td>
+                            <td>
+                                <button class="btn btn-success" onclick="approve({{ task.id }})">Approve</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" onclick="decline({{ task.id }})">Decline</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    No Notifications
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
 <div id="basePage">
     <div class="text-center">
         <div class="navGroup">
@@ -413,35 +626,6 @@ with context %}
                 </table>
             </div>
         </div>
-    </div>
-</div>
-<div class="text-center">
-    <div class="notifications">
-        <h3>Notifications:</h3>
-        <table>
-            <tbody>
-                {% if notifications %}
-                    {% for task in notifications %}
-                        <tr class="item">
-                            <td class="name" colspan="2" id="{{ task.id }}">
-                                {{ task.type }}
-                            </td>
-                            <td>
-                                {{ task.name }}
-                            </td>
-                            <td>
-                                <button class="btn btn-default" onclick="showInfo({{ task.id }})">Info</button>
-                            </td>
-                            <td>
-                                {{ task.time }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    No Notifications
-                {% endif %}
-            </tbody>
-        </table>
     </div>
 </div>
 </body>

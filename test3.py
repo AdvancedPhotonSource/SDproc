@@ -102,10 +102,11 @@ def admin():
     notifications = notification.query.order_by('id')
     for instance in notifications:
         userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
-        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
-                             'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
-                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
-                             'reason': userInfo.reason})
+        if userInfo != None:
+            notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
+                                 'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
+                                 'fullName': userInfo.fullName, 'institution': userInfo.institution,
+                                 'reason': userInfo.reason})
     return render_template('admin.html', user=current_user, fileData=fileData, sesData=sesData,
                            names=names, notifications=notifData)
 
@@ -115,7 +116,7 @@ def admin():
 def freeze():
     user = request.form.get('user', type=str)
     freeze = request.form.get('freeze', type=int)
-    user_instance = db.session.query(User).filter_by(username=user)
+    user_instance = db.session.query(User).filter_by(username=user).first()
     if freeze == 1:
         user_instance.approved = 2
     else:
@@ -128,22 +129,41 @@ def freeze():
 @login_required
 def notifInfo():
     notifID = request.form.get('id', type=int)
-    notifInfo = db.session.query(notification).filter_by(id=notifID)
+    notifInfo = db.session.query(notification).filter_by(id=notifID).first()
     userInfo = db.session.query(User).filter_by(username=notifInfo.originUser).first()
     userData = {'username': userInfo.username, 'email': userInfo.email,
                              'fullName': userInfo.fullName, 'institution': userInfo.institution,
                              'reason': userInfo.reason}
     return render_template('admin.html', user=current_user, userProf=userData)
 
+
+@app.route('/solveNotif', methods=['GET', 'POST'])
+@login_required
+def solveNotif():
+    id = request.form.get('id', type=int)
+    action = request.form.get('action', type=int)
+    notif = db.session.query(notification).filter_by(id=id).first()
+    if action == 1:
+        user = db.session.query(User).filter_by(username=notif.originUser).first()
+        user.approved = 1
+        db.session.delete(notif)
+    else:
+        db.session.delete(notif)
+    db.session.commit()
+    return 'Solved'
+
+
 @app.route('/getInfo', methods=['GET', 'POST'])
 @login_required
 def getInfo():
     table = request.form.get('table', type=str)
     id = request.form.get('id', type=int)
+    user = request.form.get('user', type=str)
     fileUsers = []
     userFiles = []
     userSessions = []
     sessionUsers = []
+    freeze = 0
     if table == 'File':
         file_instance = db.session.query(dataFile).filter_by(id=id).first()
         names = file_instance.authed.split(',')
@@ -151,6 +171,8 @@ def getInfo():
             user = db.session.query(User).filter_by(id=name).first()
             fileUsers.insert(0, {'fUser': user})
     if table == 'User':
+        user = db.session.query(User).filter_by(username=user).first()
+        freeze = user.approved
         files = dataFile.query.all()
         for instance in files:
             fsize = size(instance.path)
@@ -174,8 +196,45 @@ def getInfo():
         for name in names:
             user = db.session.query(User).filter_by(id=name).first()
             sessionUsers.insert(0, {'sUser': user})
-    return render_template('admin.html', user=current_user, fileUsers=fileUsers, userFiles=userFiles,
-                           userSessions=userSessions, sessionUsers=sessionUsers)
+    return render_template('admin.html', user=user, fileUsers=fileUsers, userFiles=userFiles,
+                           userSessions=userSessions, sessionUsers=sessionUsers, freeze=freeze)
+
+
+@app.route('/addThing', methods=['GET', 'POST'])
+@login_required
+def addThing():
+    if request.method == 'POST':
+        thing = request.form.get('id', type=str)
+        location = request.form.get('from', type=str)
+        table = request.form.get('table', type=str)
+        user = request.form.get('user', type=str)
+        if thing != None:
+            user = db.session.query(User).filter_by(username=location).first()
+            if table == '#userFileTable':
+                'userFile'
+            if table == '#userSessionTable':
+                'userSession'
+        else:
+            user = db.session.query(User).filter_by(username=user).first()
+            if table == '#fileNameTable':
+                instance = db.session.query(dataFile).filter_by(id=location).first()
+                auths = instance.authed.split(',')
+                if user.id in auths:
+                    return 'Already Shared'
+                else:
+                    instance.authed = instance.authed + ',' + str(user.id)
+                    db.session.commit()
+            if table == '#sessionUserTable':
+                instance = db.session.query(sessionFiles).filter_by(id=location).first()
+                auths = instance.authed.split(',')
+                if user.id in auths:
+                    return 'Already Shared'
+                else:
+                    instance.authed = instance.authed + ',' + str(user.id)
+                    db.session.commit()
+        db.session.commit()
+    return 'Added'
+
 
 
 @app.route('/removeThing', methods=['GET', 'POST'])
@@ -212,9 +271,26 @@ def removeThing():
         else:
             user = db.session.query(User).filter_by(username=user).first()
             if table == '#fileNameTable':
-                temp = 'inprogress'
+                file_instance = db.session.query(dataFile).filter_by(id=location).first()
+                auths = file_instance.authed.split(',')
+                auths.remove(str(user.id))
+                if len(auths) == 0:
+                    db.session.delete(file_instance)
+                else:
+                    file_instance.authed = ','.join(auths)
             if table == '#sessionUserTable':
-                temp = 'inprogress'
+                session_instance = db.session.query(sessionFiles).filter_by(id=location).first()
+                auths = session_instance.authed.split(',')
+                auths.remove(str(user.id))
+                if len(auths) == 0:
+                    db.session.delete(session_instance)
+                    instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=thing).all()
+                    for instance in instances:
+                        meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                        db.session.delete(meta)
+                        db.session.delete(instance)
+                    else:
+                        session_instance.authed = ','.join(auths)
         db.session.commit()
     return 'Removed'
 
@@ -1079,8 +1155,12 @@ def shareSes():
     thisUser = db.session.query(User).filter_by(username=shareUser).first()
     toAuth = thisUser.id
     session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
-    session_instance.authed = session_instance.authed + ',' + str(toAuth)
-    db.session.commit()
+    auths = session_instance.authed.split(',')
+    if toAuth in auths:
+        return 'Already Shared'
+    else:
+        session_instance.authed = session_instance.authed + ',' + str(toAuth)
+        db.session.commit()
     return 'Shared'
 
 
@@ -1092,8 +1172,12 @@ def shareFile():
     thisUser = db.session.query(User).filter_by(username=shareUser).first()
     toAuth = thisUser.id
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-    file_instance.authed = file_instance.authed + ',' + str(toAuth)
-    db.session.commit()
+    auths = file_instance.authed.split(',')
+    if toAuth in auths:
+        return 'Already Shared'
+    else:
+        file_instance.authed = file_instance.authed + ',' + str(toAuth)
+        db.session.commit()
     return 'Shared'
 
 

@@ -46,7 +46,7 @@ class CommentForm(Form):
 
 class register_form(Form):
     username = StringField(label='Username', validators=[validators.InputRequired()])
-    realName = StringField(label='Full Name', validators=[validators.InputRequired()])
+    fullName = StringField(label='Full Name', validators=[validators.InputRequired()])
     reason = StringField(label='Reason for Account Creation')
 
     password = PasswordField(label='Password', validators=[validators.InputRequired(), validators.equal_to('confirm', message='Passwords must match')])

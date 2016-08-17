@@ -231,7 +231,7 @@ function setupRows(){
         return false;
     })
 }
-
+var waitHighlight = $.Deferred();
 $(function()
 {
     var rows = $('tr.item')
@@ -242,6 +242,7 @@ $(function()
         rows.removeClass('highlight');
         rows.removeClass('lightlight');
         row.addClass('highlight');
+        waitHighlight.resolve();
         if (row.parents('#fileTable').length){
             $('#fileModal').load('/getInfo'+" #fileModal>*",{ id: id, table: "File"}, function(data){
                 $('#fileModal').modal('show');
@@ -252,7 +253,8 @@ $(function()
             });
         }
         if (row.parents('#nameTable').length){
-            $('#userModal').load('/getInfo'+" #userModal>*",{ id: id, table: "User"}, function(){
+            var toUser = $.trim($(row).text())
+            $('#userModal').load('/getInfo'+" #userModal>*",{ user: toUser, table: "User"}, function(){
                 $('#userModal').modal('show');
                 Users()
                 $('#userTitle').text(row[0].innerText + ' Information');
@@ -330,15 +332,59 @@ function clearHighlight(){
 }
 
 function addThing(button){
-    if (button.outerText == 'Add File'){
-        alert('Add File');
+    waitHighlight = $.Deferred();
+    if ($(button).parents('#nestedFileModal').length){
+        var tableType = "#userFileTable";
+        var nested = "#nestedFileTable";
+        var origin = localStorage.getItem('location');
+        var shortID = 'User';
     }
-    else if(button.outerText == 'Add Session'){
-        alert('Add Session');
+    else if ($(button).parents('#nestedSessionModal').length){
+        var tableType = "#userSessionTable";
+        var nested = "#nestedSessionTable";
+        var origin = localStorage.getItem('location');
+        var shortID = 'User';
+    }
+    else if ($(button).parents('#nestedFUserModal').length){
+        var tableType = "#fileNameTable";
+        var nested = "#nestedFUserNav";
+        var origin = localStorage.getItem('location');
+        var shortID = 'File';
     }
     else{
-        alert('Add User');
+        var tableType = "#sessionUserTable";
+        var nested = "#nestedFUserNav";
+        var origin = localStorage.getItem('location');
+        var shortID = 'Session';
     }
+    $.when(waitHighlight).done(function(){
+        $(nested + " tr.item").each(function(){
+            var row = $(this);
+            if ($(row).hasClass( "highlight" )){
+                var fid = $('td:first', $(row)).attr('id');
+                var user = row[0].innerText
+                $.post("/addThing", { id: fid, from: origin, table: tableType, user: user}, function(){
+                    $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user:user}, function(){
+                        $('#basePage').load("/admin #basePage>*");
+                        $.getScript( "/static/admin/admin.js" );
+                        if (tableType == "#userFileTable"){
+                            Users();
+                        }
+                        else if (tableType == "#userSessionTable"){
+                            Users();
+                        }
+                        else if (tableType == "#fileNameTable"){
+                            Files();
+                        }
+                        else{
+                            Sessions();
+                        }
+                    })
+                })
+            }
+        })
+    });
+    return waitHighlight.promise()
 }
 
 function removeThing(button){
@@ -346,19 +392,22 @@ function removeThing(button){
     if ($(button).parents('#userFileID').length){
         var tableType = "#userFileTable";
         var origin = localStorage.getItem('location');
+        var shortID = 'User';
     }
     else if ($(button).parents('#userSessionID').length){
         var tableType = "#userSessionTable";
         var origin = localStorage.getItem('location');
+        var shortID = 'User';
     }
     else if ($(button).parents('#fileUserID').length){
         var tableType = "#fileNameTable";
         var origin = localStorage.getItem('location');
+        var shortID = 'File';
     }
     else{
         var tableType = "#sessionUserTable";
         var origin = localStorage.getItem('location');
-
+        var shortID = 'Session';
     }
     $(tableType + " tr.item").each(function(){
     var row = $(this);
@@ -368,9 +417,21 @@ function removeThing(button){
         var fid = $('td:first', $(row)).attr('id');
         var user = row[0].innerText
         $.post( "/removeThing", { id: fid, from: origin, table: tableType, user: user}, function(){
-            $(tableType).load("/getInfo "+ tableType + ">*", {id: fid, table: 'User'}, function(){
+            $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user: user}, function(){
                 $('#basePage').load("/admin #basePage>*");
                 $.getScript( "/static/admin/admin.js" );
+                if (tableType == "#userFileTable"){
+                    Users();
+                }
+                else if (tableType == "#userSessionTable"){
+                    Users();
+                }
+                else if (tableType == "#fileNameTable"){
+                    Files();
+                }
+                else{
+                    Sessions();
+                }
             });
         });
     }
@@ -382,7 +443,9 @@ function removeThing(button){
 }
 
 function showInfo(notifID){
-    $('#notifModal').load('/notifInfo'+" #notifModal>*", { id: notifID})
+    $('#notifModal').load('/notifInfo'+" #notifModal>*", { id: notifID}, function(){
+        $('#notifModal').modal('show');
+    })
 }
 
 function delUser(){
@@ -419,3 +482,32 @@ function freezeUser(box){
     user = localStorage.getItem('location')
     $.post('/freeze', {'user': user, freeze: freeze})
 }
+
+function approve(task){
+    $.post('/solveNotif', {id: task, action: 1}, function(){
+        $('#notifications').load("/admin #notifications>*");
+        $.getScript("/static/admin/admin.js");
+    })
+}
+
+function decline(task){
+    $.post('/solveNotif', {id: task, action: 0}, function(){
+        $('#notifications').load("/admin #notifications>*");
+        $.getScript("/static/admin/admin.js");
+    })
+}
+
+$(function(){
+    $('#nestedFUserModal').on('hidden.bs.modal', function (e) {
+        $('#fileModal').modal('show');
+    })
+    $('#nestedSUserModal').on('hidden.bs.modal', function (e) {
+        $('#sessionModal').modal('show');
+    })
+    $('#nestedFileModal').on('hidden.bs.modal', function (e) {
+        $('#userModal').modal('show');
+    })
+    $('#nestedSessionModal').on('hidden.bs.modal', function (e) {
+        $('#userModal').modal('show');
+    })
+})
