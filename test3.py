@@ -211,9 +211,21 @@ def addThing():
         if thing != None:
             user = db.session.query(User).filter_by(username=location).first()
             if table == '#userFileTable':
-                'userFile'
+                instance = db.session.query(dataFile).filter_by(id=thing).first()
+                auths = instance.authed.split(',')
+                if user.id in auths:
+                    return 'Already Shared'
+                else:
+                    instance.authed = instance.authed + ',' + str(user.id)
+                    db.session.commit()
             if table == '#userSessionTable':
-                'userSession'
+                instance = db.session.query(sessionFiles).filter_by(id=thing).first()
+                auths = instance.authed.split(',')
+                if user.id in auths:
+                    return 'Already Shared'
+                else:
+                    instance.authed = instance.authed + ',' + str(user.id)
+                    db.session.commit()
         else:
             user = db.session.query(User).filter_by(username=user).first()
             if table == '#fileNameTable':
@@ -395,16 +407,18 @@ def dataFormat():
                         if i == 1:
                             energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
                                                  unicode_to_int(columns[4].data - 1), format_instance.hrm)
-                            additional.append(energy)
-                            addLabels.append('Energy')
+                            if againstE == False:
+                                additional.append(energy)
+                                addLabels.append('Energy')
                             etype = energy
                         elif i == 2:
                             energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
                                                       unicode_to_int(columns[4].data - 1),
                                                       unicode_to_int(columns[5].data - 1),
                                                       unicode_to_int(columns[6].data - 1), format_instance.hrm)
-                            additional.append(energy)
-                            addLabels.append('Energy')
+                            if againstE == False:
+                                additional.append(energy)
+                                addLabels.append('Energy')
                             etype = energy
                         elif i == 7:
                             energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
@@ -422,6 +436,8 @@ def dataFormat():
                             addLabels.append('Normalized')
                         continue
                     else:
+                        if i == 0 and againstE == True:
+                            continue
                         used.append(unicode_to_int(columns[i].data))
                         normLabels.append(str(columns[i].label.text)[:-2])
             labels.append(normLabels)
@@ -1679,6 +1695,7 @@ def plotData(data, used, againstE, additional, lineNames, eType):
                 if againstE:
                     xs = [float(x) for x in eType]
                     xs = numpy.multiply(xs, 1000000)
+                    xs = numpy.subtract(xs, xs[0])
                 line = ax.plot(xs, ys, alpha=0, label=lineNames[0][count])
                 lines.append(line[0])
                 lines.append(line[0])
@@ -1693,6 +1710,7 @@ def plotData(data, used, againstE, additional, lineNames, eType):
             if againstE:
                 xs = [float(x) for x in eType]
                 xs = numpy.multiply(xs, 1000000)
+                xs = numpy.subtract(xs, xs[0])
             line = ax.plot(xs, ys, alpha=0, label=lineNames[1][i])
             lines.append(line[0])
             lines.append(line[0])
