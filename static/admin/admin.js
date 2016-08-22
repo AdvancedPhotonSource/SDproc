@@ -5,6 +5,148 @@ $(document).ready( function() {
     rows.removeClass("highlight")
     rows.removeClass("lightlight")
 
+    setupRows();
+})
+
+function setupRows(){
+    var rows = $('tr.item')
+    rows.on('click', function(e){
+        var row = $(this);
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        row.addClass('highlight');
+    })
+    rows.on('mouseenter', function(e)
+    {
+        var row = $(this);
+        if ($(row).hasClass( "highlight" ))
+        {
+            rows.removeClass('lightlight');
+        }
+        else
+        {
+            rows.removeClass('lightlight');
+            row.addClass('lightlight');
+        }
+    })
+
+    $(document).on('selectstart dragstart', function(e)
+    {
+        e.preventDefault();
+        return false;
+    })
+
+    $('#nestedFileFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#nestedFileTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#nestedFileFilt').length +'">No result found</td></tr>'));
+        }
+    });
+
+    $('#nestedSessionFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#nestedSessionTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#nestedSessionFilt').length +'">No result found</td></tr>'));
+        }
+    });
+
+    $('#nestedSUserFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#nestedSUserTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#nestedSUserFilt').length +'">No result found</td></tr>'));
+        }
+    });
+
+    $('#nestedFUserFilt').keyup(function(e){
+
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var input = $(this);
+        inputContent = input.val().toLowerCase();
+        model = input.parents();
+        table = model.find('#nestedFUserTable');
+        rows = table.find('tbody tr');
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        var filteredRows = rows.filter(function(){
+            var value = $(this).find('td').text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones */
+        rows.show();
+        filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if (filteredRows.length === rows.length) {
+            table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#nestedFUserFilt').length +'">No result found</td></tr>'));
+        }
+    });
 
     $('#fileFilt').keyup(function(e){
 
@@ -201,35 +343,6 @@ $(document).ready( function() {
             table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#sessionUserFilt').length +'">No result found</td></tr>'));
         }
     });
-})
-
-function setupRows(){
-    var rows = $('tr.item')
-    rows.on('click', function(e){
-        var row = $(this);
-        rows.removeClass('highlight');
-        rows.removeClass('lightlight');
-        row.addClass('highlight');
-    })
-    rows.on('mouseenter', function(e)
-    {
-        var row = $(this);
-        if ($(row).hasClass( "highlight" ))
-        {
-            rows.removeClass('lightlight');
-        }
-        else
-        {
-            rows.removeClass('lightlight');
-            row.addClass('lightlight');
-        }
-    })
-
-    $(document).on('selectstart dragstart', function(e)
-    {
-        e.preventDefault();
-        return false;
-    })
 }
 var waitHighlight = $.Deferred();
 $(function()

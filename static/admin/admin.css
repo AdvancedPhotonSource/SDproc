@@ -183,3 +183,15 @@
     display: inline-block;
     width: 90%;
 }
+
+.fileModalBody{
+    position: relative;
+    height: 200px;
+    width: auto;
+}
+
+.ssModalFooter{
+    position: relative;
+    margin-top: 30px;
+    width: auto;
+}
