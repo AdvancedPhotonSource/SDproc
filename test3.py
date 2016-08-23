@@ -38,6 +38,7 @@ def register():
         form.populate_obj(user)
         user.set_password(form.password.data)
         user.approved = 0
+        user.isAdmin = 0
 
         db.session.add(user)
 
@@ -77,7 +78,7 @@ def login():
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-    if current_user.isAdmin == 0:
+    if current_user.isAdmin != 1:
         return redirect(url_for('index'))
     names = db.session.query(User)
     sesData = []
