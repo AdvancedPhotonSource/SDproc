@@ -115,3 +115,8 @@ select[multiple].scan-list{
     top: 27px;
     right: 8px;
 }
+
+.settings{
+    margin-left: -10%;
+    float: left;
+}

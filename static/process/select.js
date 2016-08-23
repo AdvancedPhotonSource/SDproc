@@ -151,7 +151,25 @@ $(function (){
     })
 })
 
-
-
-
-
+function outputFile(){
+    if (localStorage.getItem('previous2') === null){
+        alert('No file loaded');
+    }
+    else{
+        if ($('#sel1').val().length == 1){
+            $.post('/process', { idnext: this.value, output: 1}, function(data){
+                alert(data);
+            });
+        }
+        else{
+            var ids = []
+            $('#sel1 > option:selected').each(function(){
+                ids.push(this.value);
+            });
+            var jIds = JSON.stringify(ids);
+            $.post('/process', { idList: jIds, output: 1}, function(data){
+                alert(data);
+            });
+        }
+    }
+}

@@ -586,6 +586,99 @@ def saveSession():
     return sending
 
 
+@app.route('/generateOutput', methods=['GET', 'POST'])
+@login_required
+def generateOutput():
+    form = InputForm(request.form)
+    id = request.form.get('idnum', type=int)
+    singular = request.form.get('outSingular', type=int)
+    sesID = request.form.get('session', type=int)
+    output = []
+    if singular == 1:
+        file_instance = db.session.query(dataFile).filter_by(id=id).first()
+        format_instance = db.session.query(currentMeta).filter_by(file_id=id).first()
+        if str(file_instance.type) == 'mda':
+            data, name, unusedpath = readMda(file_instance.path)
+        else:
+            data, name, unusedpath = readMdaAscii(file_instance.path)
+        columns, bools = splitForm(form)
+        for i in range(len(bools)):
+            if bools[i].data:
+                if columns[i].data == None:
+                    if i == 1:
+                        energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
+                                             unicode_to_int(columns[4].data - 1), format_instance.hrm)
+                        output.append(energy)
+                    elif i == 2:
+                        energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
+                                                  unicode_to_int(columns[4].data - 1),
+                                                  unicode_to_int(columns[5].data - 1),
+                                                  unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                        output.append(energy)
+                    elif i == 7:
+                        energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
+                                           unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                        output.append(energy)
+                    elif i == 9:
+                        signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
+                                                   unicode_to_int(columns[10].data - 1))
+                        output.append(signal)
+                    else:
+                        norm = norm_factors(data, unicode_to_int(columns[10].data - 1))
+                        output.append(norm)
+                    continue
+                else:
+                    for idx, column in enumerate(data):
+                        if (idx + 1) == columns[i].data:
+                            output.append(data[idx])
+        output = json.dumps(output)
+    else:
+        session_metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
+        for meta in session_metas:
+            fileOutput = []
+            actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
+            form = populate_from_instance(actualMeta)
+            file_instance = db.session.query(dataFile).filter_by(id=actualMeta.file_id).first()
+            format_instance = db.session.query(currentMeta).filter_by(file_id=actualMeta.file_id).first()
+            if str(file_instance.type) == 'mda':
+                data, name, unusedpath = readMda(file_instance.path)
+            else:
+                data, name, unusedpath = readMdaAscii(file_instance.path)
+            columns, bools = splitForm(form)
+            for i in range(len(bools)):
+                if bools[i].data:
+                    if columns[i].data == None:
+                        if i == 1:
+                            energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
+                                                 unicode_to_int(columns[4].data - 1), format_instance.hrm)
+                            fileOutput.append(energy)
+                        elif i == 2:
+                            energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
+                                                      unicode_to_int(columns[4].data - 1),
+                                                      unicode_to_int(columns[5].data - 1),
+                                                      unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                            fileOutput.append(energy)
+                        elif i == 7:
+                            energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
+                                               unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                            fileOutput.append(energy)
+                        elif i == 9:
+                            signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
+                                                       unicode_to_int(columns[10].data - 1))
+                            fileOutput.append(signal)
+                        else:
+                            norm = norm_factors(data, unicode_to_int(columns[10].data - 1))
+                            fileOutput.append(norm)
+                        continue
+                    else:
+                        for idx, column in enumerate(data):
+                            if (idx + 1) == columns[i].data:
+                                fileOutput.append(data[idx])
+            output.append(fileOutput)
+        output = json.dumps(output)
+    return output
+
+
 @app.route('/db')
 @login_required
 def sesData():
@@ -880,6 +973,7 @@ def process():
     idlist = request.form.get('idList', type=str)
     pltLeg = request.form.get('pltLeg', type=int)
     binWidth = request.form.get('binWidth', type=int)
+    output = request.form.get('output', type=int)
     endmax = 'No File Selected'
     senddata = []
     allFileNames = []
@@ -947,6 +1041,8 @@ def process():
                 moveXcords(ycords, inputCord)
             endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
             allFileNames.append(file_instance.name)
+            if output == 1:
+                return json.dumps(ycords[0])
             code = simplePlot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
         if idthis is None:
             jidlist = json.loads(idlist)
@@ -1016,6 +1112,8 @@ def process():
                 allycords.append(ycords)
                 allagainstE.append(againstE)
                 allFileNames.append(file_instance.name)
+            if output == 1:
+                return json.dumps(allycords[0])
             if binWidth == None:
                 code, sumxmax, sumymax = mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames,
                                                     allFileNames, pltLeg)
@@ -1901,7 +1999,8 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                 svg[0].setAttribute("height", 600);
             }
             var labels = new Array();
-            for(var i=1; i<=this.props.labels.length; i++){
+            var lineCount = this.props.labels.length
+            for(var i=1; i<=lineCount; i++){
                 var obj = {};
                 obj.label = this.props.labels[i - 1];
                 line = mpld3.get_element(this.props.line_ids[(i * 2) - 2], this.fig);
@@ -1919,8 +2018,8 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                 }
                 else if (!!window.chrome && !!window.chrome.webstore){
                     //Chrome
-                    points[3-i].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                    points[3-i].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                    points[(lineCount)-i].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                    points[(lineCount)-i].firstChild.style.setProperty('fill-opacity', 0, 'important');
                 }
                 else{
                     //implement more if needed
@@ -1998,8 +2097,8 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                     }
                     else if (!!window.chrome && !!window.chrome.webstore){
                         //Chrome
-                        points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 1, 'important');
-                        points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('fill-opacity', 1, 'important');
                     }
                     else{
                         //implement more if needed
@@ -2019,8 +2118,8 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                     }
                     else if (!!window.chrome && !!window.chrome.webstore){
                         //Chrome
-                        points[3-d.lineNum].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                        points[3-d.lineNum].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('fill-opacity', 0, 'important');
                     }
                     else{
                         //implement more if needed

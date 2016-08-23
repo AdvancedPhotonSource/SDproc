@@ -491,6 +491,11 @@ $(function (){
         previous = localStorage.getItem('previous2');
         if (hrm == 'Fe-inline-1meV'){
             hrm = '++'
+            //    hrm_e0 = 14412500.0
+            //    hrm_bragg1 = 18.4704
+            //    hrm_bragg2 = 77.5328
+            //    hrm_alpha1 = 2.6e-6
+            //    hrm_alpha2 = 2.6e-6
             $('#HRM').text('Fe-inline-1meV')
             $('#HRM').append("<span class='caret'></span>");
         }
@@ -519,3 +524,40 @@ $(function (){
         })
     })
 })
+
+function advance(){
+    window.location.href = ("process");
+}
+
+function outputFile(){
+    if (localStorage.getItem('previous2') === null){
+        alert('No file loaded');
+    }
+    else{
+        BootstrapDialog.show({
+            title: 'Output Type?',
+            message: 'Would you like to save the data for the current file, or for the entire session?',
+            buttons: [{
+                label: 'Current File',
+                action: function(dialogItself){
+                        $('#idnum').val(localStorage.getItem('previous2'))
+                        $('#outSingular').val(1)
+                        $.post('/generateOutput', $('#meta-form').serialize(), function(data){
+                            alert(data);
+                        })
+                        dialogItself.close();
+                    }
+                }, {
+                label: 'Entire Session',
+                action: function(dialogItself){
+                    $('#session').val(localStorage.getItem('previous'))
+                    $('#outSingular').val(0)
+                    $.post('/generateOutput', $('#meta-form').serialize(), function(data){
+                        alert(data);
+                    })
+                    dialogItself.close();
+                }
+            }]
+        });
+    }
+}

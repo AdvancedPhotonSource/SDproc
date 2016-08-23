@@ -69,12 +69,14 @@ select[multiple].scan-list{
     position: relative;
     left: 180px;
     bottom: 0px;
+    top: -140px;
 }
 
 .fitBtn{
     position: relative;
     left: 510px;
     bottom: 67px;
+    top: -206px;
 }
 
 .input-group{
@@ -88,6 +90,7 @@ select[multiple].scan-list{
     position: relative;
     bottom: 13px;
     left: 164px;
+    top: -150px;
 }
 
 .doneBtn{
@@ -117,7 +120,7 @@ select[multiple].scan-list{
     border-radius: 5px;
     width: 510px;
     right: 20px;
-    top: 10px;
+    top: -130px;
 }
 
 .splitInput.input-group input{
