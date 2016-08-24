@@ -1026,7 +1026,7 @@ def process():
             fitRange = format_instance.fit_range
             if fitType == 'AtMax':
                 temp = xmax[1]
-                xmax[1] = ycords[0][xmax[1]]
+                xmax[1] = (ycords[0][xmax[1]] * 1000000)
                 npXcords = numpy.array(ycords[0])
                 npXcords = numpy.multiply(npXcords, 1000000)
                 center = atMax(ycords, npXcords, xmax, fitRange)
@@ -1094,11 +1094,13 @@ def process():
                 inputCord = format_instance.fit_pos
                 fitRange = format_instance.fit_range
                 if fitType == 'AtMax':
-                    temp = xmax[1]
-                    xmax[1] = ycords[0][xmax[1]]
+                    xmaxHold = xmax[1]
+                    xmax[1] = (ycords[0][xmax[1]] * 1000000)
                     npXcords = numpy.array(ycords[0])
+                    npXcords = numpy.multiply(npXcords, 1000000)
                     center = atMax(ycords, npXcords, xmax, fitRange)
-                    xmax[1] = temp
+                    xmax[1] = xmaxHold
+                    ycords[0] = npXcords
                     moveXcords(ycords, center)
                     format_instance.fit_type = 'AtMax'
                     format_instance.fit_pos = center
@@ -1106,6 +1108,7 @@ def process():
                     db.session.commit()
                 else:
                     moveXcords(ycords, inputCord)
+                max[0] = ((max[0] * 1000000) - format_instance.fit_pos)
                 endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
                 alldata.append(data)
                 allxmax.append(xmax)
@@ -1299,7 +1302,7 @@ def shareFile():
 def atMax(ycords, npXcords, xmax, fitRange):
     leftBound = (find_nearest(npXcords, xmax[1] - (fitRange / 2)))
     rightBound = (find_nearest(npXcords, xmax[1] + (fitRange / 2)))
-    targetRange = [x for x in ycords[0] if x >= leftBound]
+    targetRange = [x for x in npXcords if x >= leftBound]
     targetRange = [x for x in targetRange if x <= rightBound]
     npData = []
     for xcord in targetRange:
@@ -1520,7 +1523,6 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         fig, ax = plt.subplots()
         for oneDat in allycords:
             xs = oneDat[0]
-            xs = numpy.multiply(xs, 1000000)
             ys = oneDat[1]
             line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1] + ' ' + allLegendNames[count1])
             lines.append(line[0])
@@ -1653,11 +1655,9 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
 
         sum2Dymax = numpy.amax(sum2D)
         sum2Dxmax = numpy.ndarray.argmax(sum2D)
-        largePadx = numpy.multiply(largePadx, 1000000)
         line = ax.plot(largePadx, ySummed, color='k', alpha=0, label='Sum of selected')
         lines.append(line[0])
 
-        sum2D = numpy.multiply(sum2D, 1000000)
         point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
         labels.append('Sum of selected')
         lines.append(point[0])
