@@ -1192,7 +1192,7 @@ def peak_at_max():
     if fitType == 0:
         leftBound = (find_nearest(npXcords, npXcords[xmax[1]] - (fitRange / 2)))
         rightBound = (find_nearest(npXcords, npXcords[xmax[1]] + (fitRange / 2)))
-        targetRange = [x for x in ycords[0] if x >= leftBound]
+        targetRange = [x for x in npXcords if x >= leftBound]
         targetRange = [x for x in targetRange if x <= rightBound]
         npData = []
         for xcord in targetRange:
@@ -1201,14 +1201,15 @@ def peak_at_max():
         targetX = numpy.array(targetRange)
         targetY = numpy.array(npData)
         center = centroid(targetX, targetY)
+        ycords[0] = npXcords
         moveXcords(ycords, center)
         format_instance.fit_type = 'AtMax'
         format_instance.fit_pos = center
         format_instance.fit_range = fitRange
     elif fitType == 1:
-        leftBound = (find_nearest(npXcords, inputCord - (fitRange / 2)))
-        rightBound = (find_nearest(npXcords, inputCord + (fitRange / 2)))
-        targetRange = [x for x in ycords[0] if x >= leftBound]
+        leftBound = (find_nearest(npXcords, inputCord + npXcords[0] - (fitRange / 2)))
+        rightBound = (find_nearest(npXcords, inputCord + npXcords[0] + (fitRange / 2)))
+        targetRange = [x for x in npXcords if x >= leftBound]
         targetRange = [x for x in targetRange if x <= rightBound]
         npData = []
         for xcord in targetRange:
@@ -1217,14 +1218,15 @@ def peak_at_max():
         targetX = numpy.array(targetRange)
         targetY = numpy.array(npData)
         center = centroid(targetX, targetY)
+        ycords[0] = npXcords
         moveXcords(ycords, center)
         format_instance.fit_type = 'AtPoint'
         format_instance.fit_pos = center
         format_instance.fit_range = fitRange
     else:
-        leftBound = (find_nearest(npXcords, inputCord - (localRange / 2)))
-        rightBound = (find_nearest(npXcords, inputCord + (localRange / 2)))
-        targetRange = [x for x in ycords[0] if x >= leftBound]
+        leftBound = (find_nearest(npXcords, inputCord + npXcords[0] - (localRange / 2)))
+        rightBound = (find_nearest(npXcords, inputCord + npXcords[0] + (localRange / 2)))
+        targetRange = [x for x in npXcords if x >= leftBound]
         targetRange = [x for x in targetRange if x <= rightBound]
         npData = []
         for xcord in targetRange:
@@ -1232,11 +1234,11 @@ def peak_at_max():
             npData.append(ycords[1][oneCord])
         npData = numpy.array(npData)
         max = numpy.argmax(npData)
-        maxIndex = numpy.where(npYcords == npData[max])[0][0]
+        maxIndex = oneCord - len(targetRange) + max
 
         leftBound = (find_nearest(npXcords, npXcords[maxIndex] - (fitRange / 2)))
         rightBound = (find_nearest(npXcords, npXcords[maxIndex] + (fitRange / 2)))
-        targetRange = [x for x in ycords[0] if x >= leftBound]
+        targetRange = [x for x in npXcords if x >= leftBound]
         targetRange = [x for x in targetRange if x <= rightBound]
         npData = []
         for xcord in targetRange:
@@ -1245,6 +1247,7 @@ def peak_at_max():
         targetX = numpy.array(targetRange)
         targetY = numpy.array(npData)
         center = centroid(targetX, targetY)
+        ycords[0] = npXcords
         moveXcords(ycords, center)
         format_instance.fit_type = 'AtPoint'
         format_instance.fit_pos = center
