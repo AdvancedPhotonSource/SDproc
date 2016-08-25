@@ -472,7 +472,10 @@ def dataFormat():
             format.fit_pos = 0
             format.fit_range = 3
             format.file_id = idthis
-            format.hrm = '++'
+            hrm = {'hrm_e0': 14412500.0, 'hrm_bragg1': 18.4704, 'hrm_bragg2': 77.5328,
+             'hrm_geo': '++', 'hrm_alpha1': 2.6e-6, 'hrm_alpha2': 2.6e-6}
+            hrm = json.dumps(hrm)
+            format.hrm = hrm
 
             # used.append(1)
             used.append(11)
@@ -1851,24 +1854,22 @@ def convert_Numpy(used, data, additional):
 
 
 def energy_xtal(data, a1, a2, hrm):
+    hrm = json.loads(hrm)
     energy = []
     a1Dat = data[a1]
     a2Dat = data[a2]
     a1Dat = [float(i) for i in a1Dat]
     a2Dat = [float(i) for i in a2Dat]
-    hrm_e0 = 14412500.0
-    hrm_bragg1 = 18.4704
-    hrm_bragg2 = 77.5328
-    hrm_tan1 = math.tan(math.radians(hrm_bragg1))
-    hrm_tan2 = math.tan(math.radians(hrm_bragg2))
+    hrm_tan1 = math.tan(math.radians(hrm['hrm_bragg1']))
+    hrm_tan2 = math.tan(math.radians(hrm['hrm_bragg2']))
 
-    if hrm == '++':
-        a = 1.0e-6 * hrm_e0 / (hrm_tan1 + hrm_tan2)
+    if hrm['hrm_geo'] == '++':
+        a = 1.0e-6 * hrm['hrm_e0'] / (hrm_tan1 + hrm_tan2)
         b = a1Dat[0] - a2Dat[0]
         for i in range(len(a1Dat)):
             energy.append(a * (a1Dat[i] - a2Dat[i] - b))
     else:
-        a = 1.0e-6 * hrm_e0 / (hrm_tan1 - hrm_tan2)
+        a = 1.0e-6 * hrm['hrm_e0'] / (hrm_tan1 - hrm_tan2)
         b = a1Dat[0] + a2Dat[0]
         for i in range(len(a1Dat)):
             energy.append(a * (a1Dat[i] + a2Dat[i] - b))
@@ -1885,28 +1886,24 @@ def energy_xtal_temp(data, a1, a2, t1, t2, hrm):
 
 
 def temp_corr(data, t1, t2, hrm):
+    hrm = json.loads(hrm)
     corr = []
     t1Dat = data[t1]
     t2Dat = data[t2]
     t1Dat = [float(i) for i in t1Dat]
     t2Dat = [float(i) for i in t2Dat]
-    hrm_e0 = 14412500.0
-    hrm_bragg1 = 18.4704
-    hrm_bragg2 = 77.5328
-    hrm_tan1 = math.tan(math.radians(hrm_bragg1))
-    hrm_tan2 = math.tan(math.radians(hrm_bragg2))
-    hrm_alpha1 = 2.6e-6
-    hrm_alpha2 = 2.6e-6
-    at1 = hrm_alpha1 * hrm_tan1
-    at2 = hrm_alpha2 * hrm_tan2
+    hrm_tan1 = math.tan(math.radians(hrm['hrm_bragg1']))
+    hrm_tan2 = math.tan(math.radians(hrm['hrm_bragg2']))
+    at1 = hrm['hrm_alpha1'] * hrm_tan1
+    at2 = hrm['hrm_alpha2'] * hrm_tan2
 
     if hrm == '++':
-        a = - hrm_e0 / (hrm_tan1 + hrm_tan2)
+        a = - hrm['hrm_e0'] / (hrm_tan1 + hrm_tan2)
         b = at1 * t1Dat[0] + at2 * t2Dat[0]
         for i in range(len(t1Dat)):
             corr.append(a * (at1 * t1Dat[i] + at2 * t2Dat[i] - b))
     else:
-        a = - hrm_e0 / (hrm_tan1 - hrm_tan2)
+        a = - hrm['hrm_e0'] / (hrm_tan1 - hrm_tan2)
         b = at1 * t1Dat[0] - at2 * t2Dat[0]
         for i in range(len(t1Dat)):
             corr.append(a * (at1 * t1Dat[i] - at2 * t2Dat[i] - b))
