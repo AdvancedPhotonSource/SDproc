@@ -230,12 +230,16 @@ $(function()
 
 function txtFile()
 {
+    $('#formatDelim').prop('disabled', false);
+    $('#formatDelim').attr('placeholder', 'Comment character');
     $('#formatType').text('txt')
     $('#formatType').append("<span class='caret'></span>");
 }
 
 function mdaFile()
 {
+    $('#formatDelim').prop('disabled', true);
+    $('#formatDelim').attr('placeholder', 'Nothing needed for MDA');
     $('#formatType').text('mda')
     $('#formatType').append("<span class='caret'></span>");
 }

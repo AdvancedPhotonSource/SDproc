@@ -400,7 +400,7 @@ def dataFormat():
             if str(file_instance.type) == 'mda':
                 data, name, unusedpath = readMda(file_instance.path)
             else:
-                data, name, unusedpath = readMdaAscii(file_instance.path)
+                data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
             etype = data[columns[0].data - 1]
             for i in range(len(bools)):
                 if bools[i].data:
@@ -450,7 +450,7 @@ def dataFormat():
             if str(file_instance.type) == 'mda':
                 data, name, unusedpath = readMda(file_instance.path)
             else:
-                data, name, unusedpath = readMdaAscii(file_instance.path)
+                data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
             etype = data[1]
             used = []
             againstE = False
@@ -603,7 +603,7 @@ def generateOutput():
         if str(file_instance.type) == 'mda':
             data, name, unusedpath = readMda(file_instance.path)
         else:
-            data, name, unusedpath = readMdaAscii(file_instance.path)
+            data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
         columns, bools = splitForm(form)
         for i in range(len(bools)):
             if bools[i].data:
@@ -646,7 +646,7 @@ def generateOutput():
             if str(file_instance.type) == 'mda':
                 data, name, unusedpath = readMda(file_instance.path)
             else:
-                data, name, unusedpath = readMdaAscii(file_instance.path)
+                data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
             columns, bools = splitForm(form)
             for i in range(len(bools)):
                 if bools[i].data:
@@ -726,7 +726,7 @@ def addFile():
                 dfile = dataFile()
                 dfile.name = filename
                 sideVals = request.form.listvalues()
-                dfile.delim = sideVals[0][0]
+                dfile.comChar = sideVals[0][0]
                 dfile.type = sideVals[1][0]
                 dfile.path = '/home/phoebus/CASCHMITZ/Desktop/dataDir/' + pathfilename
                 dfile.comment = ''
@@ -1000,7 +1000,7 @@ def process():
             if str(file_instance.type) == 'mda':
                 data, name, unusedpath = readMda(file_instance.path)
             else:
-                data, name, unusedpath = readMdaAscii(file_instance.path)
+                data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
             if bools[1].data:
                 energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
                                      format_instance.hrm)
@@ -1072,7 +1072,7 @@ def process():
                 if str(file_instance.type) == 'mda':
                     data, name, unusedpath = readMda(file_instance.path)
                 else:
-                    data, name, unusedpath = readMdaAscii(file_instance.path)
+                    data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
                 if bools[1].data:
                     energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
                                          format_instance.hrm)
@@ -1160,7 +1160,7 @@ def peak_at_max():
     if str(file_instance.type) == 'mda':
         data, name, unusedpath = readMda(file_instance.path)
     else:
-        data, name, unusedpath = readMdaAscii(file_instance.path)
+        data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
     form = populate_from_instance(format_instance)
     columns, bools = splitForm(form)
     used = []
@@ -1416,18 +1416,19 @@ def find_nearest(array, value):
     return array[idx]
 
 
-def readAscii(path):
+def readAscii(path, comChar):
     count = 0
+    name = path.split("/")
+    name = name[-1]
     with open(path) as f:
         for line in f:
             line = line.rstrip()
-            if line.startswith("%File name:"):
-                path = line.split('W:', 1)[-1]
-                name = path.rsplit('/', 1)[-1]
-            if line.startswith("%"):
+            if line.startswith(comChar):
+                continue
+            if len(line) == 0:
                 continue
             line = line[1:]
-            line = line.split("   ")
+            line = line.split()
             if count == 0:
                 data = [[] for x in xrange(len(line))]
             count += 1
