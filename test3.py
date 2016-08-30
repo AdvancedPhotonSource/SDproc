@@ -218,7 +218,6 @@ def addThing():
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
-                    db.session.commit()
             if table == '#userSessionTable':
                 instance = db.session.query(sessionFiles).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
@@ -226,7 +225,6 @@ def addThing():
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
-                    db.session.commit()
         else:
             user = db.session.query(User).filter_by(username=user).first()
             if table == '#fileNameTable':
@@ -236,7 +234,6 @@ def addThing():
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
-                    db.session.commit()
             if table == '#sessionUserTable':
                 instance = db.session.query(sessionFiles).filter_by(id=location).first()
                 auths = instance.authed.split(',')
@@ -244,9 +241,9 @@ def addThing():
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
-                    db.session.commit()
         db.session.commit()
-    return 'Added'
+        user = user.username
+    return user
 
 
 
@@ -305,7 +302,8 @@ def removeThing():
                     else:
                         session_instance.authed = ','.join(auths)
         db.session.commit()
-    return 'Removed'
+        user = user.username
+    return user
 
 
 @app.route('/select', methods=['GET', 'POST'])
@@ -2145,4 +2143,4 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', debug=True)

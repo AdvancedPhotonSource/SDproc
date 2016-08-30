@@ -476,10 +476,10 @@ function addThing(button){
             if ($(row).hasClass( "highlight" )){
                 var fid = $('td:first', $(row)).attr('id');
                 var user = row[0].innerText
-                $.post("/addThing", { id: fid, from: origin, table: tableType, user: user}, function(){
-                    $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user:user}, function(){
+                $.post("/addThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
+                    $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user:data}, function(){
                         $('#basePage').load("/admin #basePage>*");
-                        $.getScript( "/static/admin/admin.js" );
+                        setupRows()
                         if (tableType == "#userFileTable"){
                             Users();
                         }
@@ -529,10 +529,10 @@ function removeThing(button){
         found = 1;
         var fid = $('td:first', $(row)).attr('id');
         var user = row[0].innerText
-        $.post( "/removeThing", { id: fid, from: origin, table: tableType, user: user}, function(){
-            $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user: user}, function(){
+        $.post( "/removeThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
+            $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user: data}, function(){
                 $('#basePage').load("/admin #basePage>*");
-                $.getScript( "/static/admin/admin.js" );
+                setupRows()
                 if (tableType == "#userFileTable"){
                     Users();
                 }
