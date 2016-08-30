@@ -2,7 +2,7 @@ __author__ = 'caschmitz'
 
 from ctypes import *
 
-lib1 = cdll.LoadLibrary('/Public/SDproc/anaconda/lib/libz.so.1')
+lib1 = cdll.LoadLibrary('/Public/SDproc/anaconda/lib/libz.so')
 
 from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash
 import matplotlib.pyplot as plt
