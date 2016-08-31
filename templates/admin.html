@@ -343,7 +343,7 @@ with context %}
                                 <tbody>
                                     {% if fileData %}
                                         {% for post in fileData %}
-                                          <tr class="item" onclick="addThing(this)">
+                                          <tr class="item nestItem" onclick="addThing(this)">
                                             <td class="name" colspan="2" id="{{ post.id }}">
                                               {%- if post.name == ".." -%}
                                                 Parent folder

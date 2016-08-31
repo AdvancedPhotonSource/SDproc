@@ -1,9 +1,4 @@
 __author__ = 'caschmitz'
-
-from ctypes import *
-
-lib1 = cdll.LoadLibrary('/Public/SDproc/anaconda/lib/libz.so')
-
 from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash
 import matplotlib.pyplot as plt
 import mpld3
@@ -171,10 +166,11 @@ def getInfo():
     freeze = 0
     if table == 'File':
         file_instance = db.session.query(dataFile).filter_by(id=id).first()
-        names = file_instance.authed.split(',')
-        for name in names:
-            user = db.session.query(User).filter_by(id=name).first()
-            fileUsers.insert(0, {'fUser': user})
+        if file_instance != None:
+            names = file_instance.authed.split(',')
+            for name in names:
+                user = db.session.query(User).filter_by(id=name).first()
+                fileUsers.insert(0, {'fUser': user})
     if table == 'User':
         user = db.session.query(User).filter_by(username=user).first()
         freeze = user.approved
@@ -197,10 +193,11 @@ def getInfo():
                                  'authed': instance.authed, 'modified': lastMod})
     if table == 'Session':
         session_instance = db.session.query(sessionFiles).filter_by(id=id).first()
-        names = session_instance.authed.split(',')
-        for name in names:
-            user = db.session.query(User).filter_by(id=name).first()
-            sessionUsers.insert(0, {'sUser': user})
+        if session_instance != None:
+            names = session_instance.authed.split(',')
+            for name in names:
+                user = db.session.query(User).filter_by(id=name).first()
+                sessionUsers.insert(0, {'sUser': user})
     return render_template('admin.html', user=user, fileUsers=fileUsers, userFiles=userFiles,
                            userSessions=userSessions, sessionUsers=sessionUsers, freeze=freeze)
 
@@ -280,8 +277,8 @@ def removeThing():
                         meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
                         db.session.delete(meta)
                         db.session.delete(instance)
-                    else:
-                        instance.authed = ','.join(auths)
+                else:
+                    instance.authed = ','.join(auths)
         else:
             user = db.session.query(User).filter_by(username=user).first()
             if table == '#fileNameTable':
@@ -303,8 +300,8 @@ def removeThing():
                         meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
                         db.session.delete(meta)
                         db.session.delete(instance)
-                    else:
-                        session_instance.authed = ','.join(auths)
+                else:
+                    session_instance.authed = ','.join(auths)
         db.session.commit()
         user = user.username
     return user

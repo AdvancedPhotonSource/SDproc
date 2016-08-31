@@ -6,6 +6,7 @@ $(document).ready( function() {
     rows.removeClass("lightlight")
 
     setupRows();
+    setupClick();
 })
 
 function setupRows(){
@@ -345,7 +346,7 @@ function setupRows(){
     });
 }
 var waitHighlight = $.Deferred();
-$(function()
+function setupClick()
 {
     var rows = $('tr.item')
     rows.on('click', function(e)
@@ -404,7 +405,20 @@ $(function()
         e.preventDefault();
         return false;
     })
-})
+
+    $('#nestedFUserModal').on('hidden.bs.modal', function (e) {
+        $('#fileModal').modal('show');
+    })
+    $('#nestedSUserModal').on('hidden.bs.modal', function (e) {
+        $('#sessionModal').modal('show');
+    })
+    $('#nestedFileModal').on('hidden.bs.modal', function (e) {
+        $('#userModal').modal('show');
+    })
+    $('#nestedSessionModal').on('hidden.bs.modal', function (e) {
+        $('#userModal').modal('show');
+    })
+}
 
 
 
@@ -451,6 +465,7 @@ function addThing(button){
         var nested = "#nestedFileTable";
         var origin = localStorage.getItem('location');
         var shortID = 'User';
+        var nestedMod = "#nestedFileModal"
     }
     else if ($(button).parents('#nestedSessionModal').length){
         var tableType = "#userSessionTable";
@@ -466,7 +481,7 @@ function addThing(button){
     }
     else{
         var tableType = "#sessionUserTable";
-        var nested = "#nestedFUserNav";
+        var nested = "#nestedSUserNav";
         var origin = localStorage.getItem('location');
         var shortID = 'Session';
     }
@@ -476,22 +491,33 @@ function addThing(button){
             if ($(row).hasClass( "highlight" )){
                 var fid = $('td:first', $(row)).attr('id');
                 var user = row[0].innerText
+                $('.modal').modal('hide');
                 $.post("/addThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
                     $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user:data}, function(){
-                        $('#basePage').load("/admin #basePage>*");
-                        setupRows()
-                        if (tableType == "#userFileTable"){
-                            Users();
-                        }
-                        else if (tableType == "#userSessionTable"){
-                            Users();
-                        }
-                        else if (tableType == "#fileNameTable"){
-                            Files();
-                        }
-                        else{
-                            Sessions();
-                        }
+                        $('#basePage').load("/admin #basePage>*", function(){
+                            setupRows();
+                            setupClick();
+                            if (tableType == "#userFileTable"){
+                                Users();
+                                $('.modal-backdrop').remove();
+                                $('#userModal').modal('show');
+                            }
+                            else if (tableType == "#userSessionTable"){
+                                Users();
+                                $('.modal-backdrop').remove();
+                                $('#userModal').modal('show');
+                            }
+                            else if (tableType == "#fileNameTable"){
+                                Files();
+                                $('.modal-backdrop').remove();
+                                $('#fileModal').modal('show');
+                            }
+                            else{
+                                Sessions();
+                                $('.modal-backdrop').remove();
+                                $('#sessionModal').modal('show');
+                            }
+                        });
                     })
                 })
             }
@@ -531,20 +557,22 @@ function removeThing(button){
         var user = row[0].innerText
         $.post( "/removeThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
             $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user: data}, function(){
-                $('#basePage').load("/admin #basePage>*");
-                setupRows()
-                if (tableType == "#userFileTable"){
-                    Users();
-                }
-                else if (tableType == "#userSessionTable"){
-                    Users();
-                }
-                else if (tableType == "#fileNameTable"){
-                    Files();
-                }
-                else{
-                    Sessions();
-                }
+                $('#basePage').load("/admin #basePage>*", function(){
+                    setupRows();
+                    setupClick();
+                    if (tableType == "#userFileTable"){
+                        Users();
+                    }
+                    else if (tableType == "#userSessionTable"){
+                        Users();
+                    }
+                    else if (tableType == "#fileNameTable"){
+                        Files();
+                    }
+                    else{
+                        Sessions();
+                    }
+                });
             });
         });
     }
@@ -609,18 +637,3 @@ function decline(task){
         $.getScript("/static/admin/admin.js");
     })
 }
-
-$(function(){
-    $('#nestedFUserModal').on('hidden.bs.modal', function (e) {
-        $('#fileModal').modal('show');
-    })
-    $('#nestedSUserModal').on('hidden.bs.modal', function (e) {
-        $('#sessionModal').modal('show');
-    })
-    $('#nestedFileModal').on('hidden.bs.modal', function (e) {
-        $('#userModal').modal('show');
-    })
-    $('#nestedSessionModal').on('hidden.bs.modal', function (e) {
-        $('#userModal').modal('show');
-    })
-})
