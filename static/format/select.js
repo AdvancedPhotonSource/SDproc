@@ -569,11 +569,13 @@ function outputFile(){
                 }, {
                 label: 'Save to Server',
                 action: function(dialogItself){
-                    $('#session').val(localStorage.getItem('previous'))
+                    alert("Not yet implemented/Not sure if needed")
+                    /*$('#session').val(localStorage.getItem('previous'))
                     $('#outSingular').val(0)
                     $.post('/generateOutput', $('#meta-form').serialize(), function(data){
                         alert(data);
                     })
+                    */
                     dialogItself.close();
                 }
             }]

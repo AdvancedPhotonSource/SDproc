@@ -156,7 +156,8 @@ function outputFile(){
         alert('No file loaded');
     }
     else{
-        if ($('#sel1').val().length == 1){
+        alert("Not yet implemented")
+        /*if ($('#sel1').val().length == 1){
             $.post('/process', { idnext: this.value, output: 1}, function(data){
                 alert(data);
             });
@@ -171,5 +172,6 @@ function outputFile(){
                 alert(data);
             });
         }
+        */
     }
 }
