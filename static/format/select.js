@@ -554,20 +554,20 @@ function outputFile(){
     }
     else{
         BootstrapDialog.show({
-            title: 'Output Type?',
-            message: 'Would you like to save the data for the current file, or for the entire session?',
+            title: 'Output Location?',
+            message: 'Would you like to save the data locally, or to the server?',
             buttons: [{
-                label: 'Current File',
+                label: 'Save Locally',
                 action: function(dialogItself){
-                        $('#idnum').val(localStorage.getItem('previous2'))
-                        $('#outSingular').val(1)
-                        $.post('/generateOutput', $('#meta-form').serialize(), function(data){
-                            alert(data);
-                        })
+                        $('#idnum').val(localStorage.getItem('previous2'));
+                        $('#outSingular').val(1);
+                        $('#meta-form').attr('action', '/generateOutput')
+                        $('#meta-form')[0].submit()
+                        $('#meta-form').attr('action', '');
                         dialogItself.close();
                     }
                 }, {
-                label: 'Entire Session',
+                label: 'Save to Server',
                 action: function(dialogItself){
                     $('#session').val(localStorage.getItem('previous'))
                     $('#outSingular').val(0)

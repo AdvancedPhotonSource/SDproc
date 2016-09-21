@@ -91,27 +91,30 @@ with context %}
                     <tbody>
                         {% if data %}
                             {% for post in data %}
-                                {% if post.authed|int() == user.get_id()|int() %}
-                                  <tr class="item" ondblclick="moveFile()">
-                                    <td class="name" colspan="2" id="{{ post.id }}">
-                                      {%- if post.name == ".." -%}
-                                        Parent folder
-                                      {%- else -%}
-                                        {{ post.name }}
-                                      {%- endif -%}
-                                    </a></td>
-                                    <td class="modified">
-                                      <time datetime="{{ post.modified }}">{{ post.modified }}</time>
-                                    </td>
-                                    <td class="size">
-                                      {% if post.size %}
-                                        {{ post.size }}
-                                      {% else %}
-                                        -
-                                      {% endif %}
-                                    </td>
-                                  </tr>
-                                {% endif %}
+                                {% set auths = post.authed.split(',') %}
+                                {% for aID in auths %}
+                                    {% if aID|int() == user.get_id()|int() %}
+                                        <tr class="item" ondblclick="moveFile()">
+                                            <td class="name" colspan="2" id="{{ post.id }}">
+                                                {%- if post.name == ".." -%}
+                                                Parent folder
+                                                {%- else -%}
+                                                {{ post.name }}
+                                                {%- endif -%}
+                                            </a></td>
+                                            <td class="modified">
+                                                <time datetime="{{ post.modified }}">{{ post.modified }}</time>
+                                            </td>
+                                            <td class="size">
+                                                {% if post.size %}
+                                                {{ post.size }}
+                                                {% else %}
+                                                -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
                             {% endfor %}
                         {% endif %}
                     </tbody>

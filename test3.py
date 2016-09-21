@@ -1,5 +1,5 @@
 __author__ = 'caschmitz'
-from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash
+from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash, send_from_directory, request
 import matplotlib.pyplot as plt
 import mpld3
 import os
@@ -593,10 +593,11 @@ def saveSession():
 def generateOutput():
     form = InputForm(request.form)
     id = request.form.get('idnum', type=int)
-    singular = request.form.get('outSingular', type=int)
+    toLocal = request.form.get('outSingular', type=int)
     sesID = request.form.get('session', type=int)
     output = []
-    if singular == 1:
+    colNames = []
+    if toLocal == 1:
         file_instance = db.session.query(dataFile).filter_by(id=id).first()
         format_instance = db.session.query(currentMeta).filter_by(file_id=id).first()
         if str(file_instance.type) == 'mda':
@@ -611,30 +612,37 @@ def generateOutput():
                         energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
                                              unicode_to_int(columns[4].data - 1), format_instance.hrm)
                         output.append(energy)
+                        colNames.append('Energy xtal')
                     elif i == 2:
                         energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
                                                   unicode_to_int(columns[4].data - 1),
                                                   unicode_to_int(columns[5].data - 1),
                                                   unicode_to_int(columns[6].data - 1), format_instance.hrm)
                         output.append(energy)
+                        colNames.append('Energy xtal temp')
                     elif i == 7:
                         energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
                                            unicode_to_int(columns[6].data - 1), format_instance.hrm)
                         output.append(energy)
+                        colNames.append('Temp Corr')
                     elif i == 9:
                         signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
                                                    unicode_to_int(columns[10].data - 1))
                         output.append(signal)
+                        colNames.append('Signal Normalized')
                     else:
                         norm = norm_factors(data, unicode_to_int(columns[10].data - 1))
                         output.append(norm)
+                        colNames.append('Norm Factors')
                     continue
                 else:
                     for idx, column in enumerate(data):
                         if (idx + 1) == columns[i].data:
                             output.append(data[idx])
-        output = json.dumps(output)
+                            colNames.append(bools[i].label)
+        filename = writeOutput(output, colNames, file_instance.name)
     else:
+        """
         session_metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
         for meta in session_metas:
             fileOutput = []
@@ -678,7 +686,14 @@ def generateOutput():
                                 fileOutput.append(data[idx])
             output.append(fileOutput)
         output = json.dumps(output)
-    return output
+        """
+    return redirect(url_for('sendOut', filename=filename))
+
+
+@app.route('/outData/<path:filename>', methods=['GET', 'POST'])
+@login_required
+def sendOut(filename):
+    return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True)
 
 
 @app.route('/db')
@@ -721,13 +736,13 @@ def addFile():
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 pathfilename = filename + str(datetime.now())
-                file.save(os.path.join(app.config['UPLOAD_DIR'], pathfilename))
+                file.save(os.path.join((app.config['UPLOAD_DIR'] + '/rawData'), pathfilename))
                 dfile = dataFile()
                 dfile.name = filename
                 sideVals = request.form.listvalues()
                 dfile.comChar = sideVals[0][0]
                 dfile.type = sideVals[1][0]
-                dfile.path = '/home/phoebus/CASCHMITZ/Desktop/dataDir/' + pathfilename
+                dfile.path = app.config['UPLOAD_DIR'] + '/rawData/' + pathfilename
                 dfile.comment = ''
                 dfile.authed = current_user.get_id()
                 db.session.add(dfile)
@@ -1302,6 +1317,28 @@ def shareFile():
         file_instance.authed = file_instance.authed + ',' + str(toAuth)
         db.session.commit()
     return 'Shared'
+
+
+def writeOutput(output, colNames, name):
+    filename = name + ' ' + str(getTime())
+    f = open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'w')
+    f.write(name)
+    f.write('\n')
+    for i in range(len(output)):
+        f.write('%' + str(colNames[i].text) + '= Column: ' + str(i + 1))
+        f.write('\n')
+    for i in range(len(output[0])):
+        for j in range(len(output)):
+            f.write(str(output[j][i]) + (' ' * 10))
+        f.write('\n')
+    f.close()
+
+    downloadLocation = os.path.join(app.config['UPLOAD_DIR']) + '/outData'
+
+    path = downloadLocation + '/' + filename
+
+    return filename
+
 
 
 def atMax(ycords, npXcords, xmax, fitRange):
