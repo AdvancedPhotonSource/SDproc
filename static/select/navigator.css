@@ -82,7 +82,7 @@ body, table {
 
 table {
   border-collapse: collapse;
-  width: 135%;
+  width: 100%;
   background: #fff;
 }
 thead {

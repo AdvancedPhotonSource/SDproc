@@ -243,3 +243,8 @@ function mdaFile()
     $('#formatType').text('mda')
     $('#formatType').append("<span class='caret'></span>");
 }
+
+function proceed()
+{
+    window.location.href = ("select");
+}

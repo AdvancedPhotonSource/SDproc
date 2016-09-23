@@ -1336,9 +1336,9 @@ def writeOutput(output, colNames, name):
     f.write('\n')
     for i in range(len(output)):
         if isinstance(colNames[i], unicode):
-            f.write('%' + str(colNames[i]) + '= Column: ' + str(i + 1))
-        else:
             f.write('%' + str(colNames[i].text) + '= Column: ' + str(i + 1))
+        else:
+            f.write('%' + str(colNames[i]) + '= Column: ' + str(i + 1))
         f.write('\n')
     for i in range(len(output[0])):
         for j in range(len(output)):
@@ -1375,11 +1375,9 @@ def moveXcords(data, max):
 
 
 def centroid(xVals, yVals):
-    top = 0
-    bot = 0
-    for i in range(len(xVals)):
-        top = top + xVals[i] * yVals[i]
-        bot = bot + yVals[i]
+    bot = numpy.sum(yVals)
+    topArray = numpy.multiply(xVals, yVals)
+    top = numpy.sum(topArray)
     shiftVal = top / bot
     return shiftVal
 
@@ -1970,9 +1968,7 @@ def signal_normalized(data, sCol, nCol):
     normFac = norm_factors(data, nCol)
 
     for i in range(len(sDat)):
-        signal.append(sDat[i] / nDat[i])
-    for i in range(len(signal)):
-        signal[i] = signal[i] * normFac[i]
+        signal.append(sDat[i] * normFac[i])
     return signal
 
 
@@ -1981,8 +1977,7 @@ def norm_factors(data, nCol):
     nDat = data[nCol]
     nDat = [float(i) for i in nDat]
 
-    ave = numpy.mean(nDat)  ##Using mean here, do you want to average it instead?
-    # ave = numpy.average(nDat)
+    ave = numpy.mean(nDat)
     for i in range(len(nDat)):
         norm.append(ave / nDat[i])
     return norm

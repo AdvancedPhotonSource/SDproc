@@ -17,7 +17,6 @@ with context %}
     <link href="/static/select/navigator.css" rel="stylesheet">
     <script type="text/javascript" src="/static/select/add_file.js"></script>
     <script type="text/javascript" src="/static/select/highlight.js"></script>
-    <!--<script type="text/javascript" src="/static/select/change_comment.js"></script>-->
 </head>
 <body role="document">
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -113,31 +112,30 @@ with context %}
         <h1>
             Select How to Proceed
         </h1>
-
+        <div class="pull-right margin-info">
+            <p class="margin-text" align="right">Logged in as {{ user.username }}
+                <br/>
+                <a href="/db">Logbook</a>
+                <br/>
+                <a href="/logout">Logout</a>
+            </p>
+        </div>
         <p>
             Choose to start a new session or continue a previous session.
         </p>
     </div>
-    <div class="margin-info">
-        <p align="right">Logged in as {{ user.username }}
-            <br/>
-            <a href="/db">Logbook</a>
-            <br/>
-            <a href="/logout">Logout</a>
-        </p>
-    </div>
 </div>
-<div class="centerBlock">
+<div class="text-center">
     <button id="newSession" onclick="newSession()" class="btn btn-primary btn-lg stretcher" title="Begin a new session">Start New Session</button>
 </div>
 <br/>
 <br/>
-<div class="col-center">
-    <div class="row">
-        <input type="text" class="form-control navFiltInput" placeholder="Session Name" id="navName">
-        <div class="col-xs-6 navTable" id="navTable">
-            <br/>
-            <span class="centerBlock">
+<div class="text-center">
+    <div class="allCols">
+        <div class="text-center floatL navBlock">
+            <input type="text" class="form-control navFiltInput" placeholder="Session Name" id="navName">
+            <div class="navTable" id="navTable">
+                <br/>
                 {% block header %}{% endblock %}
                 {% block table %}
                 <table>
@@ -176,37 +174,29 @@ with context %}
                     </tbody>
                 </table>
                 {% endblock %}
-            </span>
-            <br/>
+                <br/>
+            </div>
+            <div class="text-center">
+                <div class="manageButtons">
+                    <button onclick="delFile()" class="btn btn-primary btn-xs delBtn" title="Remove all selected sessions from database">
+                        Delete Session
+                    </button>
+                    <button class="btn btn-primary btn-xs shareBtn" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
+                        Share Session
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="col-xs-5 col-xs-offset-1">
-            <label for="comment">Comment:</label>
-            <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
-            <span class="pull-right">
+        <div class="text-center floatL">
+            <div class="comGroup">
+                <label for="comment">Comment:</label>
+                <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
                 <button id="finito" disabled type="submit" class="btn btn-primary btn-lg" onclick="proceed()" title="Advance with all files to be used">
                     Confirm
                 </button>
-            </span>
-        </div>
-    </div>
-    <br/>
-    <div class="row">
-        <div class="col-xs-3 optionBtns">
-            <div class="col-xs-6">
-                <span class="pull-left">
-                    <button onclick="delFile()" class="btn btn-primary btn-xs deleteStretch" title="Remove all selected sessions from database">
-                        Delete Session
-                    </button>
-                </span>
-            </div>
-            <div class="col-xs-6">
-                <span class="pull-right">
-                    <button class="btn btn-primary btn-xs deleteStretch" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
-                        Share Session
-                    </button>
-                </span>
             </div>
         </div>
+        <br/>
     </div>
 </div>
 </body>

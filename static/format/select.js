@@ -553,32 +553,11 @@ function outputFile(){
         alert('No file loaded');
     }
     else{
-        BootstrapDialog.show({
-            title: 'Output Location?',
-            message: 'Would you like to save the data locally, or to the server?',
-            buttons: [{
-                label: 'Save Locally',
-                action: function(dialogItself){
-                        $('#idnum').val(localStorage.getItem('previous2'));
-                        $('#outSingular').val(1);
-                        $('#meta-form').attr('action', '/generateOutput')
-                        $('#meta-form')[0].submit()
-                        $('#meta-form').attr('action', '');
-                        dialogItself.close();
-                    }
-                }, {
-                label: 'Save to Server',
-                action: function(dialogItself){
-                    alert("Not yet implemented/Not sure if needed")
-                    /*$('#session').val(localStorage.getItem('previous'))
-                    $('#outSingular').val(0)
-                    $.post('/generateOutput', $('#meta-form').serialize(), function(data){
-                        alert(data);
-                    })
-                    */
-                    dialogItself.close();
-                }
-            }]
-        });
+        $('#idnum').val(localStorage.getItem('previous2'));
+        $('#outSingular').val(1);
+        $('#meta-form').attr('action', '/generateOutput')
+        $('#meta-form')[0].submit()
+        $('#meta-form').attr('action', '');
+        dialogItself.close();
     }
 }

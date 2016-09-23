@@ -7,17 +7,17 @@ class InputForm(Form):
     #####How to split these up to iterate through them seperatly?  Cannot
     # Fields
     energy = IntegerField(label='Energy: ', default=1, validators=[validators.InputRequired()])
-    energyCalc = IntegerField(label='Energy Calculated')
-    energyTempCalc = IntegerField(label='Energy Temp Calculated')
-    xtal1A = IntegerField(label='Xtal 1 Angle: ', default=2, validators=[validators.InputRequired()])
-    xtal2A = IntegerField(label='Xtal 2 Angle: ', default=3, validators=[validators.InputRequired()])
-    xtal1T = IntegerField(label='Xtal 1 Temp: ', default=12, validators=[validators.InputRequired()])
-    xtal2T = IntegerField(label='Xtal 2 Temp: ', default=15, validators=[validators.InputRequired()])
+    energyCalc = IntegerField(label='Energy calculated')
+    energyTempCalc = IntegerField(label='Energy calculated w/ T corr.')
+    xtal1A = IntegerField(label='Xtal 1 angle: ', default=2, validators=[validators.InputRequired()])
+    xtal2A = IntegerField(label='Xtal 2 angle: ', default=3, validators=[validators.InputRequired()])
+    xtal1T = IntegerField(label='Xtal 1 temp: ', default=12, validators=[validators.InputRequired()])
+    xtal2T = IntegerField(label='Xtal 2 temp: ', default=15, validators=[validators.InputRequired()])
     tempCorr = IntegerField(label='Temp. corr')
     signal = IntegerField(label='Signal: ', default=11, validators=[validators.InputRequired()])
-    signalNorm = IntegerField(label='Signal Normalized')
+    signalNorm = IntegerField(label='Signal normalized')
     norm = IntegerField(label='Norm.: ', default=7, validators=[validators.InputRequired()])
-    normFac = IntegerField(label='Norm. Factors')
+    normFac = IntegerField(label='Norm. factors')
     extra = IntegerField(label='Extra: ', default=1, validators=[validators.InputRequired()])
 
     #columns = [energy, energyCalc, xtal1A, xtal2A, xtal1T, xtal2T, tempCorr, signal, signalNorm, norm, normFac, extra]
