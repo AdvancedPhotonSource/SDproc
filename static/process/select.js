@@ -152,11 +152,51 @@ $(function (){
 })
 
 function outputFile(){
-    if (localStorage.getItem('previous2') === null){
+    if (localStorage.getItem('previous3') === null){
         alert('No file loaded');
     }
     else{
-        alert("Not yet implemented")
+        BootstrapDialog.show({
+            title: 'Output Location?',
+            message: 'Would you like to save the data locally, or to the server?',
+            buttons: [{
+                label: 'Save Locally',
+                action: function(dialogItself){
+                        if ($('#sel1').val().length == 1){
+                                $('#output').val(1);
+                                $('#idnext').val(localStorage.getItem('previous3'));
+                                $('#output-form').attr('action', '/process');
+                                $('#output-form')[0].submit();
+                                $('#idnext').val(None);
+                            }
+                        else{
+                            var ids = []
+                            $('#sel1 > option:selected').each(function(){
+                                ids.push(this.value);
+                            });
+                            var jIds = JSON.stringify(ids);
+                            $('#output').val(1);
+                            $('#idList').val(jIds);
+                            $('#output-form').attr('action', '/process');
+                            $('#output-form')[0].submit();
+                            $('#idList').val(None);
+                        }
+                        dialogItself.close();
+                    }
+                }, {
+                label: 'Save to Server',
+                action: function(dialogItself){
+                    alert("Not yet implemented")
+                    /*$('#session').val(localStorage.getItem('previous'))
+                    $('#outSingular').val(0)
+                    $.post('/generateOutput', $('#meta-form').serialize(), function(data){
+                        alert(data);
+                    })
+                    */
+                    dialogItself.close();
+                }
+            }]
+        });
         /*if ($('#sel1').val().length == 1){
             $.post('/process', { idnext: this.value, output: 1}, function(data){
                 alert(data);

@@ -199,11 +199,16 @@ with context %}
                         Sum Settings
                     </button>
                 </div>
-                <div class="text-center output">
-                    <button onclick="outputFile()" class="btn btn-primary btn-md" title="Display or save output file">
-                        Output
-                    </button>
-                </div>
+                <form id="output-form" method=post action="">
+                    <input type="hidden" name="output" id="output">
+                    <input type="hidden" name="idnext" id="idnext">
+                    <input type="hidden" name="idList" id="idList">
+                    <div class="text-center output">
+                        <button onclick="outputFile()" class="btn btn-primary btn-md" title="Display or save output file">
+                            Output
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

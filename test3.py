@@ -570,6 +570,7 @@ def saveSession():
         session_instance.fit_type = instance.fit_type
         session_instance.fit_pos = instance.fit_pos
         session_instance.fit_range = instance.fit_range
+        session_instance.hrm = instance.hrm
         db.session.add(session_instance)
         db.session.commit()
 
@@ -962,6 +963,7 @@ def set_ses():
             newCurrent.fit_type = actualMeta.fit_type
             newCurrent.fit_pos = actualMeta.fit_pos
             newCurrent.fit_range = actualMeta.fit_range
+            newCurrent.hrm = actualMeta.hrm
             db.session.add(newCurrent)
             db.session.commit()
 
@@ -1059,7 +1061,15 @@ def process():
             endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
             allFileNames.append(file_instance.name)
             if output == 1:
-                return json.dumps(ycords[0])
+                outputData = []
+                colNames = []
+                outputData.append(ycords[0])
+                colNames.append(file_instance.name)
+                if current_session is not "None":
+                    filename = writeOutput(outputData, colNames, current_session)
+                else:
+                    filename = writeOutput(outputData, colNames, 'ProcessOut')
+                return redirect(url_for('sendOut', filename=filename))
             code = simplePlot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
         if idthis is None:
             jidlist = json.loads(idlist)
@@ -1325,7 +1335,10 @@ def writeOutput(output, colNames, name):
     f.write(name)
     f.write('\n')
     for i in range(len(output)):
-        f.write('%' + str(colNames[i].text) + '= Column: ' + str(i + 1))
+        if isinstance(colNames[i], unicode):
+            f.write('%' + str(colNames[i]) + '= Column: ' + str(i + 1))
+        else:
+            f.write('%' + str(colNames[i].text) + '= Column: ' + str(i + 1))
         f.write('\n')
     for i in range(len(output[0])):
         for j in range(len(output)):
@@ -2181,4 +2194,4 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
