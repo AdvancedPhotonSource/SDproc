@@ -66,6 +66,7 @@ $(document).ready( function() {
     $('#peakLocation').attr('placeholder', 'Peak found automatically');
     $('#peakLocation').prop('disabled', true);
     $('#pWInput').prop('disabled', false);
+    $('#logbtn').text('Add to Logbook');
     $('#logbtn').prop('disabled', false);
 })
 
@@ -217,8 +218,7 @@ function log(){
     previous = localStorage.getItem('previous2');
     $.post('/add_entry', {id : previous},
     function(){
-        $('#log_add').text('Added');
-        $('#log_add').fadeOut(1000);
+        $('#logbtn').text('Added');
         $('#logbtn').prop('disabled', true);
     })
 }
@@ -318,6 +318,7 @@ $(function(){
                 }
             })
         });
+        $('#logbtn').text('Add to Logbook');
         $('#logbtn').prop('disabled', false);
     });
 })
@@ -367,6 +368,7 @@ $(function(){
                 }
             })
         })
+        $('#logbtn').text('Add to Logbook');
         $('#logbtn').prop('disabled', false);
     })
 })
