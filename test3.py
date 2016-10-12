@@ -74,6 +74,26 @@ def login():
     return render_template('login_form.html', form=form, session=session)
 
 
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    notifData = []
+    thisProfile = []
+
+    thisProfile.insert(0, {'username': current_user.username, 'email': current_user.email,
+                             'fullName': current_user.fullName, 'institution': current_user.institution, 'password': ''})
+
+    notifications = notification.query.order_by('id')
+    for instance in notifications:
+        userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
+        if userInfo != None:
+            notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
+                                 'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
+                                 'fullName': userInfo.fullName, 'institution': userInfo.institution,
+                                 'reason': userInfo.reason})
+    return render_template('profile.html', user=current_user, notifications=notifData, userProf=thisProfile)
+
+
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
@@ -410,6 +430,7 @@ def dataFormat():
                             if againstE == False:
                                 additional.append(energy)
                                 addLabels.append('Energy')
+                            energy = numpy.divide(energy, 1000000)
                             etype = energy
                         elif i == 2:
                             energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
@@ -419,6 +440,7 @@ def dataFormat():
                             if againstE == False:
                                 additional.append(energy)
                                 addLabels.append('Energy')
+                            energy = numpy.divide(energy, 1000000)
                             etype = energy
                         elif i == 7:
                             energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
@@ -1335,10 +1357,10 @@ def writeOutput(output, colNames, name):
     f.write(name)
     f.write('\n')
     for i in range(len(output)):
-        if isinstance(colNames[i], unicode):
-            f.write('%' + str(colNames[i].text) + '= Column: ' + str(i + 1))
-        else:
+        if isinstance(colNames[i], str):
             f.write('%' + str(colNames[i]) + '= Column: ' + str(i + 1))
+        else:
+            f.write('%' + str(colNames[i].text) + '= Column: ' + str(i + 1))
         f.write('\n')
     for i in range(len(output[0])):
         for j in range(len(output)):

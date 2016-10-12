@@ -1,0 +1,14 @@
+.proInfo{
+    float: left;
+    margin-right: 700px;
+    margin-top: 20px;
+}
+
+.notifications{
+    float: left;
+}
+
+.pageInfo{
+    margin-top: 200px;
+    display: inline-block;
+}
