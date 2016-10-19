@@ -115,21 +115,14 @@ with context %}
     <br/>
     <br/>
     <br/>
-    <div class="margin-info">
-        {% if user.is_anonymous() %}
-            <p align="right">
-                <a href="/login">Login</a>
-                /
-                <a href="/reg">Register</a>
-            </p>
-        {% else %}
-            <p align="right">Logged in as {{ user.username }}
-                <br/>
-                <a href="/db">Logbook</a>
-                <br/>
-                <a href="/logout">Logout</a>
-            </p>
-        {% endif %}
+    <div class="pull-right margin-info">
+        <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
+            <br/>
+            <a href="/db">Logbook</a>
+            <br/>
+            <a href="/logout">Logout</a>
+            <br/>
+        </p>
     </div>
     <div class="row">
         <div class="sessionName" id="sesName">

@@ -1,6 +1,6 @@
 .proInfo{
     float: left;
-    margin-right: 700px;
+    margin-right: 500px;
     margin-top: 20px;
 }
 
@@ -11,4 +11,26 @@
 .pageInfo{
     margin-top: 200px;
     display: inline-block;
+}
+
+.proCell{
+    padding: 10px;
+}
+
+.shorten{
+    width: 200px;
+    margin-top: -5px;
+}
+
+.updateBtn{
+    margin-top: 20px;
+}
+
+.margin-info{
+    margin-top: 60px;
+    margin-right: 10px;
+}
+
+.margin-text{
+    font-size: 100% !important;
 }

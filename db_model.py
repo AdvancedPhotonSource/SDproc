@@ -16,6 +16,7 @@ class User(db.Model):
     fullName = db.Column(db.String())
     institution = db.Column(db.String())
     reason = db.Column(db.String())
+    commentChar = db.Column(db.String())
 
     approved = db.Column(db.Integer())
 

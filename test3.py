@@ -60,6 +60,8 @@ def login():
     form = login_form(request.form)
     if request.method == 'POST' and form.validate():
         user = form.get_user()
+        #user.approved = 1
+        #user.isAdmin = 1
         if user.approved == 1:
             login_user(user)
             clear_cmeta()
@@ -81,7 +83,8 @@ def profile():
     thisProfile = []
 
     thisProfile.insert(0, {'username': current_user.username, 'email': current_user.email,
-                             'fullName': current_user.fullName, 'institution': current_user.institution, 'password': ''})
+                             'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
+                           'commentChar': current_user.commentChar})
 
     notifications = notification.query.order_by('id')
     for instance in notifications:
@@ -92,6 +95,24 @@ def profile():
                                  'fullName': userInfo.fullName, 'institution': userInfo.institution,
                                  'reason': userInfo.reason})
     return render_template('profile.html', user=current_user, notifications=notifData, userProf=thisProfile)
+
+
+@app.route('/updateProf', methods=['GET', 'POST'])
+@login_required
+def updateProf():
+    user_instance = db.session.query(User).filter_by(username=current_user.username).first()
+    comChar = request.form.get('comChar', type=str)
+    password = request.form.get('pass', type=str)
+    email = request.form.get('email', type=str)
+
+    if comChar != '0':
+        user_instance.commentChar = comChar
+    if password != '0':
+        user_instance.set_password(password)
+    if email != '0':
+        user_instance.email = email
+    db.session.commit()
+    return 'Updated'
 
 
 @app.route('/admin', methods=['GET', 'POST'])

@@ -101,25 +101,35 @@
         </div>
     </div>
 </div>
+<div class="pull-right margin-info">
+    <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
+        <br/>
+        <a href="/db">Logbook</a>
+        <br/>
+        <a href="/logout">Logout</a>
+        <br/>
+    </p>
+</div>
 <div class="text-center">
     <div class="pageInfo">
-        <div class="proInfo">
+        <div class="proInfo" id="profileInfo">
             <table>
                 <tbody class="thisProf">
                     <tr>
-                        <td><b class="pull-left">Username:</b>{{ userProf.username }}</td>
-                        <td><b class="pull-left">Institution:</b>{{ userProf.institution }}</td>
+                        <td class="proCell"><b class="pull-left">Username:</b>{{ userProf[0].username }}</td>
+                        <td class="proCell"><b class="pull-left">Institution:</b>{{ userProf[0].institution }}</td>
                     </tr>
                     <tr>
-                        <td><b class="pull-left">Full Name:</b>{{ userProf.fullName }}</td>
-                        <td><b class="pull-left">Reason:</b>{{ userProf.reason }}</td>
+                        <td class="proCell"><b class="pull-left">Full Name:</b>{{ userProf[0].fullName }}</td>
+                        <td class="proCell"><b class="pull-left">Comment Char:</b><input type="text" class="form-control shorten" placeholder='{{ userProf[0].commentChar }}' id="proChar"></td>
                     </tr>
                     <tr>
-                        <td><b class="pull-left">Email:</b>{{ userProf.email }}</td>
-                        <td><b class="pull-left">Password:</b>{{ userProf.password }}</td>
+                        <td class="proCell"><b class="pull-left">Email:</b><input type="text" class="form-control shorten" placeholder='{{ userProf[0].email }}' id="proEmail"></td>
+                        <td class="proCell"><b class="pull-left">Password:</b><input type="password" class="form-control shorten" id="proPass"></td>
                     </tr>
                 </tbody>
             </table>
+            <button class="btn btn-primary btn-md updateBtn" onclick="updateProf()">Update Profile</button>
         </div>
         <div class="notifications" id="notifications">
             <h3>Notifications:</h3>
