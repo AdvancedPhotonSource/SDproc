@@ -417,7 +417,7 @@ def dataFormat():
         mpld3.plugins.connect(fig, InteractiveLegend([], [], 0, nameID, None))
         code = mpld3.fig_to_html(fig)
         plt.clf()
-        againstE = False
+        againstE = 'Point'
     else:
         idthis = request.form.get('idnext', type=int)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
@@ -441,33 +441,28 @@ def dataFormat():
                 data, name, unusedpath = readMda(file_instance.path)
             else:
                 data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
-            etype = data[columns[0].data - 1]
             for i in range(len(bools)):
                 if bools[i].data:
                     if columns[i].data == None:
                         if i == 1:
                             energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
                                                  unicode_to_int(columns[4].data - 1), format_instance.hrm)
-                            if againstE == False:
-                                additional.append(energy)
-                                addLabels.append('Energy')
+                            additional.append(energy)
+                            addLabels.append('Energy Xtal')
                             energy = numpy.divide(energy, 1000000)
-                            etype = energy
                         elif i == 2:
                             energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
                                                       unicode_to_int(columns[4].data - 1),
                                                       unicode_to_int(columns[5].data - 1),
                                                       unicode_to_int(columns[6].data - 1), format_instance.hrm)
-                            if againstE == False:
-                                additional.append(energy)
-                                addLabels.append('Energy')
+                            additional.append(energy)
+                            addLabels.append('Energy Xtal Tcorr.')
                             energy = numpy.divide(energy, 1000000)
-                            etype = energy
                         elif i == 7:
                             energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
                                                unicode_to_int(columns[6].data - 1), format_instance.hrm)
                             additional.append(energy)
-                            addLabels.append('Energy')
+                            addLabels.append('Temp. corr')
                         elif i == 9:
                             signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
                                                        unicode_to_int(columns[10].data - 1))
@@ -479,10 +474,20 @@ def dataFormat():
                             addLabels.append('Normalized')
                         continue
                     else:
-                        if i == 0 and againstE == True:
-                            continue
                         used.append(unicode_to_int(columns[i].data))
                         normLabels.append(str(columns[i].label.text)[:-2])
+            if againstE == 'Energy':
+                etype = data[unicode_to_int(columns[0].data - 1)]
+            elif againstE == 'Extal':
+                etype = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data - 1),
+                                     unicode_to_int(columns[4].data - 1), format_instance.hrm), 1000000)
+            elif againstE == 'ExtalTC':
+                etype = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
+                                                      unicode_to_int(columns[4].data - 1),
+                                                      unicode_to_int(columns[5].data - 1),
+                                                      unicode_to_int(columns[6].data - 1), format_instance.hrm), 1000000)
+            else:
+                etype = 0
             labels.append(normLabels)
             labels.append(addLabels)
             code = plotData(data, used, againstE, additional, labels, etype)
@@ -495,7 +500,7 @@ def dataFormat():
                 data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
             etype = data[1]
             used = []
-            againstE = False
+            againstE = 'Point'
             format = currentMeta()
             format.name = file_instance.name
             format.path = file_instance.path
@@ -509,7 +514,7 @@ def dataFormat():
             format.xtal2T = 15
             format.norm = 7
             format.extra = 1
-            format.against_E = False
+            format.against_E = 'Point'
             format.fit_type = 'AtMax'
             format.fit_pos = 0
             format.fit_range = 3
@@ -523,7 +528,7 @@ def dataFormat():
             used.append(11)
             labels = []
             labels.append(['Signal'])
-            code = plotData(data, used, False, None, labels, etype)
+            code = plotData(data, used, 'Point', None, labels, etype)
             format.plot = code
             db.session.add(format)
             db.session.commit()
@@ -541,12 +546,6 @@ def save_graph():
     idthis = request.form.get("idnum", type=int)
     if idthis is not None:
         againstE = request.form.get("agaE", type=str)
-        if againstE == 'true' or againstE == 'True':
-            againstE = True
-        elif againstE == 'false' or againstE == 'False':
-            againstE = False
-        else:
-            print(againstE)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
 
         format_instance = db.session.query(currentMeta).filter_by(file_id=file_instance.id).first()
@@ -1324,7 +1323,7 @@ def peak_at_max():
         format_instance.fit_range = fitRange
     db.session.commit()
     code = simplePlot(ycords, xmax, file_instance.name, legendNames, 0, 0)
-    return render_template("data_format.html", user=current_user, ses=current_session, code=code, form=form)
+    return render_template("data_format.html", user=current_user, ses=current_session, code=code, form=form, shiftVal=str(abs(ycords[0][0])))
 
 
 @app.route('/updateHRM', methods=['GET', 'POST'])
@@ -1373,15 +1372,16 @@ def shareFile():
 
 
 def writeOutput(output, colNames, name):
+    comChar = current_user.commentChar
     filename = name + ' ' + str(getTime())
     f = open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'w')
     f.write(name)
     f.write('\n')
     for i in range(len(output)):
         if isinstance(colNames[i], str):
-            f.write('%' + str(colNames[i]) + '= Column: ' + str(i + 1))
+            f.write(comChar + str(colNames[i]) + '= Column: ' + str(i + 1))
         else:
-            f.write('%' + str(colNames[i].text) + '= Column: ' + str(i + 1))
+            f.write(comChar + str(colNames[i].text) + '= Column: ' + str(i + 1))
         f.write('\n')
     for i in range(len(output[0])):
         for j in range(len(output)):
@@ -1575,16 +1575,16 @@ def simplePlot(data, xmax, filename, linenames, legend, sized):
         xs = data[0]
         ys = data[1]
         plt.plot(xs, ys)
-        plt.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
+        #plt.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
     else:
         fig, ax = plt.subplots()
         xs = data[0]
         ys = data[1]
         line = ax.plot(xs, ys, alpha=0, label=filename + ' ' + linenames[0])
         lines.append(line[0])
-        point = ax.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
+        #point = ax.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
         labels.append(filename + ' ' + linenames[0])
-        lines.append(point[0])
+        #lines.append(point[0])
 
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, sized, nameID, css))
         mpld3.plugins.connect(fig, HideLegend(nameID))
@@ -1610,7 +1610,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1]:
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Extal' or allagainstE[count1] == 'ExtalTC':
                 xs = alldata[count1][1]
                 xs = numpy.multiply(xs, 1000000)
             plt.plot(xs, ys)
@@ -1782,7 +1782,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1]:
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Extal' or allagainstE[count1] == 'ExtalTC':
                 xs = alldata[count1][1]
             plt.plot(xs, ys)
             plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
@@ -1882,33 +1882,29 @@ def plotData(data, used, againstE, additional, lineNames, eType):
     count = 0
     nameID = str(uuid.uuid4())
     fig, ax = plt.subplots()
-    for idx, column in enumerate(data):
-        for i in used:
-            if (idx + 1) == i:
-                xs = range(1, len(data[idx]) + 1)
-                ys = data[idx]
+    for i in used:
+        xs = range(1, len(data[i]) + 1)
+        ys = data[i - 1]
 
-                if againstE:
-                    xs = [float(x) for x in eType]
-                    xs = numpy.multiply(xs, 1000000)
-                    xs = numpy.subtract(xs, xs[0])
-                line = ax.plot(xs, ys, alpha=0, label=lineNames[0][count])
-                lines.append(line[0])
-                lines.append(line[0])
-                labels.append(lineNames[0][count])
-                count += 1
+        if againstE == 'Energy' or againstE == 'Extal' or againstE == 'ExtalTC':
+            xs = [float(x) for x in eType]
+            xs = numpy.multiply(xs, 1000000)
+            xs = numpy.subtract(xs, xs[0])
+        line = ax.plot(xs, ys, alpha=0, label=lineNames[0][count])
+        lines.append(line[0])
+        labels.append(lineNames[0][count])
+        count += 1
 
     if additional:
         for i in range(len(additional)):
             xs = range(1, len(additional[i]) + 1)
 
             ys = additional[i]
-            if againstE:
+            if againstE == 'Energy' or againstE == 'Extal' or againstE == 'ExtalTC':
                 xs = [float(x) for x in eType]
                 xs = numpy.multiply(xs, 1000000)
                 xs = numpy.subtract(xs, xs[0])
             line = ax.plot(xs, ys, alpha=0, label=lineNames[1][i])
-            lines.append(line[0])
             lines.append(line[0])
             labels.append(lineNames[1][i])
 
@@ -2091,37 +2087,39 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
             for(var i=1; i<=lineCount; i++){
                 var obj = {};
                 obj.label = this.props.labels[i - 1];
-                line = mpld3.get_element(this.props.line_ids[(i * 2) - 2], this.fig);
+                line = mpld3.get_element(this.props.line_ids[i - 1], this.fig);
                 obj.line1 = line
-                point = mpld3.get_element(this.props.line_ids[(i * 2) - 1], this.fig);
-                obj.line2 = point;
+                //point = mpld3.get_element(this.props.line_ids[(i * 2) - 1], this.fig);
+                //obj.line2 = point;
                 obj.visible = false;
                 obj.lineNum = i;
-                var outer = point.parent.baseaxes[0][0].children[1];
-                var points = outer.getElementsByTagName("g");
-                if (typeof InstallTrigger !== 'undefined'){
+                //var outer = point.parent.baseaxes[0][0].children[1];
+                //var points = outer.getElementsByTagName("g");
+                //if (typeof InstallTrigger !== 'undefined'){
                     //Firefox
-                    points[i-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                    points[i-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
-                }
-                else if (!!window.chrome && !!window.chrome.webstore){
+                //    points[i-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                //    points[i-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                //}
+                //else if (!!window.chrome && !!window.chrome.webstore){
                     //Chrome
-                    points[(lineCount)-i].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                    points[(lineCount)-i].firstChild.style.setProperty('fill-opacity', 0, 'important');
-                }
-                else{
+                 //   points[(lineCount)-i].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                 //   points[(lineCount)-i].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                //}
+                //else{
                     //implement more if needed
-                    points[i-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                    points[i-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
-                }
+                 //   points[i-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                 //   points[i-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                //}
 
                labels.push(obj);
             }
+            debugger;
             var ax = this.fig.axes[0];
-            var legend = this.fig.canvas.append("svg:g")
+            var legend = this.fig.canvas.append("svg")
                                     .attr("name", this.props.nameID)
-                                    .style("overflow", "auto")
-                                    .style("max-height", "300px")
+                                    .attr("id", "legendSVG")
+                                    .attr("overflow", "scroll")
+
 
             legend.selectAll("rect")
                         .data(labels)
@@ -2174,47 +2172,47 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                 d3.select(d.line1.path[0][0])
                     .style("stroke-opacity", d.visible? 1 : d.line1.props.alpha)
 
-                if(d.visible == true){
-                    var outer = d.line2.parent.baseaxes[0][0].children[1];
-                    var points = outer.getElementsByTagName("g");
+                //if(d.visible == true){
+                    //var outer = d.line2.parent.baseaxes[0][0].children[1];
+                    //var points = outer.getElementsByTagName("g");
 
-                    if (typeof InstallTrigger !== 'undefined'){
+                    //if (typeof InstallTrigger !== 'undefined'){
                         //Firefox
-                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
-                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 1, 'important');
-                    }
-                    else if (!!window.chrome && !!window.chrome.webstore){
+                        //points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                        //points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                    //}
+                    //else if (!!window.chrome && !!window.chrome.webstore){
                         //Chrome
-                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('stroke-opacity', 1, 'important');
-                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('fill-opacity', 1, 'important');
-                    }
-                    else{
+                       // points[(lineCount)-d.lineNum].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                      //  points[(lineCount)-d.lineNum].firstChild.style.setProperty('fill-opacity', 1, 'important');
+                    //}
+                    //else{
                         //implement more if needed
-                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
-                        points[d.lineNum-1].firstChild.style.setProperty('fill-opbacity', 1, 'important');
-                    }
+                      //  points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 1, 'important');
+                      //  points[d.lineNum-1].firstChild.style.setProperty('fill-opbacity', 1, 'important');
+                    //}
 
-                }
-                else{
-                    var outer = d.line2.parent.baseaxes[0][0].children[1];
-                    var points = outer.getElementsByTagName("g");
+                //}
+                //else{
+                    //var outer = d.line2.parent.baseaxes[0][0].children[1];
+                   // var points = outer.getElementsByTagName("g");
 
-                    if (typeof InstallTrigger !== 'undefined'){
+                    //if (typeof InstallTrigger !== 'undefined'){
                         //Firefox
-                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
-                    }
-                    else if (!!window.chrome && !!window.chrome.webstore){
+                     //   points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                     //   points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                    //}
+                    //else if (!!window.chrome && !!window.chrome.webstore){
                         //Chrome
-                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                        points[(lineCount)-d.lineNum].firstChild.style.setProperty('fill-opacity', 0, 'important');
-                    }
-                    else{
+                       // points[(lineCount)-d.lineNum].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                       // points[(lineCount)-d.lineNum].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                    //}
+                    //else{
                         //implement more if needed
-                        points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
-                        points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
-                    }
-                }
+                       // points[d.lineNum-1].firstChild.style.setProperty('stroke-opacity', 0, 'important');
+                      //  points[d.lineNum-1].firstChild.style.setProperty('fill-opacity', 0, 'important');
+                   // }
+                //}
             }
         };
     """

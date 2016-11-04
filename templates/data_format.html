@@ -211,10 +211,16 @@ with context %}
                 </div>
             </div>
             <div class="AEGroup">
-                <div class="bootbtn" id="AeListener">
-                    <label for="againstE">Plot against Energy</label>
-                    <input type="checkbox" id="againstE" data-toggle="toggle">
-                </div>
+                <label for="againstE">Plot against</label>
+                <button id="againstE" type="button" class="btn btn-default dropdown-toggle setSize" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">Point #<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a onclick="setAE(event)">Point #</a></li>
+                    <li><a onclick="setAE(event)">Energy</a></li>
+                    <li><a onclick="setAE(event)">Energy xtal</a></li>
+                    <li><a onclick="setAE(event)">Energy xtal w/ T corr.</a></li>
+                </ul>
             </div>
             <div class="logBtn">
                 <button type="button" onclick="log()" class="btn btn-primary btn-sm" id="logbtn">
@@ -383,36 +389,40 @@ with context %}
                     <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="fitMethod" aria-haspopup="true"
                             aria-expanded="false">Centroid<span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" id="fitMethdd" aria-labelledby="fitMethod">
+                    <ul class="dropdown-menu centMenu" id="fitMethdd">
                         <li><a>None yet implemented</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="dropup">
-                <span class="fitBtn">
-                    <button class="btn btn-primary btn-md" onclick="fitPeak()" title="Apply selected fitting technique to plot">
-                        Fit
-                    </button>
-                </span>
-                <div class="HRM-select">
-                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="HRM" aria-haspopup="true"
-                            aria-expanded="false">Fe-inline-1meV<span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" id="HRMdd" aria-labelledby="HRM">
-                        <li><a>Fe-inline-1meV</a></li>
-                        <li><a>Sn-nested-1meV</a></li>
-                        <li><a>Eu-nested-1meV</a></li>
-                        <li><a>Dy-nested-1meV</a></li>
-                        <li><a>IXS-cryo-1meV</a></li>
-                        <li><a>Sn-cryo-1meV</a></li>
-                    </ul>
-                </div>
+            <div class="fitBtn">
+                <button class="btn btn-primary btn-md" onclick="fitPeak()" title="Apply selected fitting technique to plot">
+                    Fit
+                </button>
             </div>
-            <span class="saveSes">
+            <div class="HRM-select dropup">
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="HRM" aria-haspopup="true"
+                        aria-expanded="false">Fe-inline-1meV<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu hrmMenu" id="HRMdd">
+                    <li><a>Fe-inline-1meV</a></li>
+                    <li><a>Sn-nested-1meV</a></li>
+                    <li><a>Eu-nested-1meV</a></li>
+                    <li><a>Dy-nested-1meV</a></li>
+                    <li><a>IXS-cryo-1meV</a></li>
+                    <li><a>Sn-cryo-1meV</a></li>
+                </ul>
+            </div>
+            <div class="saveSes">
                 <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#ssModal" title="Save this session so that it can be accessed later">
                     Save Session
                 </button>
-            </span>
+            </div>
+            <div id="shiftVal" class="shiftVal">
+                {% if shiftVal is defined %}
+                    Shifted:
+                    {{ shiftVal }}
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

@@ -64,7 +64,7 @@ class logBook(db.Model):
     timestamp = db.Column(db.DateTime())
     session = db.Column(db.String())
 
-    against_E = db.Column(db.Boolean())
+    against_E = db.Column(db.String())
 
     hrm = db.Column(db.String())
 
@@ -121,7 +121,7 @@ class currentMeta(db.Model):
 
     hrm = db.Column(db.String())
 
-    against_E = db.Column(db.Boolean())
+    against_E = db.Column(db.String())
 
     energy = db.Column(db.Integer())
     xtal1A = db.Column(db.Integer())
@@ -160,7 +160,7 @@ class sessionMeta(db.Model):
     fit_pos = db.Column(db.Float())
     fit_range = db.Column(db.Float)
 
-    against_E = db.Column(db.Boolean())
+    against_E = db.Column(db.String())
 
     hrm = db.Column(db.String())
 

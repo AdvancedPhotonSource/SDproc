@@ -136,8 +136,9 @@ select[multiple].scan-list{
 
 .fitBtn{
     position: relative;
+    display: inline-block;
     top: -236px;
-    right: 30px;
+    right: 20px;
 }
 
 .input-group{
@@ -149,8 +150,9 @@ select[multiple].scan-list{
 
 .HRM-select{
     position: relative;
+    width: 50%;
     bottom: 13px;
-    left: -324px;
+    left: -44px;
     top: -180px;
 }
 
@@ -162,6 +164,7 @@ select[multiple].scan-list{
 
 .fitMeth{
     position: relative;
+    display: inline-block;
     left: 200px;
     bottom: 20px;
 }
@@ -250,4 +253,26 @@ body{
     left: 500px;
     width: 0px;
     float: left;
+}
+
+.hrmMenu{
+    margin-left: 200px;
+}
+
+.shiftVal{
+    position: relative;
+    display: inline-block;
+    top: -327px;
+    left: 90px;
+}
+
+.setSize{
+    width: 167px;
+}
+
+svg#legendSVG{
+    height: 100px;
+    width: 150px;
+    background-color: #ccc;
+    overflow: auto;
 }

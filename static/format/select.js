@@ -9,19 +9,6 @@ $(function (){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
-                var hidden = $(data).find('#agaE').val();
-                if (hidden === 'true' || hidden === 'True')
-                {
-                    $('#againstE').prop('checked', true);
-                    $('#againstE').bootstrapToggle('on');
-                    $('#agaE').val(true);
-                }
-                else
-                {
-                    $('#againstE').prop('checked', false);
-                    $('#againstE').bootstrapToggle('off');
-                    $('#agaE').val(false);
-                }
             })
 
             $.post('/show_comment', { idnext: this.value, format: 1, ses: ses},
@@ -181,8 +168,6 @@ function saveSes(){
     {
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
-        var temp = $('#againstE').prop('checked');
-        $('#agaE').val(temp);
         $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1});
         $.post('/save_graph', $('#meta-form').serialize());
     }
@@ -222,28 +207,6 @@ function log(){
         $('#logbtn').prop('disabled', true);
     })
 }
-
-function hitAgaE(){
-    var temp = $('#againstE').prop('checked');
-    if (temp == false)
-    {
-        $('#againstE').bootstrapToggle('on');
-    }
-    else
-    {
-        $('#againstE').bootstrapToggle('off');
-    }
-    $('#againstE').promise().done(function(){
-        $('#meta-form').trigger('change');
-    });
-}
-
-
-$(function(){
-    $('#AeListener').click(function(){
-        hitAgaE();
-    });
-})
 
 function deleteCmeta(){
     if (localStorage.getItem('previous2') === null){
@@ -290,8 +253,6 @@ function deleteCmeta(){
 }
 
 
-
-
 $(function(){
     $('#meta-form').on('submit', function(event){
         event.preventDefault();
@@ -303,19 +264,6 @@ $(function(){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
-                var hidden = $(data).find('#agaE').val();
-                if (hidden === 'true' || hidden === 'True')
-                {
-                    $('#againstE').prop('checked', true);
-                    $('#againstE').bootstrapToggle('on');
-                    $('#agaE').val(true);
-                }
-                else
-                {
-                    $('#againstE').prop('checked', false);
-                    $('#againstE').bootstrapToggle('off');
-                    $('#agaE').val(false);
-                }
             })
         });
         $('#logbtn').text('Add to Logbook');
@@ -325,29 +273,8 @@ $(function(){
 
 $(function(){
     $('#meta-form').on('change', function(event){
-        if(event.target.id == 'snbool')
-            $('#sbool').removeProp('checked');
-        else if(event.target.id == 'sbool')
-            $('#snbool').removeProp('checked');
-        else if(event.target.id == 'ebool')
-        {
-            $('#ecbool').removeProp('checked');
-            $('#etcbool').removeProp('checked');
-        }
-        else if(event.target.id == 'ecbool')
-        {
-            $('#ebool').removeProp('checked');
-            $('#etcbool').removeProp('checked');
-        }
-        else if(event.target.id == 'etcbool')
-        {
-            $('#ebool').removeProp('checked');
-            $('#ecbool').removeProp('checked');
-        }
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
-        var temp = $('#againstE').prop('checked');
-        $('#agaE').val(temp);
         $.post('/save_graph', $('#meta-form').serialize(),
         function(){
             $.post('/data', { idnext: previous , plot: 1},
@@ -355,17 +282,6 @@ $(function(){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
-                var hidden = $('#agaE').val();
-                if (hidden === 'true' || hidden === 'True')
-                {
-                    $('#againstE').prop('checked', true);
-                    $('#againstE').bootstrapToggle('on');
-                }
-                else
-                {
-                    $('#againstE').prop('checked', false);
-                    $('#againstE').bootstrapToggle('off');
-                }
             })
         })
         $('#logbtn').text('Add to Logbook');
@@ -425,14 +341,12 @@ function fitPeak(){
     if (!$('#sbool').prop('checked') && !$('#sncbool').prop('checked')){
         $('#sbool').prop('checked', true);
     }
-    if ($('#againstE').prop('checked') == false){
-        $('#againstE').bootstrapToggle('on');
-    }
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
         if ($.isNumeric(range)){
             $.post('/peakFit', {idnum: previous, fitType: 0, inputRange: range}, function(data){
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#shiftVal').html( $(data).find('#shiftVal').html());
             });
         }
         else{
@@ -447,6 +361,7 @@ function fitPeak(){
             if ($.isNumeric(range)){
                 $.post('/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range}, function(data){
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#shiftVal').html( $(data).find('#shiftVal').html());
                 })
             }
             else{
@@ -468,6 +383,7 @@ function fitPeak(){
                 if ($.isNumeric(localRange)){
                     $.post('/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange}, function(data){
                         $('#plot_spot').html( $(data).find('#plot_spot').html());
+                        $('#shiftVal').html( $(data).find('#shiftVal').html());
                     })
                 }
                 else{
@@ -562,4 +478,28 @@ function outputFile(){
         $('#meta-form').attr('action', '');
         dialogItself.close();
     }
+}
+
+function setAE(event){
+    if (event.target.text == 'Energy'){
+        $('#againstE').text('Energy');
+        $('#againstE').append("<span class='caret'></span>");
+        $('#agaE').val('Energy');
+    }
+    else if (event.target.text == 'Energy xtal'){
+        $('#againstE').text('Energy xtal');
+        $('#againstE').append("<span class='caret'></span>");
+        $('#agaE').val('Extal');
+    }
+    else if (event.target.text == 'Energy xtal w/ T corr.'){
+        $('#againstE').text('Energy xtal w/ T corr.');
+        $('#againstE').append("<span class='caret'></span>");
+        $('#agaE').val('ExtalTC');
+    }
+    else {
+        $('#againstE').text('Point #');
+        $('#againstE').append("<span class='caret'></span>");
+        $('#agaE').val('Point');
+    }
+    $('#meta-form').trigger('change');
 }
