@@ -270,6 +270,18 @@ body{
     width: 167px;
 }
 
+.fixedHead{
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.scrollable{
+    display: block;
+    height: 350px;
+    overflow: auto;
+}
+
 svg#legendSVG{
     height: 100px;
     width: 150px;

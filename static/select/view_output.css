@@ -107,10 +107,6 @@ select[multiple].scan-list{
 
 .navTable{
     width:500px;
-    height:auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-    max-height:350px;
 }
 
 .filtInput{
@@ -129,4 +125,16 @@ select[multiple].scan-list{
     margin-top: 50px;
     width: 500px;
     float: left;
+}
+
+.fixedHead{
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.scrollable{
+    display: block;
+    height: 350px;
+    overflow: auto;
 }

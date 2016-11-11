@@ -429,6 +429,8 @@ function Users(){
     $('#sessionFilt').hide();
     $('#userNav').show();
     $('#userFilt').show();
+    $('#navGroup').removeClass('fileSesNavGroup');
+    $('#navGroup').addClass('navGroup');
     clearHighlight();
 }
 
@@ -439,6 +441,8 @@ function Files(){
     $('#sessionFilt').hide();
     $('#fileNav').show();
     $('#fileFilt').show();
+    $('#navGroup').removeClass('navGroup');
+    $('#navGroup').addClass('fileSesNavGroup');
     clearHighlight();
 }
 
@@ -449,6 +453,8 @@ function Sessions(){
     $('#fileFilt').hide();
     $('#sessionNav').show();
     $('#sessionFilt').show();
+    $('#navGroup').removeClass('navGroup');
+    $('#navGroup').addClass('fileSesNavGroup');
     clearHighlight();
 }
 

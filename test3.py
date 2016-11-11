@@ -28,6 +28,11 @@ def load_user(user_id):
     return db.session.query(User).get(user_id)
 
 
+@app.route('/', methods=['GET', 'POST'])
+def toLogin():
+    return redirect(url_for('login'))
+
+
 @app.route('/reg', methods=['GET', 'POST'])
 def register():
     from forms import register_form

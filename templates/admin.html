@@ -547,7 +547,7 @@ with context %}
         </div>
     </div>
     <div class="text-center">
-        <div class="navGroup">
+        <div class="navGroup" id="navGroup">
             <div class="buttonGroup">
                 <div class="btn-group" role="group" aria-label="...">
                     <button type="button" class="btn btn-default" onclick="Users()">Users</button>
@@ -558,13 +558,13 @@ with context %}
             <input type="text" class="form-control filtInput" placeholder="File Name" id="fileFilt">
             <div class="fileNav" id="fileNav">
                 <table id="fileTable">
-                    <thead>
+                    <thead class="fixedHead">
                         {{ thead() }}
                     </thead>
-                    <tbody>
+                    <tbody class="scrollable">
                         {% if fileData %}
                             {% for post in fileData %}
-                              <tr class="item">
+                              <tr class="item fixedHead">
                                 <td class="name" colspan="2" id="{{ post.id }}">
                                   {%- if post.name == ".." -%}
                                     Parent folder
@@ -609,13 +609,13 @@ with context %}
             <input type="text" class="form-control filtInput" placeholder="Session Name" id="sessionFilt">
             <div class="sessionNav" id="sessionNav">
                 <table id="sessionTable">
-                    <thead>
+                    <thead class="fixedHead">
                         {{ thead() }}
                     </thead>
-                    <tbody>
+                    <tbody class="scrollable">
                         {% if sesData %}
                             {% for post in sesData %}
-                              <tr class="item">
+                              <tr class="item fixedHead">
                                 <td class="name" colspan="2" id="{{ post.id }}">
                                   {%- if post.name == ".." -%}
                                     Parent folder
