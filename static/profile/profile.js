@@ -12,7 +12,7 @@ function updateProf(){
         proEmail = $('#proEmail').val();
     }
 
-    $.post('/updateProf', {comChar: proChar, pass: proPass, email: proEmail}, function(){
+    $.post('/SDproc/updateProf', {comChar: proChar, pass: proPass, email: proEmail}, function(){
         $('#profileInfo').load(location.href+" #profileInfo>*","");
     });
 }

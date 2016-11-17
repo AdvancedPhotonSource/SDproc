@@ -3,14 +3,14 @@ $(function (){
         if ($('#sel1').val().length == 1){
             var ses = localStorage.getItem('usingSes');
             localStorage.setItem('previous3', this.value);
-            $.post('/process', { idnext: this.value },
+            $.post('/SDproc/process', { idnext: this.value },
             function(data){
                 $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
                 $('#maxes').html( $(data).find('#maxes').html());
                 $('#maxVal').html( $(data).find('#maxVal').html());
             })
 
-            $.post('/show_comment', { idnext: this.value, format: 1, ses: ses},
+            $.post('/SDproc/show_comment', { idnext: this.value, format: 1, ses: ses},
             function(data){
                 $('#comment').text(data);
             })
@@ -24,7 +24,7 @@ $(function (){
             var jIds = JSON.stringify(ids);
             localStorage.setItem('previous3', jIds);
 
-            $.post('/process', { idList: jIds },
+            $.post('/SDproc/process', { idList: jIds },
             function(data){
                 $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
                 $('#maxes').html( $(data).find('#maxes').html());
@@ -57,7 +57,7 @@ function asynchOnLoad(){
     var saved_files = JSON.parse(localStorage.getItem('use_files'));
     $(saved_files).each(function(){
         var temp = this
-        $.post("/make_name", {id: this},
+        $.post("/SDproc/make_name", {id: this},
         function(data){
         $('#sel1')
             .append($('<option></option')
@@ -82,7 +82,7 @@ function removeID(id, idArray){
 
 
 $(window).on('unload', function(){
-    $.post('/close_plots');
+    $.post('/SDproc/close_plots');
     if (localStorage.getItem('previous3') === null)
     {
         return;
@@ -94,7 +94,7 @@ $(window).on('unload', function(){
 })
 
 function log(){
-    $.post('/add_entry', {process: 1},
+    $.post('/SDproc/add_entry', {process: 1},
     function(){
         $('#log_add').text('Added');
         $('#log_add').fadeOut(1000);
@@ -109,7 +109,7 @@ function saveSettings(){
         if ($.isNumeric(binWidth)){
             if (id.length > 1){
                 var id = JSON.stringify(id);
-                $.post('/process', { idList: id , binWidth: binWidth},
+                $.post('/SDproc/process', { idList: id , binWidth: binWidth},
                     function(data){
                         $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
                         $('#maxes').html( $(data).find('#maxes').html());
@@ -118,7 +118,7 @@ function saveSettings(){
                 $('#ssModal').modal('hide');
             }
             else{
-                $.post('/process', { idnext: id , binWidth: binWidth},
+                $.post('/SDproc/process', { idnext: id , binWidth: binWidth},
                     function(data){
                         $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
                         $('#maxes').html( $(data).find('#maxes').html());
@@ -165,7 +165,7 @@ function outputFile(){
                         if ($('#sel1').val().length == 1){
                                 $('#output').val(1);
                                 $('#idnext').val(localStorage.getItem('previous3'));
-                                $('#output-form').attr('action', '/process');
+                                $('#output-form').attr('action', '/SDproc/process');
                                 $('#output-form')[0].submit();
                                 $('#idnext').val(None);
                             }
@@ -177,7 +177,7 @@ function outputFile(){
                             var jIds = JSON.stringify(ids);
                             $('#output').val(1);
                             $('#idList').val(jIds);
-                            $('#output-form').attr('action', '/process');
+                            $('#output-form').attr('action', '/SDproc/process');
                             $('#output-form')[0].submit();
                             $('#idList').val(None);
                         }

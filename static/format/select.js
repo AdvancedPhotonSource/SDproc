@@ -4,14 +4,14 @@ $(function (){
         if (localStorage.getItem('previous2') === null)
         {
             localStorage.setItem('previous2', this.value);
-            $.post('/data', { idnext: this.value , plot: 1},
+            $.post('/SDproc/data', { idnext: this.value , plot: 1},
             function(data){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
             })
 
-            $.post('/show_comment', { idnext: this.value, format: 1, ses: ses},
+            $.post('/SDproc/show_comment', { idnext: this.value, format: 1, ses: ses},
             function(data){
             $('#comment').val(data)
             })
@@ -23,9 +23,9 @@ $(function (){
             $('#idnum').val(previous);
             localStorage.setItem('previous2', this.value);
             $('#meta-form').submit();
-            $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1},
+            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1},
             function(){
-                $.post('/show_comment', { idnext: nextID, format: 1, ses: ses},
+                $.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
                 function(data){
                     $('#comment').val(data)
                 })
@@ -66,7 +66,7 @@ function asynchOnLoad(){
     var saved_files = JSON.parse(localStorage.getItem('use_files'));
     $(saved_files).each(function(){
         var temp = this
-        $.post("/make_name", {id: this},
+        $.post("/SDproc/make_name", {id: this},
         function(data){
         $('#sel1')
             .append($('<option></option')
@@ -91,7 +91,7 @@ function removeID(id, idArray){
 
 
 $(window).on('unload', function(){
-    $.post('/close_plots');
+    $.post('/SDproc/close_plots');
     if (localStorage.getItem('previous2') === null)
     {
         return;
@@ -100,8 +100,8 @@ $(window).on('unload', function(){
     {
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
-        $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1})
-        $.post('/save_graph', $('#meta-form').serialize())
+        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1})
+        $.post('/SDproc/save_graph', $('#meta-form').serialize())
         localStorage.removeItem('previous2');
     }
 })
@@ -168,10 +168,10 @@ function saveSes(){
     {
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
-        $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1});
-        $.post('/save_graph', $('#meta-form').serialize());
+        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1});
+        $.post('/SDproc/save_graph', $('#meta-form').serialize());
     }
-    $.post('/save_ses',{name: $('#ssName').val(), comment: $('#ssComment').val(), checked: 0}, function(data){
+    $.post('/SDproc/save_ses',{name: $('#ssName').val(), comment: $('#ssComment').val(), checked: 0}, function(data){
         var data = JSON.parse(data)
         if (data.status == null){
             BootstrapDialog.show({
@@ -180,8 +180,8 @@ function saveSes(){
                 buttons: [{
                     label: 'Yes',
                     action: function(dialogItself){
-                        $.post('/delete',{ id: data, table: "Session"});
-                        $.post('/save_ses',{name: $('#ssName').val(), comment: $('#ssComment').val(), checked: 1}, function(data){
+                        $.post('/SDproc/delete',{ id: data, table: "Session"});
+                        $.post('/SDproc/save_ses',{name: $('#ssName').val(), comment: $('#ssComment').val(), checked: 1}, function(data){
                             $('#sesName').html(data);
                             dialogItself.close();
                         });
@@ -201,7 +201,7 @@ function saveSes(){
 
 function log(){
     previous = localStorage.getItem('previous2');
-    $.post('/add_entry', {id : previous},
+    $.post('/SDproc/add_entry', {id : previous},
     function(){
         $('#logbtn').text('Added');
         $('#logbtn').prop('disabled', true);
@@ -214,7 +214,7 @@ function deleteCmeta(){
     }
     else{
         selected = localStorage.getItem('previous2')
-        $.post('/clearPart_cmeta', {id: selected}, function(){
+        $.post('/SDproc/clearPart_cmeta', {id: selected}, function(){
             $('#sel1 > option:selected').each(function(){
                 localStorage.removeItem('previous2');
                 var sel = parseInt(selected);
@@ -256,10 +256,10 @@ function deleteCmeta(){
 $(function(){
     $('#meta-form').on('submit', function(event){
         event.preventDefault();
-        $.post('/save_graph', $(this).serialize(),
+        $.post('/SDproc/save_graph', $(this).serialize(),
         function(){
             nextID = localStorage.getItem('previous2');
-            $.post('/data', { idnext: nextID , plot: 1},
+            $.post('/SDproc/data', { idnext: nextID , plot: 1},
             function(data){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
@@ -275,9 +275,9 @@ $(function(){
     $('#meta-form').on('change', function(event){
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
-        $.post('/save_graph', $('#meta-form').serialize(),
+        $.post('/SDproc/save_graph', $('#meta-form').serialize(),
         function(){
-            $.post('/data', { idnext: previous , plot: 1},
+            $.post('/SDproc/data', { idnext: previous , plot: 1},
             function(data){
                 $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
@@ -293,7 +293,7 @@ $(function(){
     $('#comment').on('change', function(){
         previous = localStorage.getItem('previous2');
         $('#idnum').val(previous);
-        $.post('/save_comment', {idprev: previous, comment: $('#comment').val(), format: 1});
+        $.post('/SDproc/save_comment', {idprev: previous, comment: $('#comment').val(), format: 1});
     })
 })
 
@@ -344,7 +344,7 @@ function fitPeak(){
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
         if ($.isNumeric(range)){
-            $.post('/peakFit', {idnum: previous, fitType: 0, inputRange: range}, function(data){
+            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range}, function(data){
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
                 $('#shiftVal').html( $(data).find('#shiftVal').html());
             });
@@ -359,7 +359,7 @@ function fitPeak(){
         var range = $('#pWInput').val()
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
-                $.post('/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range}, function(data){
+                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range}, function(data){
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
                 $('#shiftVal').html( $(data).find('#shiftVal').html());
                 })
@@ -381,7 +381,7 @@ function fitPeak(){
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
                 if ($.isNumeric(localRange)){
-                    $.post('/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange}, function(data){
+                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange}, function(data){
                         $('#plot_spot').html( $(data).find('#plot_spot').html());
                         $('#shiftVal').html( $(data).find('#shiftVal').html());
                     })
@@ -456,7 +456,7 @@ $(function (){
             $('#HRM').append("<span class='caret'></span>");
         }
         hrm = JSON.stringify(hrm);
-        $.post('/updateHRM', {idnum: previous, hrm: hrm}, function(){
+        $.post('/SDproc/updateHRM', {idnum: previous, hrm: hrm}, function(){
             $('#meta-form').trigger('change');
         })
     })
@@ -473,7 +473,7 @@ function outputFile(){
     else{
         $('#idnum').val(localStorage.getItem('previous2'));
         $('#outSingular').val(1);
-        $('#meta-form').attr('action', '/generateOutput')
+        $('#meta-form').attr('action', '/SDproc/generateOutput')
         $('#meta-form')[0].submit()
         $('#meta-form').attr('action', '');
         dialogItself.close();

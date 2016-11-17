@@ -3,7 +3,12 @@ $(document).ready(function(){
     rows.removeClass("highlight")
     rows.removeClass("lightlight")
 
+    setupRows();
+    setupClick();
+});
 
+
+function setupRows(){
     $('#ssName').keyup(function(e){
 
         /* Ignore tab key */
@@ -66,7 +71,7 @@ $(document).ready(function(){
             $(table.find('tbody tr:visible').trigger("click"));
         }
     });
-});
+}
 
 
 $( "#fileForm" ).submit(function(event){
@@ -83,7 +88,7 @@ $(window).on('unload', function(){
     else
     {
         previous = localStorage.getItem('previous_upload');
-        $.post( "/save_comment", { idprev: previous, comment: $('#comment').val()});
+        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val()});
     }
 })
 
@@ -102,7 +107,7 @@ function sendfileForm()
     fFormData.append('formatType', $.trim($('#formatType').text()))
     fFormData.append('formatDelim', $('#formatDelim').val())
     $.ajax({
-        url: '/addf',
+        url: '/SDproc/addf',
         type: 'POST',
         data: fFormData,
         contentType: false,
@@ -110,13 +115,15 @@ function sendfileForm()
         processData: false,
         async: false,
         success: function (){
-            $('#navTable').load(location.href+" #navTable>*","");
-            $.getScript( "/static/upload/highlight.js" );
-            resetForm();
-            return;
+            $('#navTable').load("/SDproc/upload #navTable>*", function(){
+                setupRows();
+                setupClick();
+                resetForm();
+                return;
+            })
         },
-        error: function(error){
-            console.log(error);
+        error: function(request){
+            console.log(request);
             return;
         }
     });
@@ -138,12 +145,14 @@ function delFile()
                         {
                             found = 1;
                             var fid = $('td:first', $(row)).attr('id')
-                            $.post( "/delete", { id: fid, table: "File"},
+                            $.post( "/SDproc/delete", { id: fid, table: "File"},
                             function(){
-                            $('#navTable').load(location.href+" #navTable>*","");
-                            $.getScript( "/static/upload/highlight.js" );
-                            $('#comment').val('')
-                            localStorage.removeItem('previous_upload');
+                            $('#navTable').load("/SDproc/upload #navTable>*", function(){
+                                setupRows();
+                                setupClick();
+                                $('#comment').val('')
+                                localStorage.removeItem('previous_upload');
+                            })
                             })
                         }
                         });
@@ -178,7 +187,7 @@ function shareFile(){
                             var fid = $('td:first', $(row)).attr('id');
                             var nameTable = $('#nameTable');
                             var toUser = $.trim($(table.find('tbody tr.highlight')).text())
-                            $.post( "/shareFile", { id: fid, toUser: toUser});
+                            $.post( "/SDproc/shareFile", { id: fid, toUser: toUser});
                         }
                         });
                         if (found == 0)
@@ -247,4 +256,62 @@ function mdaFile()
 function proceed()
 {
     window.location.href = ("select");
+}
+
+function setupClick()
+{
+    var rows = $('tr.item');
+    rows.on('click', function(e)
+    {
+        var row = $(this);
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        row.addClass('highlight');
+        comment($('td:first', $(row)).attr('id'));
+    })
+
+    rows.on('mouseenter', function(e)
+    {
+        var row = $(this);
+        if ($(row).hasClass( "highlight" ))
+        {
+            rows.removeClass('lightlight');
+        }
+        else
+        {
+            rows.removeClass('lightlight');
+            row.addClass('lightlight');
+        }
+    })
+
+    $(document).on('selectstart dragstart', function(e)
+    {
+        e.preventDefault();
+        return false;
+    })
+}
+
+function comment(id)
+{
+        if (localStorage.getItem('previous_upload') === null)
+        {
+            localStorage.setItem('previous_upload', id)
+            $.post('/SDproc/show_comment', { idnext: id },
+            function(data){
+            $('#comment').val(data)
+            })
+        }
+        else
+        {
+            var nextID = id
+            previous = localStorage.getItem('previous_upload');
+            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val()},
+            function(){
+                $.post('/SDproc/show_comment', { idnext: nextID },
+                function(data){
+                    $('#comment').val(data)
+                })
+            })
+            localStorage.setItem('previous_upload', id);
+        }
 }

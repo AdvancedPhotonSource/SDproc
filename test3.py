@@ -1,4 +1,11 @@
 __author__ = 'caschmitz'
+'''
+For debugging server use:
+    try:
+        *line you want to test*
+    except Exception,e:
+        print(str(e))
+'''
 from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash, send_from_directory, request
 import matplotlib.pyplot as plt
 import mpld3
@@ -21,6 +28,16 @@ login_manager.init_app(app)
 ALLOWED_EXTENSIONS = {'txt', 'mda'}
 usedArgs = []
 current_session = 'None'
+
+
+#### REMOVE THIS ON SERVER #####
+@app.before_request
+def fixURL():
+    url = request.path
+    if 'SDproc' in url:
+        fixedUrl = url[7:]
+        return redirect(fixedUrl, 307)
+    return
 
 
 @login_manager.user_loader

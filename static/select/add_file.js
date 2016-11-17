@@ -80,7 +80,7 @@ $(window).on('unload', function(){
     else
     {
         previous = localStorage.getItem('previous');
-        $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2});
+        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2});
     }
 })
 
@@ -125,7 +125,7 @@ function moveFile()
         if ($(row).hasClass( "highlight" ))
         {
             found = 1;
-            $.post( "/make_name" , {id : $('td:first', $(row)).attr('id')},
+            $.post( "/SDproc/make_name" , {id : $('td:first', $(row)).attr('id')},
             function(data){
                 var temp = data;
                 $('#sel1')
@@ -146,8 +146,8 @@ function moveFile()
 function newSession()
 {
     localStorage.clear();
-    $.post('/clear_rowa',function(){
-        $.post('/clear_cmeta', function(){
+    $.post('/SDproc/clear_rowa',function(){
+        $.post('/SDproc/clear_cmeta', function(){
             window.location.href = ("data");
         })
     });
@@ -156,10 +156,10 @@ function newSession()
 
 function proceed()
 {
-    $.post('/clear_rowa',function(){
-        $.post('/clear_cmeta', function(){
+    $.post('/SDproc/clear_rowa',function(){
+        $.post('/SDproc/clear_cmeta', function(){
             sesID = localStorage.getItem('previous');
-            $.post('/set_ses', {id: sesID}, function(data){
+            $.post('/SDproc/set_ses', {id: sesID}, function(data){
             var parsed = $.parseJSON(data);
             var files = [];
                 $(parsed).each(function(){
@@ -189,7 +189,7 @@ function delFile()
                         {
                             found = 1;
                             var fid = $('td:first', $(row)).attr('id')
-                            $.post( "/delete", { id: fid, table: "Session"},
+                            $.post( "/SDproc/delete", { id: fid, table: "Session"},
                             function(){
                             $('#navTable').load(location.href+" #navTable>*","");
                             $.getScript( "/static/select/highlight.js" );
@@ -231,7 +231,7 @@ function shareSes(){
                             var fid = $('td:first', $(row)).attr('id');
                             var nameTable = $('#nameTable');
                             var toUser = $.trim($(table.find('tbody tr.highlight')).text())
-                            $.post( "/shareSes", { id: fid, toUser: toUser});
+                            $.post( "/SDproc/shareSes", { id: fid, toUser: toUser});
                         }
                         });
                         if (found == 0)

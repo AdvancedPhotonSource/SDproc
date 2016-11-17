@@ -358,7 +358,7 @@ function setupClick()
         row.addClass('highlight');
         waitHighlight.resolve();
         if (row.parents('#fileTable').length){
-            $('#fileModal').load('/getInfo'+" #fileModal>*",{ id: id, table: "File"}, function(data){
+            $('#fileModal').load('/SDproc/getInfo'+" #fileModal>*",{ id: id, table: "File"}, function(data){
                 $('#fileModal').modal('show');
                 Files()
                 $('#fileTitle').text((row[0].innerText).slice(0, (row[0].innerText).indexOf(" ")) + ' Information');
@@ -368,7 +368,7 @@ function setupClick()
         }
         if (row.parents('#nameTable').length){
             var toUser = $.trim($(row).text())
-            $('#userModal').load('/getInfo'+" #userModal>*",{ user: toUser, table: "User"}, function(){
+            $('#userModal').load('/SDproc/getInfo'+" #userModal>*",{ user: toUser, table: "User"}, function(){
                 $('#userModal').modal('show');
                 Users()
                 $('#userTitle').text(row[0].innerText + ' Information');
@@ -377,7 +377,7 @@ function setupClick()
             });
         }
         if (row.parents('#sessionTable').length){
-            $('#sessionModal').load('/getInfo'+" #sessionModal>*",{ id: id, table: "Session"}, function(){
+            $('#sessionModal').load('/SDproc/getInfo'+" #sessionModal>*",{ id: id, table: "Session"}, function(){
                 $('#sessionModal').modal('show');
                 Sessions()
                 $('#sessionTitle').text((row[0].innerText).slice(0, (row[0].innerText).indexOf(" ")) + ' Information');
@@ -498,9 +498,9 @@ function addThing(button){
                 var fid = $('td:first', $(row)).attr('id');
                 var user = row[0].innerText
                 $('.modal').modal('hide');
-                $.post("/addThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
-                    $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user:data}, function(){
-                        $('#basePage').load("/admin #basePage>*", function(){
+                $.post("/SDproc/addThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
+                    $(tableType).load("/SDproc/getInfo "+ tableType + ">*", {id: origin, table: shortID, user:data}, function(){
+                        $('#basePage').load("/SDproc/admin #basePage>*", function(){
                             setupRows();
                             setupClick();
                             if (tableType == "#userFileTable"){
@@ -561,9 +561,9 @@ function removeThing(button){
         found = 1;
         var fid = $('td:first', $(row)).attr('id');
         var user = row[0].innerText
-        $.post( "/removeThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
-            $(tableType).load("/getInfo "+ tableType + ">*", {id: origin, table: shortID, user: data}, function(){
-                $('#basePage').load("/admin #basePage>*", function(){
+        $.post( "/SDproc/removeThing", { id: fid, from: origin, table: tableType, user: user}, function(data){
+            $(tableType).load("/SDproc/getInfo "+ tableType + ">*", {id: origin, table: shortID, user: data}, function(){
+                $('#basePage').load("/SDproc/admin #basePage>*", function(){
                     setupRows();
                     setupClick();
                     if (tableType == "#userFileTable"){
@@ -590,7 +590,7 @@ function removeThing(button){
 }
 
 function showInfo(notifID){
-    $('#notifModal').load('/notifInfo'+" #notifModal>*", { id: notifID}, function(){
+    $('#notifModal').load('/SDproc/notifInfo'+" #notifModal>*", { id: notifID}, function(){
         $('#notifModal').modal('show');
     })
 }
@@ -604,9 +604,9 @@ function delUser(){
             action: function(dialogItself){
                     dialogItself.close();
                     user = localStorage.getItem('location')
-                    $.post("/delete", { delUser: user, table: 'User'}, function(){
+                    $.post("/SDproc/delete", { delUser: user, table: 'User'}, function(){
                         $('#userModal').modal('hide');
-                        $('#basePage').load("/admin #basePage>*");
+                        $('#basePage').load("/SDproc/admin #basePage>*");
                         $.getScript("/static/admin/admin.js");
                     })
                 }
@@ -627,19 +627,19 @@ function freezeUser(box){
         freeze = 1;
     }
     user = localStorage.getItem('location')
-    $.post('/freeze', {'user': user, freeze: freeze})
+    $.post('/SDproc/freeze', {'user': user, freeze: freeze})
 }
 
 function approve(task){
-    $.post('/solveNotif', {id: task, action: 1}, function(){
-        $('#notifications').load("/admin #notifications>*");
+    $.post('/SDproc/solveNotif', {id: task, action: 1}, function(){
+        $('#notifications').load("/SDproc/admin #notifications>*");
         $.getScript("/static/admin/admin.js");
     })
 }
 
 function decline(task){
-    $.post('/solveNotif', {id: task, action: 0}, function(){
-        $('#notifications').load("/admin #notifications>*");
+    $.post('/SDproc/solveNotif', {id: task, action: 0}, function(){
+        $('#notifications').load("/SDproc/admin #notifications>*");
         $.getScript("/static/admin/admin.js");
     })
 }

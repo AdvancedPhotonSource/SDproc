@@ -37,7 +37,7 @@ function comment(id)
         if (localStorage.getItem('previous') === null)
         {
             localStorage.setItem('previous', id)
-            $.post('/show_comment', { idnext: id, format: 2},
+            $.post('/SDproc/show_comment', { idnext: id, format: 2},
             function(data){
             $('#comment').val(data)
             })
@@ -46,13 +46,12 @@ function comment(id)
         {
             var nextID = id
             previous = localStorage.getItem('previous');
-            $.post( "/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2},
+            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2},
             function(){
-                $.post('/show_comment', { idnext: nextID, format: 2},
+                $.post('/SDproc/show_comment', { idnext: nextID, format: 2},
                 function(data){
                     $('#comment').val(data)
                 })
-            //$.getScript( "/static/select/add_file.js" );
             })
             localStorage.setItem('previous', id);
         }
