@@ -606,8 +606,11 @@ function delUser(){
                     user = localStorage.getItem('location')
                     $.post("/SDproc/delete", { delUser: user, table: 'User'}, function(){
                         $('#userModal').modal('hide');
-                        $('#basePage').load("/SDproc/admin #basePage>*");
-                        $.getScript("/static/admin/admin.js");
+                        $('#basePage').load("/SDproc/admin #basePage>*", function(){
+                            setupRows();
+                            setupClick();
+                            Users();
+                        });
                     })
                 }
             }, {
@@ -632,14 +635,18 @@ function freezeUser(box){
 
 function approve(task){
     $.post('/SDproc/solveNotif', {id: task, action: 1}, function(){
-        $('#notifications').load("/SDproc/admin #notifications>*");
-        $.getScript("/static/admin/admin.js");
+        $('#notifications').load("/SDproc/admin #notifications>*", function(){
+            setupRows();
+            setupClick();
+        });
     })
 }
 
 function decline(task){
     $.post('/SDproc/solveNotif', {id: task, action: 0}, function(){
-        $('#notifications').load("/SDproc/admin #notifications>*");
-        $.getScript("/static/admin/admin.js");
+        $('#notifications').load("/SDproc/admin #notifications>*", function(){
+            setupRows();
+            setupClick();
+        });
     })
 }

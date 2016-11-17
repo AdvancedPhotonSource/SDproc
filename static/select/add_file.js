@@ -1,9 +1,11 @@
 $(document).ready(function(){
     $('#finito').prop('disabled', true);
-    localStorage.removeItem('previous')
+    localStorage.removeItem('previous');
     var rows = $('tr.item');
-    rows.removeClass("highlight")
-    rows.removeClass("lightlight")
+    rows.removeClass("highlight");
+    rows.removeClass("lightlight");
+
+    setupClick();
 
 
     $('#ssName').keyup(function(e){
@@ -191,8 +193,9 @@ function delFile()
                             var fid = $('td:first', $(row)).attr('id')
                             $.post( "/SDproc/delete", { id: fid, table: "Session"},
                             function(){
-                            $('#navTable').load(location.href+" #navTable>*","");
-                            $.getScript( "/static/select/highlight.js" );
+                            $('#navTable').load("/SDproc/select #navTable>*",function(){
+                                setupClick();
+                            });
                             $('#comment').val('')
                             localStorage.removeItem('previous');
                             $('#finito').prop('disabled', true);
@@ -212,6 +215,66 @@ function delFile()
                 }
             }]
         });
+}
+
+
+function setupClick()
+{
+    var rows = $('tr.item');
+    rows.on('click', function(e)
+    {
+        var row = $(this);
+        rows.removeClass('highlight');
+        rows.removeClass('lightlight');
+        row.addClass('highlight');
+        comment($('td:first', $(row)).attr('id'));
+        $('#finito').prop('disabled', false);
+    })
+
+    rows.on('mouseenter', function(e)
+    {
+        var row = $(this);
+        if ($(row).hasClass( "highlight" ))
+        {
+            rows.removeClass('lightlight');
+        }
+        else
+        {
+            rows.removeClass('lightlight');
+            row.addClass('lightlight');
+        }
+    })
+
+    $(document).on('selectstart dragstart', function(e)
+    {
+        e.preventDefault();
+        return false;
+    })
+}
+
+function comment(id)
+{
+        if (localStorage.getItem('previous') === null)
+        {
+            localStorage.setItem('previous', id)
+            $.post('/SDproc/show_comment', { idnext: id, format: 2},
+            function(data){
+            $('#comment').val(data)
+            })
+        }
+        else
+        {
+            var nextID = id
+            previous = localStorage.getItem('previous');
+            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2},
+            function(){
+                $.post('/SDproc/show_comment', { idnext: nextID, format: 2},
+                function(data){
+                    $('#comment').val(data)
+                })
+            })
+            localStorage.setItem('previous', id);
+        }
 }
 
 function shareSes(){

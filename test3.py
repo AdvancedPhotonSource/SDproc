@@ -2135,7 +2135,6 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
 
                labels.push(obj);
             }
-            debugger;
             var ax = this.fig.axes[0];
             var legend = this.fig.canvas.append("svg")
                                     .attr("name", this.props.nameID)

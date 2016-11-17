@@ -6,7 +6,6 @@ $(function (){
             localStorage.setItem('previous2', this.value);
             $.post('/SDproc/data', { idnext: this.value , plot: 1},
             function(data){
-                $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
             })
@@ -261,7 +260,6 @@ $(function(){
             nextID = localStorage.getItem('previous2');
             $.post('/SDproc/data', { idnext: nextID , plot: 1},
             function(data){
-                $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
             })
@@ -279,7 +277,6 @@ $(function(){
         function(){
             $.post('/SDproc/data', { idnext: previous , plot: 1},
             function(data){
-                $.getScript( "https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" );
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
             })
@@ -340,6 +337,14 @@ function fitPeak(){
     }
     if (!$('#sbool').prop('checked') && !$('#sncbool').prop('checked')){
         $('#sbool').prop('checked', true);
+    }
+    var checked = [];
+    $('#metaForm_id input:checked').each(function(){
+        checked.push($(this).attr('name'));
+    })
+    if (checked.length > 2){
+        alert('Please only select 1 energy and 1 signal')
+        return;
     }
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
