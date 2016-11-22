@@ -6,7 +6,8 @@ For debugging server use:
     except Exception,e:
         print(str(e))
 '''
-from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash, send_from_directory, request
+from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash, \
+    send_from_directory, request
 import matplotlib.pyplot as plt
 import mpld3
 import os
@@ -82,8 +83,8 @@ def login():
     form = login_form(request.form)
     if request.method == 'POST' and form.validate():
         user = form.get_user()
-        #user.approved = 1
-        #user.isAdmin = 1
+        # user.approved = 1
+        # user.isAdmin = 1
         if user.approved == 1:
             login_user(user)
             clear_cmeta()
@@ -105,7 +106,7 @@ def profile():
     thisProfile = []
 
     thisProfile.insert(0, {'username': current_user.username, 'email': current_user.email,
-                             'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
+                           'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
                            'commentChar': current_user.commentChar})
 
     notifications = notification.query.order_by('id')
@@ -195,8 +196,8 @@ def notifInfo():
     notifInfo = db.session.query(notification).filter_by(id=notifID).first()
     userInfo = db.session.query(User).filter_by(username=notifInfo.originUser).first()
     userData = {'username': userInfo.username, 'email': userInfo.email,
-                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
-                             'reason': userInfo.reason}
+                'fullName': userInfo.fullName, 'institution': userInfo.institution,
+                'reason': userInfo.reason}
     return render_template('admin.html', user=current_user, userProf=userData)
 
 
@@ -308,7 +309,6 @@ def addThing():
         db.session.commit()
         user = user.username
     return user
-
 
 
 @app.route('/removeThing', methods=['GET', 'POST'])
@@ -489,7 +489,7 @@ def dataFormat():
                             signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
                                                        unicode_to_int(columns[10].data - 1))
                             additional.append(signal)
-                            addLabels.append('Signal')
+                            addLabels.append('Signal Normalized')
                         else:
                             norm = norm_factors(data, unicode_to_int(columns[10].data - 1))
                             additional.append(norm)
@@ -502,12 +502,13 @@ def dataFormat():
                 etype = data[unicode_to_int(columns[0].data - 1)]
             elif againstE == 'Extal':
                 etype = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data - 1),
-                                     unicode_to_int(columns[4].data - 1), format_instance.hrm), 1000000)
+                                                 unicode_to_int(columns[4].data - 1), format_instance.hrm), 1000000)
             elif againstE == 'ExtalTC':
                 etype = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
                                                       unicode_to_int(columns[4].data - 1),
                                                       unicode_to_int(columns[5].data - 1),
-                                                      unicode_to_int(columns[6].data - 1), format_instance.hrm), 1000000)
+                                                      unicode_to_int(columns[6].data - 1), format_instance.hrm),
+                                     1000000)
             else:
                 etype = 0
             labels.append(normLabels)
@@ -542,7 +543,7 @@ def dataFormat():
             format.fit_range = 3
             format.file_id = idthis
             hrm = {'hrm_e0': 14412500.0, 'hrm_bragg1': 18.4704, 'hrm_bragg2': 77.5328,
-             'hrm_geo': '++', 'hrm_alpha1': 2.6e-6, 'hrm_alpha2': 2.6e-6}
+                   'hrm_geo': '++', 'hrm_alpha1': 2.6e-6, 'hrm_alpha2': 2.6e-6}
             hrm = json.dumps(hrm)
             format.hrm = hrm
 
@@ -658,11 +659,12 @@ def saveSession():
 def generateOutput():
     form = InputForm(request.form)
     id = request.form.get('idnum', type=int)
-    toLocal = request.form.get('outSingular', type=int)
+    outType = request.form.get('outType', type=int)
+    cordData = request.form.get('cordData', type=str)
     sesID = request.form.get('session', type=int)
     output = []
     colNames = []
-    if toLocal == 1:
+    if outType == 1:
         file_instance = db.session.query(dataFile).filter_by(id=id).first()
         format_instance = db.session.query(currentMeta).filter_by(file_id=id).first()
         if str(file_instance.type) == 'mda':
@@ -706,52 +708,16 @@ def generateOutput():
                             output.append(data[idx])
                             colNames.append(bools[i].label)
         filename = writeOutput(output, colNames, file_instance.name)
-    else:
-        """
-        session_metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
-        for meta in session_metas:
-            fileOutput = []
-            actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
-            form = populate_from_instance(actualMeta)
-            file_instance = db.session.query(dataFile).filter_by(id=actualMeta.file_id).first()
-            format_instance = db.session.query(currentMeta).filter_by(file_id=actualMeta.file_id).first()
-            if str(file_instance.type) == 'mda':
-                data, name, unusedpath = readMda(file_instance.path)
-            else:
-                data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
-            columns, bools = splitForm(form)
-            for i in range(len(bools)):
-                if bools[i].data:
-                    if columns[i].data == None:
-                        if i == 1:
-                            energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
-                                                 unicode_to_int(columns[4].data - 1), format_instance.hrm)
-                            fileOutput.append(energy)
-                        elif i == 2:
-                            energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                                      unicode_to_int(columns[4].data - 1),
-                                                      unicode_to_int(columns[5].data - 1),
-                                                      unicode_to_int(columns[6].data - 1), format_instance.hrm)
-                            fileOutput.append(energy)
-                        elif i == 7:
-                            energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
-                                               unicode_to_int(columns[6].data - 1), format_instance.hrm)
-                            fileOutput.append(energy)
-                        elif i == 9:
-                            signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
-                                                       unicode_to_int(columns[10].data - 1))
-                            fileOutput.append(signal)
-                        else:
-                            norm = norm_factors(data, unicode_to_int(columns[10].data - 1))
-                            fileOutput.append(norm)
-                        continue
-                    else:
-                        for idx, column in enumerate(data):
-                            if (idx + 1) == columns[i].data:
-                                fileOutput.append(data[idx])
-            output.append(fileOutput)
-        output = json.dumps(output)
-        """
+    elif outType == 2:
+        file_instance = db.session.query(dataFile).filter_by(id=id).first()
+        cords = json.loads(cordData)
+        output = []
+        output.append(cords[0])
+        output.append(cords[1])
+        colNames = []
+        colNames.append("Energy")
+        colNames.append("Signal")
+        filename = writeOutput(output, colNames, file_instance.name)
     return redirect(url_for('sendOut', filename=filename))
 
 
@@ -1243,6 +1209,7 @@ def peak_at_max():
     inputCord = request.form.get('inputCord', type=float)
     fitRange = request.form.get('inputRange', type=float)
     localRange = request.form.get('localRange', type=float)
+    sendOut = request.form.get('sendOut', type=int)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     format_instance = db.session.query(currentMeta).filter_by(file_id=idthis).first()
     if str(file_instance.type) == 'mda':
@@ -1255,14 +1222,14 @@ def peak_at_max():
     additional = []
     legendNames = []
     if bools[1].data:
-        energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
-                             unicode_to_int(columns[4].data - 1), format_instance.hrm)
+        energy = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data - 1),
+                                          unicode_to_int(columns[4].data - 1), format_instance.hrm), 1000000)
         additional.append(energy)
         legendNames.append(columns[1].id)
     elif bools[2].data:
-        energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                  unicode_to_int(columns[4].data - 1), unicode_to_int(columns[5].data - 1),
-                                  unicode_to_int(columns[6].data - 1), format_instance.hrm)
+        energy = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
+                                               unicode_to_int(columns[4].data - 1), unicode_to_int(columns[5].data - 1),
+                                               unicode_to_int(columns[6].data - 1), format_instance.hrm), 1000000)
         additional.append(energy)
         legendNames.append(columns[2].id)
     else:
@@ -1345,7 +1312,11 @@ def peak_at_max():
         format_instance.fit_range = fitRange
     db.session.commit()
     code = simplePlot(ycords, xmax, file_instance.name, legendNames, 0, 0)
-    return render_template("data_format.html", user=current_user, ses=current_session, code=code, form=form, shiftVal=str(abs(ycords[0][0])))
+    if sendOut == 1:
+        ycords[0] = ycords[0].tolist()
+        return json.dumps(ycords)
+    return render_template("data_format.html", user=current_user, ses=current_session, code=code, form=form,
+                           shiftVal=str(abs(ycords[0][0])))
 
 
 @app.route('/updateHRM', methods=['GET', 'POST'])
@@ -1397,7 +1368,7 @@ def writeOutput(output, colNames, name):
     comChar = current_user.commentChar
     filename = name + ' ' + str(getTime())
     f = open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'w')
-    f.write(name)
+    f.write('#' + name)
     f.write('\n')
     for i in range(len(output)):
         if isinstance(colNames[i], str):
@@ -1416,7 +1387,6 @@ def writeOutput(output, colNames, name):
     path = downloadLocation + '/' + filename
 
     return filename
-
 
 
 def atMax(ycords, npXcords, xmax, fitRange):
@@ -1597,16 +1567,16 @@ def simplePlot(data, xmax, filename, linenames, legend, sized):
         xs = data[0]
         ys = data[1]
         plt.plot(xs, ys)
-        #plt.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
+        # plt.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
     else:
         fig, ax = plt.subplots()
         xs = data[0]
         ys = data[1]
         line = ax.plot(xs, ys, alpha=0, label=filename + ' ' + linenames[0])
         lines.append(line[0])
-        #point = ax.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
+        # point = ax.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
         labels.append(filename + ' ' + linenames[0])
-        #lines.append(point[0])
+        # lines.append(point[0])
 
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, sized, nameID, css))
         mpld3.plugins.connect(fig, HideLegend(nameID))

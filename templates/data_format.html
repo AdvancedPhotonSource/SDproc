@@ -236,7 +236,8 @@ with context %}
                 <div class="formVariables">
                     <input type="hidden" name="idnum" id="idnum">
                     <input type="hidden" name="agaE" id="agaE" value="{{ againstE }}">
-                    <input type="hidden" name="outSingular" id="outSingular">
+                    <input type="hidden" name="outType" id="outType">
+                    <input type="hidden" name="cordData" id="cordData">
                     <input type="hidden" name="session" id="session">
                     <div id="metaForm_id">
                         <br/>
@@ -395,7 +396,7 @@ with context %}
                 </div>
             </div>
             <div class="fitBtn">
-                <button class="btn btn-primary btn-md" onclick="fitPeak()" title="Apply selected fitting technique to plot">
+                <button class="btn btn-primary btn-md" onclick="fitPeak(0)" title="Apply selected fitting technique to plot">
                     Fit
                 </button>
             </div>

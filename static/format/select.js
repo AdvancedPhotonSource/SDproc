@@ -54,6 +54,7 @@ $(document).ready( function() {
     $('#pWInput').prop('disabled', false);
     $('#logbtn').text('Add to Logbook');
     $('#logbtn').prop('disabled', false);
+    localStorage.setItem('justPeakFit', 0)
 })
 
 function asynchOnLoad(){
@@ -262,6 +263,7 @@ $(function(){
             function(data){
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                localStorage.setItem('justPeakFit', 0);
             })
         });
         $('#logbtn').text('Add to Logbook');
@@ -279,6 +281,7 @@ $(function(){
             function(data){
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                localStorage.setItem('justPeakFit', 0);
             })
         })
         $('#logbtn').text('Add to Logbook');
@@ -297,6 +300,7 @@ $(function(){
 function aroundMax(){
     $('#fitType').text('Fit around max');
     $('#fitType').append("<span class='caret'></span>");
+    $('#peakLocation').val('');
     $('#peakLocation').attr('placeholder', 'Peak found automatically');
     $('#peakLocation').prop('disabled', true);
     $('#peakGroup').removeClass('splitInput');
@@ -322,7 +326,8 @@ function nearestPeak(){
     $('#localRange').show();
 }
 
-function fitPeak(){
+var waitPeak = $.Deferred();
+function fitPeak(sendOut){
     previous = localStorage.getItem('previous2');
     $('#a1bool').removeProp('checked');
     $('#a2bool').removeProp('checked');
@@ -349,9 +354,14 @@ function fitPeak(){
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
         if ($.isNumeric(range)){
-            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range}, function(data){
+            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range, sendOut: sendOut}, function(data){
+                if (sendOut == 1){
+                    localStorage.setItem('peakData', data);
+                    waitPeak.resolve();
+                }
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
                 $('#shiftVal').html( $(data).find('#shiftVal').html());
+                localStorage.setItem('justPeakFit', 1);
             });
         }
         else{
@@ -364,9 +374,14 @@ function fitPeak(){
         var range = $('#pWInput').val()
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
-                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range}, function(data){
+                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range, sendOut: sendOut}, function(data){
+                if (sendOut == 1){
+                    localStorage.setItem('peakData', data);
+                    waitPeak.resolve();
+                }
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
                 $('#shiftVal').html( $(data).find('#shiftVal').html());
+                localStorage.setItem('justPeakFit', 1);
                 })
             }
             else{
@@ -386,9 +401,14 @@ function fitPeak(){
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
                 if ($.isNumeric(localRange)){
-                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange}, function(data){
+                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange, sendOut: sendOut}, function(data){
+                        if (sendOut == 1){
+                            localStorage.setItem('peakData', data);
+                            waitPeak.resolve();
+                        }
                         $('#plot_spot').html( $(data).find('#plot_spot').html());
                         $('#shiftVal').html( $(data).find('#shiftVal').html());
+                        localStorage.setItem('justPeakFit', 1);
                     })
                 }
                 else{
@@ -472,16 +492,29 @@ function advance(){
 }
 
 function outputFile(){
+    waitPeak = $.Deferred();
     if (localStorage.getItem('previous2') === null){
         alert('No file loaded');
     }
+    else if (localStorage.getItem('justPeakFit') == 1){
+        fitPeak(1)
+        $.when(waitPeak).done(function(){
+            $('#idnum').val(localStorage.getItem('previous2'));
+            var cords = localStorage.getItem('peakData');
+            $('#outType').val(2);
+            $('#cordData').val(cords);
+            $('#meta-form').attr('action', '/SDproc/generateOutput')
+            $('#meta-form')[0].submit()
+            $('#meta-form').attr('action', '');
+        });
+        return waitPeak.promise()
+    }
     else{
         $('#idnum').val(localStorage.getItem('previous2'));
-        $('#outSingular').val(1);
+        $('#outType').val(1);
         $('#meta-form').attr('action', '/SDproc/generateOutput')
         $('#meta-form')[0].submit()
         $('#meta-form').attr('action', '');
-        dialogItself.close();
     }
 }
 
