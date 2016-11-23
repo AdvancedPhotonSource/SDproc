@@ -532,7 +532,7 @@ $(function (){
 })
 
 function advance(){
-    window.location.href = ("waitProc");
+    window.location.href = ("process");
 }
 
 function outputFile(){

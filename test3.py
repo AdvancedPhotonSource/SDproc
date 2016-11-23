@@ -702,15 +702,15 @@ def saveSession():
 @login_required
 def generateOutput():
     form = InputForm(request.form)
-    id = request.form.get('idnum', type=int)
+    id = request.form.get('idnum', type=str)
     outType = request.form.get('outType', type=int)
     cordData = request.form.get('cordData', type=str)
     sesID = request.form.get('session', type=int)
     output = []
     colNames = []
     if outType == 1:
-        file_instance = db.session.query(dataFile).filter_by(id=id).first()
-        format_instance = db.session.query(currentMeta).filter_by(file_id=id).first()
+        file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
+        format_instance = db.session.query(currentMeta).filter_by(file_id=int(id)).first()
         if str(file_instance.type) == 'mda':
             data, name, unusedpath = readMda(file_instance.path)
         else:
@@ -753,7 +753,7 @@ def generateOutput():
                             colNames.append(bools[i].label)
         filename = writeOutput(output, colNames, file_instance.name)
     elif outType == 2:
-        file_instance = db.session.query(dataFile).filter_by(id=id).first()
+        file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
         output = []
         output.append(cords[0])
@@ -762,6 +762,16 @@ def generateOutput():
         colNames.append("Energy")
         colNames.append("Signal")
         filename = writeOutput(output, colNames, file_instance.name)
+    elif outType == 3:
+        jidlist = json.loads(id)
+        cords = json.loads(cordData)
+        output = []
+        output.append(cords[0])
+        output.append(cords[1])
+        colNames = []
+        colNames.append("Energy")
+        colNames.append("Signal")
+        filename = writeOutput(output, colNames, jidlist)
     return redirect(url_for('sendOut', filename=filename))
 
 
@@ -1216,15 +1226,20 @@ def process():
                 allycords.append(ycords)
                 allagainstE.append(againstE)
                 allFileNames.append(file_instance.name)
-            if output == 1:
-                return json.dumps(allycords[0])
             if binWidth == None:
-                code, sumxmax, sumymax = mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames,
+                code, sumxmax, sumymax, sumX, sumY = mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames,
                                                     allFileNames, pltLeg)
+                sumX = sumX.tolist()
+                sumY = sumY.tolist()
             else:
-                code, sumxmax, sumymax = mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames,
+                code, sumxmax, sumymax, sumX, sumY = mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames,
                                                   allFileNames,
                                                   pltLeg, binWidth)
+            if output == 1:
+                outputs = []
+                outputs.append(sumX)
+                outputs.append(sumY)
+                return json.dumps(outputs)
             endmax.append([format(sumxmax, '.6f'), format(sumymax, '.6f')])
             allFileNames.append('Summed Files')
     else:
@@ -1410,10 +1425,21 @@ def shareFile():
 
 def writeOutput(output, colNames, name):
     comChar = current_user.commentChar
-    filename = name + ' ' + str(getTime())
+    if isinstance(name, list):
+        filename = 'Summed Data ' + str(getTime())
+    else:
+        filename = name + ' ' + str(getTime())
     f = open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'w')
-    f.write('#' + name)
-    f.write('\n')
+    if isinstance(name, list):
+        f.write('#Files Included:')
+        f.write('\n')
+        for id in name:
+            file = db.session.query(dataFile).filter_by(id=id).first()
+            f.write('#' + file.name)
+            f.write('\n')
+    else:
+        f.write('#' + name)
+        f.write('\n')
     for i in range(len(output)):
         if isinstance(colNames[i], str):
             f.write(comChar + str(colNames[i]) + '= Column: ' + str(i + 1))
@@ -1650,18 +1676,18 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
                 xs = alldata[count1][1]
                 xs = numpy.multiply(xs, 1000000)
             plt.plot(xs, ys)
-            plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
+            #plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
             count2 += 1
     else:
         fig, ax = plt.subplots()
         for oneDat in allycords:
             xs = oneDat[0]
             ys = oneDat[1]
-            line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1] + ' ' + allLegendNames[count1])
+            line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1])
             lines.append(line[0])
-            point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
+            #point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
             labels.append(allFileNames[count1] + ' ' + allLegendNames[count1])
-            lines.append(point[0])
+            #lines.append(point[0])
             count1 += 1
         sumNumpy = []
         YVals = []
@@ -1791,14 +1817,14 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         line = ax.plot(largePadx, ySummed, color='k', alpha=0, label='Sum of selected')
         lines.append(line[0])
 
-        point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
+        #point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
         labels.append('Sum of selected')
-        lines.append(point[0])
+        #lines.append(point[0])
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
     plt.close()
-    return code, sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax
+    return code, sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, largePadx, ySummed
 
 
 def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNames, pltLeg, binWidth):
@@ -1821,18 +1847,18 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
             if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Extal' or allagainstE[count1] == 'ExtalTC':
                 xs = alldata[count1][1]
             plt.plot(xs, ys)
-            plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
+            #plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
             count2 += 1
     else:
         fig, ax = plt.subplots()
         for oneDat in allycords:
             xs = oneDat[0]
             ys = oneDat[1]
-            line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1] + ' ' + allLegendNames[count1])
+            line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1])
             lines.append(line[0])
-            point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
+            #point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
             labels.append(allFileNames[count1] + ' ' + allLegendNames[count1])
-            lines.append(point[0])
+            #lines.append(point[0])
             count1 += 1
         minValue = 0
         maxValue = 0
@@ -1893,14 +1919,14 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         sum2Dymax = numpy.amax(sum2D)
         sum2Dxmax = numpy.ndarray.argmax(sum2D)
 
-        point = ax.plot(sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, '-bD')
+        #point = ax.plot(sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, '-bD')
         labels.append('Sum of selected')
-        lines.append(point[0])
+        #lines.append(point[0])
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
     plt.close()
-    return code, sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax
+    return code, sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, sumXvals, sumYvals
 
 
 def plotData(data, used, againstE, additional, lineNames, eType):
