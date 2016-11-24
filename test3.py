@@ -464,6 +464,7 @@ def dataFormat():
     global current_session
     thisSession = current_session
     findPlot = request.form.get('plot', type=int)
+    unit = request.form.get('unit', type=str)
     fdata = []
     nameID = str(uuid.uuid4())
     userID = str(user.get_id())
@@ -557,7 +558,7 @@ def dataFormat():
                 etype = 0
             labels.append(normLabels)
             labels.append(addLabels)
-            code = plotData(data, used, againstE, additional, labels, etype)
+            code = plotData(data, used, againstE, additional, labels, etype, unit)
             format_instance.plot = code
             db.session.commit()
         else:
@@ -595,7 +596,7 @@ def dataFormat():
             used.append(11)
             labels = []
             labels.append(['Signal'])
-            code = plotData(data, used, 'Point', None, labels, etype)
+            code = plotData(data, used, 'Point', None, labels, etype, unit)
             format.plot = code
             db.session.add(format)
             db.session.commit()
@@ -1929,7 +1930,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
     return code, sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, sumXvals, sumYvals
 
 
-def plotData(data, used, againstE, additional, lineNames, eType):
+def plotData(data, used, againstE, additional, lineNames, eType, unit):
     plt.close()
     fig = plt.figure(figsize=(10, 7))
     css = """
@@ -1947,11 +1948,16 @@ def plotData(data, used, againstE, additional, lineNames, eType):
     for i in used:
         xs = range(1, len(data[i]) + 1)
         ys = data[i - 1]
-
+        plt.xlabel('Point #')
         if againstE == 'Energy' or againstE == 'Extal' or againstE == 'ExtalTC':
             xs = [float(x) for x in eType]
-            xs = numpy.multiply(xs, 1000000)
-            xs = numpy.subtract(xs, xs[0])
+            if unit == 'keV':
+                xs = numpy.subtract(xs, xs[0])
+                plt.xlabel('keV')
+            else:
+                xs = numpy.multiply(xs, 1000000)
+                xs = numpy.subtract(xs, xs[0])
+                plt.xlabel('meV')
         line = ax.plot(xs, ys, alpha=0, label=lineNames[0][count])
         lines.append(line[0])
         labels.append(lineNames[0][count])
@@ -1960,12 +1966,17 @@ def plotData(data, used, againstE, additional, lineNames, eType):
     if additional:
         for i in range(len(additional)):
             xs = range(1, len(additional[i]) + 1)
-
             ys = additional[i]
+            plt.xlabel('Point #')
             if againstE == 'Energy' or againstE == 'Extal' or againstE == 'ExtalTC':
                 xs = [float(x) for x in eType]
-                xs = numpy.multiply(xs, 1000000)
-                xs = numpy.subtract(xs, xs[0])
+                if unit == 'keV':
+                    xs = numpy.subtract(xs, xs[0])
+                    plt.xlabel('keV')
+                else:
+                    xs = numpy.multiply(xs, 1000000)
+                    xs = numpy.subtract(xs, xs[0])
+                    plt.xlabel('meV')
             line = ax.plot(xs, ys, alpha=0, label=lineNames[1][i])
             lines.append(line[0])
             labels.append(lineNames[1][i])

@@ -286,17 +286,24 @@ body{
     float:right;
 }
 
+.inline div{
+    float: left;
+}
+
 .AEGroup{
     position: relative;
+    left: 110px;
+}
+
+.unitGroup{
+    position: relative;
     left: 210px;
-    float: left;
 }
 
 .logBtn{
     position: relative;
-    left: 500px;
+    left: 350px;
     width: 0px;
-    float: left;
 }
 
 .hrmMenu{
@@ -331,4 +338,12 @@ svg#legendSVG{
     width: 150px;
     background-color: #ccc;
     overflow: auto;
+}
+
+.aeDrop{
+    margin-left: 82px;
+}
+
+.unitDrop{
+    margin-left: 35px;
 }

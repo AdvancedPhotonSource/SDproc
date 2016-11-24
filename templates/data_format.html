@@ -253,32 +253,45 @@ with context %}
                     </div>
                 </div>
             </div>
-            <div class="AEGroup">
-                <label for="againstE">Plot against</label>
-                <button id="againstE" type="button" class="btn btn-default dropdown-toggle setSize" data-toggle="dropdown" aria-haspopup="true"
-                        aria-expanded="false">Point #<span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a onclick="setAE(event)">Point #</a></li>
-                    <li><a onclick="setAE(event)">Energy</a></li>
-                    <li><a onclick="setAE(event)">Energy xtal</a></li>
-                    <li><a onclick="setAE(event)">Energy xtal w/ T corr.</a></li>
-                </ul>
-            </div>
-            <div class="logBtn">
-                <button type="button" onclick="log()" class="btn btn-primary btn-sm" id="logbtn">
-                    Add to Logbook
-                </button>
-                <span class="addText">
-                    <p id="log_add">
-                    </p>
-                </span>
+            <div class="inline">
+                <div class="AEGroup">
+                    <label for="againstE">Plot against</label>
+                    <button id="againstE" type="button" class="btn btn-default dropdown-toggle setSize" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">Point #<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu aeDrop">
+                        <li><a onclick="setAE(event)">Point #</a></li>
+                        <li><a onclick="setAE(event)">Energy</a></li>
+                        <li><a onclick="setAE(event)">Energy xtal</a></li>
+                        <li><a onclick="setAE(event)">Energy xtal w/ T corr.</a></li>
+                    </ul>
+                </div>
+                <div class="unitGroup">
+                    <label for="unitBtn">Unit</label>
+                    <button id="unitBtn" type="button" class="btn btn-default dropdown-toggle setSize" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">meV<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu unitDrop">
+                        <li><a onclick="setUnit(event)">meV</a></li>
+                        <li><a onclick="setUnit(event)">keV</a></li>
+                    </ul>
+                </div>
+                <div class="logBtn">
+                    <button type="button" onclick="log()" class="btn btn-primary btn-sm" id="logbtn">
+                        Add to Logbook
+                    </button>
+                    <span class="addText">
+                        <p id="log_add">
+                        </p>
+                    </span>
+                </div>
             </div>
             <div class="floatClear"></div>
             <form id="meta-form" method=post action="" remote="true">
                 <div class="formVariables">
                     <input type="hidden" name="idnum" id="idnum">
                     <input type="hidden" name="agaE" id="agaE" value="{{ againstE }}">
+                    <input type="hidden" name="unit" id="unit">
                     <input type="hidden" name="outType" id="outType">
                     <input type="hidden" name="cordData" id="cordData">
                     <input type="hidden" name="session" id="session">

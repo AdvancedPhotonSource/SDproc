@@ -88,6 +88,7 @@ $(function (){
 
 
 $(document).ready( function() {
+    $('#unit').val('meV');
     asynchOnLoad()
     if (!localStorage.getItem('previous2') === null)
         localStorage.removeItem("previous2")
@@ -98,7 +99,7 @@ $(document).ready( function() {
     $('#pWInput').prop('disabled', false);
     $('#logbtn').text('Add to Logbook');
     $('#logbtn').prop('disabled', false);
-    localStorage.setItem('justPeakFit', 0)
+    localStorage.setItem('justPeakFit', 0);
 })
 
 function asynchOnLoad(){
@@ -321,7 +322,8 @@ $(function(){
         $('#idnum').val(previous);
         $.post('/SDproc/save_graph', $('#meta-form').serialize(),
         function(){
-            $.post('/SDproc/data', { idnext: previous , plot: 1},
+            var unit = $('#unit').val();
+            $.post('/SDproc/data', { idnext: previous , plot: 1, unit: unit},
             function(data){
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
@@ -582,6 +584,20 @@ function setAE(event){
         $('#againstE').text('Point #');
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('Point');
+    }
+    $('#meta-form').trigger('change');
+}
+
+function setUnit(event){
+    if (event.target.text == 'meV'){
+        $('#unitBtn').text('meV');
+        $('#unitBtn').append("<span class='caret'></span>");
+        $('#unit').val('meV');
+    }
+    else{
+        $('#unitBtn').text('keV');
+        $('#unitBtn').append("<span class='caret'></span>");
+        $('#unit').val('keV');
     }
     $('#meta-form').trigger('change');
 }
