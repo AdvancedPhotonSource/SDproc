@@ -171,3 +171,11 @@ select[multiple].scan-list{
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+footer {
+    position: fixed;
+    left: 50%;
+    bottom: 0px;
+    height: 30px;
+    transform: translate(-50%, -50%);
+}

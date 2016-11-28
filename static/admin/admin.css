@@ -262,3 +262,11 @@
     height: 350px;
     overflow: auto;
 }
+
+footer {
+    position: fixed;
+    left: 50%;
+    bottom: 0px;
+    height: 30px;
+    transform: translate(-50%, -50%);
+}

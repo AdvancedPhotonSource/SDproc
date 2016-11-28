@@ -61,3 +61,12 @@
 
 a {color: #337AB7; text-decoration: none; }
 a:hover {color: #23527C; text-decoration: underline; cursor: pointer;}
+
+
+footer {
+    position: fixed;
+    left: 50%;
+    bottom: 0px;
+    height: 30px;
+    transform: translate(-50%, -50%);
+}

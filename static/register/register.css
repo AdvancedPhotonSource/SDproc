@@ -58,3 +58,11 @@ td {
 .regStretch{
     width: 300px;
 }
+
+footer {
+    position: fixed;
+    left: 50%;
+    bottom: 0px;
+    height: 30px;
+    transform: translate(-50%, -50%);
+}

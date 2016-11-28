@@ -257,6 +257,8 @@ def solveNotif():
         db.session.delete(notif)
     else:
         db.session.delete(notif)
+        user = db.session.query(User).filter_by(username=notif.originUser).first()
+        db.session.delete(user)
     db.session.commit()
     return 'Solved'
 

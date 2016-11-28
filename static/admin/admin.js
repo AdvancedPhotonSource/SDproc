@@ -692,5 +692,10 @@ function decline(task){
             setupRows();
             setupClick();
         });
+        $('#basePage').load("/SDproc/admin #basePage>*", function(){
+            setupRows();
+            setupClick();
+            Users();
+        });
     })
 }

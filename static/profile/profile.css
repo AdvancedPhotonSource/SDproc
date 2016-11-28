@@ -78,3 +78,11 @@
 .margin-text{
     font-size: 100% !important;
 }
+
+footer {
+    position: fixed;
+    left: 50%;
+    bottom: 0px;
+    height: 30px;
+    transform: translate(-50%, -50%);
+}

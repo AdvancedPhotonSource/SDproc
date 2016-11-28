@@ -80,7 +80,8 @@ function setupRows(){
             table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ ('#ssName').length +'">No result found</td></tr>'));
         }
         if (filteredRows.length === rows.length-1){
-            $(table.find('tbody tr:visible').addClass('highlight'))
+            $(table.find('tbody tr:visible').addClass('highlight'));
+	    $(table.find('tbody tr:visible').trigger('click'));
         }
     });
 
@@ -229,9 +230,11 @@ function shareFile(){
                         {
                             found = 1;
                             var fid = $('td:first', $(row)).attr('id');
-                            var nameTable = $('#nameTable');
-                            var toUser = $.trim($(table.find('tbody tr.highlight')).text())
-                            $.post( "/SDproc/shareFile", { id: fid, toUser: toUser});
+			    $.post( "/SDproc/save_comment", { idprev: fid, comment: $('#comment').val()}, function(){
+			    	var nameTable = $('#nameTable');
+                            	var toUser = $.trim($(table.find('tbody tr.highlight')).text())
+                            	$.post( "/SDproc/shareFile", { id: fid, toUser: toUser})
+			    });
                         }
                         });
                         if (found == 0)
