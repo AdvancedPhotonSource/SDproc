@@ -52,6 +52,8 @@ For debugging server use:
 '''
 from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash, \
     send_from_directory, request
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import mpld3
 import os
@@ -1272,6 +1274,7 @@ def peak_at_max():
     fitRange = request.form.get('inputRange', type=float)
     localRange = request.form.get('localRange', type=float)
     sendOut = request.form.get('sendOut', type=int)
+    unit = request.form.get('unit', type=str)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     format_instance = db.session.query(currentMeta).filter_by(file_id=idthis).first()
     if str(file_instance.type) == 'mda':
@@ -1307,8 +1310,11 @@ def peak_at_max():
         legendNames.append(columns[8].id)
     max, xmax, ycords = convert_Numpy(used, data, additional)
     npXcords = numpy.array(ycords[0])
-    npXcords = numpy.multiply(npXcords, 1000000)
-    npYcords = numpy.array(ycords[1])
+    if unit == 'keV':
+        npYcords = numpy.array(ycords[1])
+    else:
+        npXcords = numpy.multiply(npXcords, 1000000)
+        npYcords = numpy.array(ycords[1])
     if fitType == 0:
         leftBound = (find_nearest(npXcords, npXcords[xmax[1]] - (fitRange / 2)))
         rightBound = (find_nearest(npXcords, npXcords[xmax[1]] + (fitRange / 2)))
@@ -1645,10 +1651,10 @@ def simplePlot(data, xmax, filename, linenames, legend, sized):
         fig, ax = plt.subplots()
         xs = data[0]
         ys = data[1]
-        line = ax.plot(xs, ys, alpha=0, label=filename + ' ' + linenames[0])
+        line = ax.plot(xs, ys, alpha=0, label=filename)
         lines.append(line[0])
         # point = ax.plot(xs[xmax[1]], ys[xmax[1]], '-bD')
-        labels.append(filename + ' ' + linenames[0])
+        labels.append(filename)
         # lines.append(point[0])
 
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, sized, nameID, css))
@@ -1689,7 +1695,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
             line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1])
             lines.append(line[0])
             #point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
-            labels.append(allFileNames[count1] + ' ' + allLegendNames[count1])
+            labels.append(allFileNames[count1])
             #lines.append(point[0])
             count1 += 1
         sumNumpy = []
@@ -1860,7 +1866,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
             line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1])
             lines.append(line[0])
             #point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
-            labels.append(allFileNames[count1] + ' ' + allLegendNames[count1])
+            labels.append(allFileNames[count1])
             #lines.append(point[0])
             count1 += 1
         minValue = 0

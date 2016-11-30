@@ -88,7 +88,8 @@ $(function (){
 
 
 $(document).ready( function() {
-    $('#unit').val('meV');
+    $('#unit').val('keV');
+    setPlotAgainst(localStorage.getItem('plotAgainst'));
     asynchOnLoad()
     if (!localStorage.getItem('previous2') === null)
         localStorage.removeItem("previous2")
@@ -356,7 +357,7 @@ function aroundMax(){
 function atPoint(){
     $('#fitType').text('Peak at Point');
     $('#fitType').append("<span class='caret'></span>");
-    $('#peakLocation').attr('placeholder', 'Energy Value');
+    $('#peakLocation').attr('placeholder', 'Energy Value (meV)');
     $('#peakLocation').prop('disabled', false);
     $('#peakGroup').removeClass('splitInput');
     $('#localRange').hide();
@@ -365,8 +366,8 @@ function atPoint(){
 function nearestPeak(){
     $('#fitType').text('Fit around point');
     $('#fitType').append("<span class='caret'></span>");
-    $('#peakLocation').attr('placeholder', 'Energy Value');
-    $('#localRange').prop('placeholder', 'Range');
+    $('#peakLocation').attr('placeholder', 'Energy Value (meV)');
+    $('#localRange').prop('placeholder', 'Range (meV)');
     $('#peakLocation').prop('disabled', false);
     $('#peakGroup').addClass('splitInput');
     $('#localRange').show();
@@ -397,10 +398,11 @@ function fitPeak(sendOut){
         alert('Please only select 1 energy and 1 signal')
         return;
     }
+    var unit = $('#unit').val();
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
         if ($.isNumeric(range)){
-            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range, sendOut: sendOut}, function(data){
+            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range, sendOut: sendOut, unit: unit}, function(data){
                 if (sendOut == 1){
                     localStorage.setItem('peakData', data);
                     waitPeak.resolve();
@@ -420,7 +422,7 @@ function fitPeak(sendOut){
         var range = $('#pWInput').val()
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
-                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range, sendOut: sendOut}, function(data){
+                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range, sendOut: sendOut, unit: unit}, function(data){
                 if (sendOut == 1){
                     localStorage.setItem('peakData', data);
                     waitPeak.resolve();
@@ -447,7 +449,7 @@ function fitPeak(sendOut){
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
                 if ($.isNumeric(localRange)){
-                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange, sendOut: sendOut}, function(data){
+                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange, sendOut: sendOut, unit: unit}, function(data){
                         if (sendOut == 1){
                             localStorage.setItem('peakData', data);
                             waitPeak.resolve();
@@ -569,21 +571,25 @@ function setAE(event){
         $('#againstE').text('Energy');
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('Energy');
+        localStorage.setItem('plotAgainst', 'Energy');
     }
     else if (event.target.text == 'Energy xtal'){
         $('#againstE').text('Energy xtal');
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('Extal');
+        localStorage.setItem('plotAgainst', 'Energy xtal');
     }
     else if (event.target.text == 'Energy xtal w/ T corr.'){
         $('#againstE').text('Energy xtal w/ T corr.');
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('ExtalTC');
+        localStorage.setItem('plotAgainst', 'Energy xtal w/ T corr.');
     }
     else {
         $('#againstE').text('Point #');
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('Point');
+        localStorage.setItem('plotAgainst', 'Point #');
     }
     $('#meta-form').trigger('change');
 }
@@ -600,4 +606,35 @@ function setUnit(event){
         $('#unit').val('keV');
     }
     $('#meta-form').trigger('change');
+}
+
+function setPlotAgainst(storedData){
+    if (storedData == 'Energy'){
+        $('#againstE').text('Energy');
+        $('#againstE').append("<span class='caret'></span>");
+    }
+    else if (storedData == 'Energy xtal'){
+        $('#againstE').text('Energy xtal');
+        $('#againstE').append("<span class='caret'></span>");
+    }
+    else if (storedData == 'Energy xtal w/ T corr.'){
+        $('#againstE').text('Energy xtal w/ T corr.');
+        $('#againstE').append("<span class='caret'></span>");
+    }
+    else {
+        $('#againstE').text('Point #');
+        $('#againstE').append("<span class='caret'></span>");
+    }
+}
+
+function logout(){
+    if (localStorage.getItem('previous2') === null){
+        window.location.href = ("logout");
+    }
+    else{
+        previous = localStorage.getItem('previous2');
+        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1}, function(){
+            window.location.href = ("logout")
+        });
+    }
 }

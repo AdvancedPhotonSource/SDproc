@@ -354,3 +354,15 @@ function shareSes(){
             }]
         });
 }
+
+function logout(){
+    if (localStorage.getItem('previous') === null){
+        window.location.href = ("logout");
+    }
+    else{
+        previous = localStorage.getItem('previous');
+        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2}, function(){
+            window.location.href = ("logout")
+        });
+    }
+}

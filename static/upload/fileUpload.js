@@ -362,3 +362,15 @@ function comment(id)
             localStorage.setItem('previous_upload', id);
         }
 }
+
+function logout(){
+    if (localStorage.getItem('previous_upload') === null){
+        window.location.href = ("logout");
+    }
+    else{
+        previous = localStorage.getItem('previous_upload');
+        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val()}, function(){
+            window.location.href = ("logout")
+        });
+    }
+}
