@@ -59,7 +59,7 @@ import mpld3
 import os
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from app import app
-from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta, notification
+from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta, notification, currentDAT
 from forms import InputForm, CommentForm
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -72,7 +72,7 @@ import mda
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-ALLOWED_EXTENSIONS = {'txt', 'mda'}
+ALLOWED_EXTENSIONS = {'txt', 'mda', 'dat'}
 usedArgs = []
 current_session = 'None'
 
@@ -711,6 +711,7 @@ def generateOutput():
     outType = request.form.get('outType', type=int)
     cordData = request.form.get('cordData', type=str)
     sesID = request.form.get('session', type=int)
+    datFName = request.form.get('datFName', type=str)
     output = []
     colNames = []
     if outType == 1:
@@ -756,7 +757,7 @@ def generateOutput():
                         if (idx + 1) == columns[i].data:
                             output.append(data[idx])
                             colNames.append(bools[i].label)
-        filename = writeOutput(output, colNames, file_instance.name)
+        filename = writeOutput(output, colNames, file_instance.name, '')
     elif outType == 2:
         file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
@@ -766,7 +767,10 @@ def generateOutput():
         colNames = []
         colNames.append("Energy")
         colNames.append("Signal")
-        filename = writeOutput(output, colNames, file_instance.name)
+        if datFName is not None:
+            filename = writeOutput(output, colNames, datFName, '')
+        else:
+            filename = writeOutput(output, colNames, file_instance.name, '')
     elif outType == 3:
         jidlist = json.loads(id)
         cords = json.loads(cordData)
@@ -776,14 +780,63 @@ def generateOutput():
         colNames = []
         colNames.append("Energy")
         colNames.append("Signal")
-        filename = writeOutput(output, colNames, jidlist)
-    return redirect(url_for('sendOut', filename=filename))
+        filename = writeOutput(output, colNames, jidlist, datFName)
+    elif outType == 4:
+        file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
+        cords = json.loads(cordData)
+        output = []
+        output.append(cords[0])
+        output.append(cords[1])
+        colNames = []
+        colNames.append("Energy")
+        colNames.append("Signal")
+        filename = writeOutput(output, colNames, datFName, '')
+        dfile = dataFile()
+        dfile.name = datFName
+        dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
+        dfile.comment = ''
+        dfile.authed = current_user.get_id()
+        user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
+        dfile.comChar = user_instance.commentChar
+        dfile.type = 'dat'
+        db.session.add(dfile)
+        db.session.commit()
+        with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
+            data = DATfile.read()
+        return data
+    elif outType == 5:
+        jidlist = json.loads(id)
+        cords = json.loads(cordData)
+        output = []
+        output.append(cords[0])
+        output.append(cords[1])
+        colNames = []
+        colNames.append("Energy")
+        colNames.append("Signal")
+        filename = writeOutput(output, colNames, jidlist, datFName)
+        dfile = dataFile()
+        dfile.name = datFName
+        dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
+        dfile.comment = ''
+        dfile.authed = current_user.get_id()
+        user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
+        dfile.comChar = user_instance.commentChar
+        dfile.type = 'dat'
+        db.session.add(dfile)
+        db.session.commit()
+        with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
+            data = DATfile.read()
+        return data
+    return redirect(url_for('sendOut', filename=filename, displayName=datFName))
 
 
-@app.route('/outData/<path:filename>', methods=['GET', 'POST'])
+@app.route('/outData/<path:filename>/<displayName>', methods=['GET', 'POST'])
 @login_required
-def sendOut(filename):
-    return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True)
+def sendOut(filename, displayName):
+    if displayName is not None:
+        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True, attachment_filename=displayName + '.dat')
+    else:
+        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True)
 
 
 @app.route('/db')
@@ -1017,7 +1070,7 @@ def clear_cmeta():
     current_session = 'None'
     meta = db.metadata
     for table in (meta.sorted_tables):
-        if table.name == 'current_meta':
+        if table.name == 'current_meta' or table.name == 'currentDAT':
             db.session.execute(table.delete())
     db.session.commit()
     return 'Cleared'
@@ -1387,6 +1440,65 @@ def peak_at_max():
                            shiftVal=str(abs(ycords[0][0])))
 
 
+@app.route('/modifyDAT', methods=['GET', 'POST'])
+@login_required
+def modifyDAT():
+    try:
+        DAT = db.session.query(currentDAT).one()
+    except Exception, e:
+        code = 'No DAT selected'
+        return render_template("modifyDAT.html", user=current_user, ses=current_session, code=code)
+    user = db.session.query(User).filter_by(username=current_user.username).first()
+    fig = plt.figure(figsize=(10, 7))
+    css = """
+    .legend-box{
+        cursor: pointer;
+    }
+    """
+    xs = []
+    ys = []
+    labels = []
+    lines = []
+    nameID = str(uuid.uuid4())
+    fig, ax = plt.subplots()
+    DAT = DAT.DAT.split("\n")
+    DAT = [x for x in DAT if not x.startswith(user.commentChar)]
+    for i in DAT:
+        if not i:
+            continue
+        line = i.split()
+        xs.append(float(line[0]))
+        ys.append(float(line[1]))
+    line = ax.plot(xs, ys, alpha=0, label='Summed')
+    lines.append(line[0])
+    labels.append('Summed')
+    mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
+    mpld3.plugins.connect(fig, HideLegend(nameID))
+    code = mpld3.fig_to_html(fig)
+    plt.close()
+    return render_template("modifyDAT.html", user=current_user, ses=current_session, code=code)
+
+
+@app.route('/setDAT', methods=['GET', 'POST'])
+@login_required
+def setDAT():
+    DAT = request.form.get('DAT', type=str)
+    DName = request.form.get('DName', type=str)
+    meta = db.metadata
+    for table in (meta.sorted_tables):
+        if table.name == 'currentDAT':
+            db.session.execute(table.delete())
+    db.session.commit()
+
+    cDAT = currentDAT()
+    cDAT.DAT = DAT
+    if DName is not None:
+        cDAT.DATname = DName
+    db.session.add(cDAT)
+    db.session.commit()
+    return 'Set'
+
+
 @app.route('/updateHRM', methods=['GET', 'POST'])
 @login_required
 def updateHRM():
@@ -1432,10 +1544,10 @@ def shareFile():
     return 'Shared'
 
 
-def writeOutput(output, colNames, name):
+def writeOutput(output, colNames, name, lname):
     comChar = current_user.commentChar
     if isinstance(name, list):
-        filename = 'Summed Data ' + str(getTime())
+        filename = lname + ' ' + str(getTime())
     else:
         filename = name + ' ' + str(getTime())
     f = open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'w')

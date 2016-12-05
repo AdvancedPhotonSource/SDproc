@@ -1,0 +1,40 @@
+.margin-info{
+    position: absolute;
+    top:60px;
+    right:10px;
+}
+
+.sessionName{ position:absolute; top: 105px; left:150px; font-weight:bold; border:1px dotted; padding:10px;}
+
+.mainContent{
+    width: 50%;
+    overflow: hidden;
+}
+
+.plot{
+    position: relative;
+    margin-left: 200px;
+    margin-top: 100px;
+}
+
+.floatL{
+    float: left;
+}
+
+.floatR{
+    width: 50%;
+    float: left;
+}
+
+.clear{
+    clear: both;
+}
+
+.buttons{
+    margin-top: 200px;
+    clear: both;
+}
+
+#remBackground{
+    margin-top: 50px;
+}

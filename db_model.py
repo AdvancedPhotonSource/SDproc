@@ -191,6 +191,14 @@ class currentMeta(db.Model):
     xbool = db.Column(db.Boolean())
 
 
+class currentDAT(db.Model):
+    __tablename__ = 'currentDAT'
+    id = db.Column(db.Integer, primary_key=True)
+
+    DATname = db.Column(db.String())
+    DAT = db.Column(db.String())
+
+
 class sessionMeta(db.Model):
     __tablename__ = 'sessionMeta'
     id = db.Column(db.Integer, primary_key=True)

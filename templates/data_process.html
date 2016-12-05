@@ -114,7 +114,12 @@ with context %}
                 </li>
                 <li class="active">
                     <a href="process">
-                        Process
+                        Sum
+                    </a>
+                </li>
+                <li>
+                    <a href="modifyDAT">
+                        Modify DAT
                     </a>
                 </li>
             </ul>
@@ -244,6 +249,7 @@ with context %}
                     <input type="hidden" name="cordData" id="cordData">
                     <input type="hidden" name="idnum" id="idnum">
                     <input type="hidden" name="outType" id="outType">
+                    <input type="hidden" name="datFName" id="datFName">
                 </form>
                 <div class="text-center output" id="outputBtn">
                     <button onclick="outputFile()" class="btn btn-primary btn-md" title="Display or save output file">
@@ -255,8 +261,8 @@ with context %}
     </div>
 </div>
 <div id="procButton" class="procButton">
-    <button onclick="startProc()" class="btn btn-primary btn-lg" title="Process all files">
-        Process
+    <button onclick="startProc()" class="btn btn-primary btn-lg" title="Sum all files">
+        Sum
     </button>
 </div>
 <footer>
