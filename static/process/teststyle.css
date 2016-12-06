@@ -88,13 +88,15 @@ select[multiple].scan-list{
 
 .ssModalFooter{
     position: relative;
-    height:50px;
+    height:70px;
     width:auto;
+    border-top: 1px solid #e5e5e5;
+    padding-top: 20px;
 }
 
 .ssModalBody{
     position: relative;
-    height:200px;
+    height:160px;
     width:auto;
 }
 

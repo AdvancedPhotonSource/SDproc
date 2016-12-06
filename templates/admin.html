@@ -187,7 +187,7 @@ with context %}
                 </div>
             </div>
             <div class="text-center">
-                <div class="ModalFooter">
+                <div class="ModalFooter ssModalFooter">
                     <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -368,7 +368,7 @@ with context %}
                 </div>
             </div>
             <div class="text-center">
-                <div class="ModalFooter">
+                <div class="ModalFooter ssModalFooter">
                     <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -390,13 +390,13 @@ with context %}
                     <div class="ModalBody">
                         <div class="userFileTable nestedTable" id="nestedFileNav">
                             <table id="nestedFileTable">
-                                <thead>
+                                <thead class="fixedHead">
                                     {{ thead() }}
                                 </thead>
-                                <tbody>
+                                <tbody class="scrollable">
                                     {% if fileData %}
                                         {% for post in fileData %}
-                                          <tr class="item nestItem" onclick="addThing(this)">
+                                          <tr class="item nestItem fixedHead" onclick="addThing(this)">
                                             <td class="name" colspan="2" id="{{ post.id }}">
                                               {%- if post.name == ".." -%}
                                                 Parent folder
@@ -442,13 +442,13 @@ with context %}
                     <div class="notifModalBody">
                         <div class="userFileTable nestedTable" id="nestedSessionNav">
                         <table id="nestedSessionTable">
-                            <thead>
+                            <thead class="fixedHead">
                                 {{ thead() }}
                             </thead>
-                            <tbody>
+                            <tbody class="scrollable">
                                 {% if sesData %}
                                     {% for post in sesData %}
-                                      <tr class="item" onclick="addThing(this)">
+                                      <tr class="item fixedHead" onclick="addThing(this)">
                                         <td class="name" colspan="2" id="{{ post.id }}">
                                           {%- if post.name == ".." -%}
                                             Parent folder
@@ -488,7 +488,7 @@ with context %}
                     <h4 class="modal-title">Users:</h4>
                 </div>
                 <div class="text-center">
-                    <input type="text" class="form-control modFiltInput singularFilt" placeholder="File Name" id="nestedSUserFilt">
+                    <input type="text" class="form-control modFiltInput singularFilt" placeholder="Username" id="nestedSUserFilt">
                 </div>
                 <div class="ModalBody">
                     <div class="fileNameTable" id="nestedSUserNav">
@@ -507,7 +507,7 @@ with context %}
                         </table>
                     </div>
                 </div>
-                <div class="text-center">
+                <div class="text-center ssModalFooter">
                     <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -521,7 +521,7 @@ with context %}
                     <h4 class="modal-title">Users:</h4>
                 </div>
                 <div class="text-center">
-                    <input type="text" class="form-control modFiltInput singularFilt" placeholder="File Name" id="nestedFUserFilt">
+                    <input type="text" class="form-control modFiltInput singularFilt" placeholder="Username" id="nestedFUserFilt">
                 </div>
                 <div class="ModalBody">
                     <div class="fileNameTable" id="nestedFUserNav">
@@ -540,7 +540,7 @@ with context %}
                         </table>
                     </div>
                 </div>
-                <div class="text-center">
+                <div class="text-center ssModalFooter">
                     <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
                 </div>
             </div>

@@ -38,3 +38,82 @@
 #remBackground{
     margin-top: 50px;
 }
+
+.rightIn{
+    position: relative;
+    left: 150px;
+    bottom: 25px;
+}
+
+.leftIn{
+    position: relative;
+    left: 50px;
+}
+
+.flatRad{
+    position: relative;
+}
+
+.flatLabel{
+    position: relative;
+    top: 15px;
+    left: 20px;
+}
+
+.remFlat{
+    position: relative;
+    top: 10px;
+    width: 350px;
+    left: 60px;
+}
+
+.linearRad{
+    position: relative;
+}
+
+.linLabel{
+    position: relative;
+    top: 35px;
+    left: 20px;
+}
+
+.remLin{
+    position: relative;
+    top: 30px;
+    width: 350px;
+    left: 50px;
+}
+
+.avRad{
+    position: relative;
+    top: 50px;
+    left: 36px;
+}
+
+.avLabel{
+    position: relative;
+    top: 48px;
+    left: 20px;
+}
+
+.remBackModalFooter{
+    position: relative;
+    border-top: 1px solid #e5e5e5;
+    height:70px;
+    width:auto;
+    padding-top: 20px;
+}
+
+.remBackModalBody{
+    position: relative;
+    height:160px;
+    width:auto;
+}
+
+.form-control{margin-bottom:20px}
+
+.centerBlock
+{
+    display: table;
+    margin: 0 auto;
+}

@@ -94,7 +94,7 @@
     height:auto;
     overflow-x: hidden;
     overflow-y: auto;
-    max-height:350px;
+    max-height:400px;
     margin-right: 10px;
     margin-left: 27px;
     float: left;
@@ -226,6 +226,7 @@
 
 .nestedTable{
     display: inline-block;
+    overflow-y: hidden !important;
     width: 90%;
 }
 
@@ -239,6 +240,8 @@
     position: relative;
     margin-top: 30px;
     width: auto;
+    border-top: 1px solid #e5e5e5;
+    padding-top: 20px;
 }
 
 .margin-info{
@@ -269,4 +272,12 @@ footer {
     bottom: 0px;
     height: 30px;
     transform: translate(-50%, -50%);
+}
+
+.borderTop{
+    border-top: 1px solid #e5e5e5;
+}
+
+.ModalBody{
+    padding-bottom: 20px;
 }
