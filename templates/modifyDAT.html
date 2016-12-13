@@ -89,7 +89,7 @@ with context %}
                         <input type="radio" id="linearRad" name="methodRad" aria-label="...">
                     </span>
                     <input type="text" class="form-control" id="leftX" style="width:25%" placeholder="Left X" aria-label="...">
-                    <input type="text" class="form-control" id="leftY" style="width:25%" placeholder="Right Y" aria-label="...">
+                    <input type="text" class="form-control" id="leftY" style="width:25%" placeholder="Left Y" aria-label="...">
                     <input type="text" class="form-control" id="rightX" style="width:25%" placeholder="Right X" aria-label="...">
                     <input type="text" class="form-control" id="rightY" style="width:25%" placeholder="Right Y" aria-label="...">
                 </div>
@@ -99,12 +99,12 @@ with context %}
             <div class="remBackModalFooter">
                 <div class="col-xs-4">
                     <span class="centerBlock">
-                        <button type="button" onclick="remBackground()" class="btn btn-primary btn-default">Apply</button>
+                        <button type="button" onclick="remBackground()" class="btn btn-primary btn-default" data-dismiss="modal">Apply</button>
                     </span>
                 </div>
                 <div class="col-xs-4">
                     <span class="centerBlock">
-                        <button type="button" class="btn btn-primary btn-default" data-dismiss="modal">Reset</button>
+                        <button type="button" class="btn btn-primary btn-default" onclick="resetPlot()" data-dismiss="modal">Reset</button>
                     </span>
                 </div>
                 <div class="col-xs-4">
@@ -126,16 +126,16 @@ with context %}
             <div class="remBackModalBody">
                 <label class="leftIn" style="margin-top:30px;">Left Inpoint</label>
                 <br/>
-                <input type="text" id="leftIn" class="floatL leftIn" placeholder="X-Point from plot(meV)">
+                <input type="text" id="leftIn" class="floatL leftIn form-control" placeholder="X-Point from plot(meV)">
 
                 <label class="rightIn">Right Inpoint</label>
                 <br/>
-                <input type="text" id="rightIn" class="floatL rightIn" placeholder="X-Point from plot(meV)">
+                <input type="text" id="rightIn" class="floatL rightIn form-control" placeholder="X-Point from plot(meV)">
             </div>
             <div class="remBackModalFooter">
                 <div class="col-xs-6">
                     <span class="centerBlock">
-                        <button type="button" class="btn btn-primary btn-default" data-dismiss="modal">Average</button>
+                        <button type="button" class="btn btn-primary btn-default" data-dismiss="modal" onclick="averageRange()">Average</button>
                     </span>
                 </div>
                 <div class="col-xs-6">
@@ -236,8 +236,22 @@ with context %}
              <div id="process_plot" class="plot">
                 {{code|safe}}
             </div>
+            <form id="output-form" method=post action="">
+                <input type="hidden" name="outType" id="outType">
+                <input type="hidden" name="datFName" id="datFName">
+            </form>
+            <div class="text-center output" id="outputBtn">
+                <button onclick="outputFile()" class="btn btn-primary btn-md" title="Display or save output file">
+                    Output
+                </button>
+            </div>
         </div>
     </div>
 </div>
+<footer>
+    <div class="text-center">
+        <p>Copyright (c) UChicago Argonne, LLC. All rights reserved.</p>
+    </div>
+</footer>
 </body>
 </html>

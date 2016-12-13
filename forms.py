@@ -43,7 +43,9 @@ __author__ = 'caschmitz'
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
-from wtforms import Form, FloatField, validators, StringField, PasswordField, BooleanField, IntegerField
+from wtforms import Form, FloatField, validators, StringField, PasswordField, BooleanField, IntegerField, TextAreaField
+from wtforms.validators import DataRequired
+from flask_wtf import RecaptchaField
 from db_model import db, User
 import flask.ext.wtf.html5 as html5
 
@@ -86,7 +88,8 @@ class InputForm(Form):
 
 class CommentForm(Form):
     # Fields
-    comment = StringField('Comment', [validators.Length(min=0, max=10000)])
+    comment = TextAreaField('Comment', validators=[DataRequired()])
+    recaptcha = RecaptchaField()
 
 class register_form(Form):
     username = StringField(label='Username', validators=[validators.InputRequired()])
@@ -112,6 +115,7 @@ class register_form(Form):
 class login_form(Form):
     username = StringField(label='Username', validators=[validators.InputRequired()])
     password = PasswordField(label='Password', validators=[validators.InputRequired()])
+    #recaptcha = RecaptchaField()
 
     def validate(self):
         if not Form.validate(self):

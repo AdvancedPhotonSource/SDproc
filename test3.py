@@ -69,6 +69,7 @@ import numpy
 import uuid
 from sqlalchemy import desc
 import mda
+from scipy import stats
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -430,6 +431,12 @@ def index():
         data.insert(0,
                     {'name': instance.name, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed,
                      'modified': lastMod})
+    DATsessions = db.session.query(dataFile).filter_by(type='dat')
+    for Dinstance in DATsessions:
+        lastMod = modified(Dinstance.path)
+        data.insert(0,
+                    {'name': Dinstance.name, 'id': Dinstance.id, 'comment': Dinstance.comment, 'authed': Dinstance.authed,
+                    'modified': lastMod})
     if request.method == 'POST':
         return redirect(url_for('dataFormat'))
     return render_template('view_output.html', data=data, user=user, names=names)
@@ -712,6 +719,7 @@ def generateOutput():
     cordData = request.form.get('cordData', type=str)
     sesID = request.form.get('session', type=int)
     datFName = request.form.get('datFName', type=str)
+    DBSave = request.form.get('DBSave', type=int)
     output = []
     colNames = []
     if outType == 1:
@@ -791,16 +799,17 @@ def generateOutput():
         colNames.append("Energy")
         colNames.append("Signal")
         filename = writeOutput(output, colNames, datFName, '')
-        dfile = dataFile()
-        dfile.name = datFName
-        dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
-        dfile.comment = ''
-        dfile.authed = current_user.get_id()
-        user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
-        dfile.comChar = user_instance.commentChar
-        dfile.type = 'dat'
-        db.session.add(dfile)
-        db.session.commit()
+        if DBSave != 0:
+            dfile = dataFile()
+            dfile.name = datFName
+            dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
+            dfile.comment = ''
+            dfile.authed = current_user.get_id()
+            user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
+            dfile.comChar = user_instance.commentChar
+            dfile.type = 'dat'
+            db.session.add(dfile)
+            db.session.commit()
         with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
             data = DATfile.read()
         return data
@@ -814,8 +823,43 @@ def generateOutput():
         colNames.append("Energy")
         colNames.append("Signal")
         filename = writeOutput(output, colNames, jidlist, datFName)
+        if DBSave != 0:
+            dfile = dataFile()
+            dfile.name = datFName
+            dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
+            dfile.comment = ''
+            dfile.authed = current_user.get_id()
+            user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
+            dfile.comChar = user_instance.commentChar
+            dfile.type = 'dat'
+            db.session.add(dfile)
+            db.session.commit()
+        with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
+            data = DATfile.read()
+        return data
+    elif outType == 6:
+        DAT = db.session.query(currentDAT).one()
+        output = []
+        data = json.loads(DAT.DAT)
+        output.append(data[0])
+        output.append(data[1])
+        colNames = []
+        colNames.append("Energy")
+        colNames.append("Signal")
+        filename = writeOutput(output, colNames, DAT.DATname, '')
+        datFName = DAT.DATname
+    elif outType == 7:
+        DAT = db.session.query(currentDAT).one()
+        output = []
+        data = json.loads(DAT.DAT)
+        output.append(data[0])
+        output.append(data[1])
+        colNames = []
+        colNames.append("Energy")
+        colNames.append("Signal")
+        filename = writeOutput(output, colNames, DAT.DATname, '')
         dfile = dataFile()
-        dfile.name = datFName
+        dfile.name = DAT.DATname
         dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
         dfile.comment = ''
         dfile.authed = current_user.get_id()
@@ -824,9 +868,7 @@ def generateOutput():
         dfile.type = 'dat'
         db.session.add(dfile)
         db.session.commit()
-        with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
-            data = DATfile.read()
-        return data
+        return 'Saved'
     return redirect(url_for('sendOut', filename=filename, displayName=datFName))
 
 
@@ -1080,6 +1122,8 @@ def clear_cmeta():
 @login_required
 def clearPart_cmeta():
     idthis = request.form.get('id', type=int)
+    if idthis in usedArgs:
+        usedArgs.remove(idthis)
     deleting = db.session.query(currentMeta).filter_by(file_id=idthis).first()
     db.session.delete(deleting)
     db.session.commit()
@@ -1276,6 +1320,9 @@ def process():
                     format_instance.fit_range = fitRange
                     db.session.commit()
                 else:
+                    npXcords = numpy.array(ycords[0])
+                    npXcords = numpy.multiply(npXcords, 1000000)
+                    ycords[0] = npXcords
                     moveXcords(ycords, inputCord)
                 max[0] = ((max[0] * 1000000) - format_instance.fit_pos)
                 endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
@@ -1413,7 +1460,7 @@ def peak_at_max():
             npData.append(ycords[1][oneCord])
         npData = numpy.array(npData)
         max = numpy.argmax(npData)
-        maxIndex = oneCord - len(targetRange) + max
+        maxIndex = oneCord - len(targetRange) + max + 1
 
         leftBound = (find_nearest(npXcords, npXcords[maxIndex] - (fitRange / 2)))
         rightBound = (find_nearest(npXcords, npXcords[maxIndex] + (fitRange / 2)))
@@ -1461,14 +1508,9 @@ def modifyDAT():
     lines = []
     nameID = str(uuid.uuid4())
     fig, ax = plt.subplots()
-    DAT = DAT.DAT.split("\n")
-    DAT = [x for x in DAT if not x.startswith(user.commentChar)]
-    for i in DAT:
-        if not i:
-            continue
-        line = i.split()
-        xs.append(float(line[0]))
-        ys.append(float(line[1]))
+    data = json.loads(DAT.DAT)
+    xs = data[0]
+    ys = data[1]
     line = ax.plot(xs, ys, alpha=0, label='Summed')
     lines.append(line[0])
     labels.append('Summed')
@@ -1476,7 +1518,7 @@ def modifyDAT():
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
     plt.close()
-    return render_template("modifyDAT.html", user=current_user, ses=current_session, code=code)
+    return render_template("modifyDAT.html", user=current_user, ses=DAT.DATname, code=code)
 
 
 @app.route('/setDAT', methods=['GET', 'POST'])
@@ -1491,12 +1533,125 @@ def setDAT():
     db.session.commit()
 
     cDAT = currentDAT()
+
+    xs = []
+    ys = []
+    user = db.session.query(User).filter_by(username=current_user.username).first()
+    data = DAT.split("\n")
+    data = [x for x in data if not x.startswith(user.commentChar)]
+    for i in data:
+        if not i:
+            continue
+        line = i.split()
+        xs.append(float(line[0]))
+        ys.append(float(line[1]))
+    DAT = [xs, ys]
+    DAT = json.dumps(DAT)
     cDAT.DAT = DAT
+    cDAT.originDAT = DAT
     if DName is not None:
         cDAT.DATname = DName
     db.session.add(cDAT)
     db.session.commit()
     return 'Set'
+
+@app.route('/averageDAT', methods=['GET', 'POST'])
+@login_required
+def averageDAT():
+    rightIn = request.form.get('right', type=int)
+    leftIn = request.form.get('left', type=int)
+    DAT = db.session.query(currentDAT).one()
+    leftCords = [[] for _ in xrange(2)]
+    rightCords = [[] for _ in xrange(2)]
+    data = json.loads(DAT.DAT)
+    for i in range(len(data[0])):
+        if data[0][i] <= leftIn:
+            leftCords[0].append(data[0][i])
+            leftCords[1].append(data[1][i])
+        if data[0][i] >= rightIn:
+            rightCords[0].append(data[0][i])
+            rightCords[1].append(data[1][i])
+
+    linRegLeft = stats.linregress(leftCords[0], leftCords[1])
+    Lx1 = data[0][1]
+    Lx2 = leftIn
+    Ly1 = data[1][1]
+    Ly2 = linRegLeft.slope * (Lx2 - Lx1) + Ly1
+
+
+
+    linRegRight = stats.linregress(rightCords[0], rightCords[1])
+
+    Rx1 = rightIn
+    Rx2 = data[0][-1]
+    Ry2 = data[1][-1]
+    Ry1 = linRegRight.slope * (Rx1 - Rx2) + Ry2
+
+    fig = plt.figure(figsize=(10, 7))
+    css = """
+        .legend-box{
+            cursor: pointer;
+        }
+        """
+    labels = []
+    lines = []
+    nameID = str(uuid.uuid4())
+    fig, ax = plt.subplots()
+    xs = data[0]
+    ys = data[1]
+    line = ax.plot(xs, ys, alpha=0, label='Summed')
+    lines.append(line[0])
+    labels.append('Summed')
+
+    line = ax.plot([Lx1, Lx2], [Ly1, Ly2], alpha=0, label='Left Lin Reg')
+    lines.append(line[0])
+    labels.append('Left Lin Reg')
+    line = ax.plot([Rx1, Rx2], [Ry1, Ry2], alpha=0, label='Right Lin Reg')
+    lines.append(line[0])
+    labels.append('Right Lin Reg')
+    mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
+    mpld3.plugins.connect(fig, HideLegend(nameID))
+    code = mpld3.fig_to_html(fig)
+    plt.close()
+
+    return code
+
+
+@app.route('/remBackDAT', methods=['GET', 'POST'])
+@login_required
+def remBackDAT():
+    flatVal = request.form.get('flatVal', type=int)
+    if flatVal != None:
+        DAT = db.session.query(currentDAT).one()
+        data = json.loads(DAT.DAT)
+        for i in range(len(data[1])):
+            data[1][i] = data[1][i] - flatVal
+        DAT.DAT = json.dumps(data)
+        db.session.commit()
+    leftX = request.form.get('leftX', type=int)
+    leftY = request.form.get('leftY', type=int)
+    rightX = request.form.get('rightX', type=int)
+    rightY = request.form.get('rightY', type=int)
+    if leftX != None:
+        DAT = db.session.query(currentDAT).one()
+        data = json.loads(DAT.DAT)
+        xs = numpy.array([leftX, rightX])
+        ys = numpy.array([leftY, rightY])
+        slope, intercept = numpy.polyfit(xs, ys, 1)
+        for i in range(len(data[1])):
+            data[1][i] = data[1][i] - abs((slope * data[0][i]) + intercept)
+        DAT.DAT = json.dumps(data)
+        db.session.commit()
+    return redirect(url_for('modifyDAT'))
+
+
+@app.route('/resetDAT', methods=['GET', 'POST'])
+@login_required
+def resetDAT():
+    DAT = db.session.query(currentDAT).one()
+    DAT.DAT = DAT.originDAT
+    db.session.commit()
+    return redirect(url_for('modifyDAT'))
 
 
 @app.route('/updateHRM', methods=['GET', 'POST'])

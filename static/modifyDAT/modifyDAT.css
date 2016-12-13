@@ -110,10 +110,30 @@
     width:auto;
 }
 
-.form-control{margin-bottom:20px}
+.form-control{
+    margin-bottom:20px;
+    width: 32%;
+}
 
 .centerBlock
 {
     display: table;
     margin: 0 auto;
+}
+
+footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 30px;
+    width: 100%;
+}
+
+body{
+    margin: 0 0 30px;
+}
+
+html{
+    position: relative;
+    min-height: 100%;
 }

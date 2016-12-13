@@ -197,6 +197,7 @@ class currentDAT(db.Model):
 
     DATname = db.Column(db.String())
     DAT = db.Column(db.String())
+    originDAT = db.Column(db.String())
 
 
 class sessionMeta(db.Model):

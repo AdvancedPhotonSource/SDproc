@@ -204,9 +204,18 @@ h1{
 }
 
 footer {
-    position: fixed;
-    left: 50%;
-    bottom: 0px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
     height: 30px;
-    transform: translate(-50%, -50%);
+    width: 100%;
+}
+
+body{
+    margin: 0 0 30px;
+}
+
+html{
+    position: relative;
+    min-height: 100%;
 }

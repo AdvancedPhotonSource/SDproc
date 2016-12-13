@@ -52,11 +52,10 @@ $(function (){
             function(data){
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
-            })
-
-            $.post('/SDproc/show_comment', { idnext: this.value, format: 1, ses: ses},
-            function(data){
-            $('#comment').val(data)
+                $.post('/SDproc/show_comment', { idnext: localStorage.getItem('previous2'), format: 1, ses: ses},
+                function(data){
+                    $('#comment').val(data)
+                })
             })
         }
         else
@@ -88,7 +87,7 @@ $(function (){
 
 
 $(document).ready( function() {
-    $('#unit').val('keV');
+    $('#unit').val('meV');
     setPlotAgainst(localStorage.getItem('plotAgainst'));
     asynchOnLoad()
     if (!localStorage.getItem('previous2') === null)
@@ -512,12 +511,12 @@ $(function (){
             $('#HRM').text('Dy-nested-1meV')
             $('#HRM').append("<span class='caret'></span>");
         }
-        else if (hrm = 'IXS-cryo-1meV'){
+        else if (hrm == 'IXS-cryo-1meV'){
             alert('Not yet implemented')
             $('#HRM').text('IXS-cryo-1meV')
             $('#HRM').append("<span class='caret'></span>");
         }
-        else if (hrm = 'Sn-cryo-1meV'){
+        else if (hrm == 'Sn-cryo-1meV'){
             var hrm = {};
             hrm['hrm_e0'] = 23880000.0
             hrm['hrm_bragg1'] = 9.122

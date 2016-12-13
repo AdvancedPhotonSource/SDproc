@@ -215,6 +215,7 @@ function setcDAT(){
             $('#idnum').val(id);
             $('#cordData').val(data);
             $('#outType').val(4);
+            $('#DBSave').val(0);
             $('#output-form').attr('action', '/SDproc/generateOutput')
             $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
                 $.post('/SDproc/setDAT', {DAT: data})
@@ -226,6 +227,7 @@ function setcDAT(){
             $('#idnum').val(id);
             $('#cordData').val(data);
             $('#outType').val(5);
+            $('#DBSave').val(0);
             $('#output-form').attr('action', '/SDproc/generateOutput')
             $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
                 $.post('/SDproc/setDAT', {DAT: data})
@@ -256,6 +258,7 @@ function outputFile(){
                                 $('#idnum').val(id);
                                 $('#cordData').val(data);
                                 $('#outType').val(4);
+                                $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())
                                 if (jQuery.type($('#DATname').val()) === "string" && $('#DATname').val().length > 0){
@@ -281,6 +284,7 @@ function outputFile(){
                                 $('#idnum').val(jIds);
                                 $('#cordData').val(data);
                                 $('#outType').val(5);
+                                $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())
                                 if (jQuery.type($('#DATname').val()) === "string" && $('#DATname').val().length > 0){
@@ -304,6 +308,7 @@ function outputFile(){
                                 $('#idnum').val(id);
                                 $('#cordData').val(data);
                                 $('#outType').val(4);
+                                $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())
                                 if (jQuery.type($('#DATname').val()) === "string" && $('#DATname').val().length > 0){
@@ -329,6 +334,7 @@ function outputFile(){
                                 $('#idnum').val(jIds);
                                 $('#cordData').val(data);
                                 $('#outType').val(5);
+                                $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())
                                 if (jQuery.type($('#DATname').val()) === "string" && $('#DATname').val().length > 0){
