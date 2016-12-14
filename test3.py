@@ -594,7 +594,7 @@ def dataFormat():
             format.norm = 7
             format.extra = 1
             format.against_E = 'Point'
-            format.fit_type = 'AtMax'
+            format.fit_type = 'Unfit'
             format.fit_pos = 0
             format.fit_range = 3
             format.file_id = idthis
@@ -1203,33 +1203,39 @@ def process():
                 data, name, unusedpath = readMda(file_instance.path)
             else:
                 data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
-            if bools[1].data:
-                energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
-                                     format_instance.hrm)
-                additional.append(energy)
-                legendNames.append(columns[1].id)
-            elif bools[2].data:
-                energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                          unicode_to_int(columns[4].data - 1), unicode_to_int(columns[5].data - 1),
-                                          unicode_to_int(columns[6].data - 1), format_instance.hrm)
-                additional.append(energy)
-                legendNames.append(columns[2].id)
-            else:
+            fitType = format_instance.fit_type
+            if fitType == 'Unfit':
                 used.append(unicode_to_int(columns[0].data))
                 legendNames.append(columns[0].id)
-            if bools[9].data:
-                signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
-                                           unicode_to_int(columns[10].data - 1))
-                additional.append(signal)
-                legendNames.append(columns[9].id)
-            else:
                 used.append(unicode_to_int(columns[8].data))
                 legendNames.append(columns[8].id)
+            else:
+                if bools[1].data:
+                    energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
+                                         format_instance.hrm)
+                    additional.append(energy)
+                    legendNames.append(columns[1].id)
+                elif bools[2].data:
+                    energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
+                                              unicode_to_int(columns[4].data - 1), unicode_to_int(columns[5].data - 1),
+                                              unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                    additional.append(energy)
+                    legendNames.append(columns[2].id)
+                else:
+                    used.append(unicode_to_int(columns[0].data))
+                    legendNames.append(columns[0].id)
+                if bools[9].data:
+                    signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
+                                               unicode_to_int(columns[10].data - 1))
+                    additional.append(signal)
+                    legendNames.append(columns[9].id)
+                else:
+                    used.append(unicode_to_int(columns[8].data))
+                    legendNames.append(columns[8].id)
             max, xmax, ycords = convert_Numpy(used, data, additional)
-            fitType = format_instance.fit_type
             inputCord = format_instance.fit_pos
             fitRange = format_instance.fit_range
-            if fitType == 'AtMax':
+            if fitType == 'AtMax' or fitType == 'Unfit':
                 temp = xmax[1]
                 xmax[1] = (ycords[0][xmax[1]] * 1000000)
                 npXcords = numpy.array(ycords[0])
@@ -1701,6 +1707,8 @@ def shareFile():
 
 def writeOutput(output, colNames, name, lname):
     comChar = current_user.commentChar
+    if comChar == None:
+        comChar = '#'
     if isinstance(name, list):
         filename = lname + ' ' + str(getTime())
     else:
