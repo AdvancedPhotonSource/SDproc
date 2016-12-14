@@ -201,8 +201,8 @@ with context %}
                                 {% set auths = post.authed.split(',') %}
                                 {% for aID in auths %}
                                     {% if aID|int() == user.get_id()|int() %}
-                                      <tr class="item fixedHead" ondblclick="moveFile()">
-                                        <td class="name" colspan="2" id="{{ post.id }}">
+                                      <tr class="item fixedHead">
+                                        <td class="name" colspan="2" id="{{ post.id }}" data-type="{{ post.type }}">
                                           {%- if post.name == ".." -%}
                                             Parent folder
                                           {%- else -%}

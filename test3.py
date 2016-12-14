@@ -430,13 +430,13 @@ def index():
         lastMod = instance.last_used
         data.insert(0,
                     {'name': instance.name, 'id': instance.id, 'comment': instance.comment, 'authed': instance.authed,
-                     'modified': lastMod})
+                     'modified': lastMod, 'type': 'ses'})
     DATsessions = db.session.query(dataFile).filter_by(type='dat')
     for Dinstance in DATsessions:
         lastMod = modified(Dinstance.path)
         data.insert(0,
                     {'name': Dinstance.name, 'id': Dinstance.id, 'comment': Dinstance.comment, 'authed': Dinstance.authed,
-                    'modified': lastMod})
+                    'modified': lastMod, 'type': 'dat'})
     if request.method == 'POST':
         return redirect(url_for('dataFormat'))
     return render_template('view_output.html', data=data, user=user, names=names)
@@ -988,7 +988,10 @@ def save_comment():
         if idprev is not None and formatting == 1:
             instance = db.session.query(dataFile).filter_by(id=idprev).first()
             format_instance = db.session.query(currentMeta).filter_by(path=instance.path).first()
-            format_instance.comment = comment
+            if format_instance is None:
+                instance.comment = comment
+            else:
+                format_instance.comment = comment
             db.session.commit()
         if idprev is not None and formatting == 2:
             instance = db.session.query(sessionFiles).filter_by(id=idprev).first()
@@ -1014,7 +1017,9 @@ def show_comment():
                 setBaseComment(idnext)
             instance = db.session.query(dataFile).filter_by(id=idnext).first()
             format_instance = db.session.query(currentMeta).filter_by(file_id=instance.id).first()
-            if format_instance.comment is not None:
+            if format_instance is None:
+                send_comment = instance.comment
+            elif format_instance.comment is not None:
                 send_comment = format_instance.comment
             else:
                 setBaseComment(idnext)
@@ -1136,6 +1141,33 @@ def set_ses():
     if request.method == 'POST':
         files = []
         sesID = request.form.get('id', type=int)
+        type = request.form.get('type', type=str)
+        if type == 'dat':
+            dat = db.session.query(dataFile).filter_by(id=sesID).first()
+            with open(dat.path, 'r') as DATfile:
+                data = DATfile.read()
+                cDAT = currentDAT()
+
+                xs = []
+                ys = []
+                user = db.session.query(User).filter_by(username=current_user.username).first()
+                data = data.split("\n")
+                data = [x for x in data if not x.startswith(user.commentChar)]
+                for i in data:
+                    if not i:
+                        continue
+                    line = i.split()
+                    xs.append(float(line[0]))
+                    ys.append(float(line[1]))
+                DAT = [xs, ys]
+                DAT = json.dumps(DAT)
+                cDAT.DAT = DAT
+                cDAT.originDAT = DAT
+                if dat.name is not None:
+                    cDAT.DATname = dat.name
+                db.session.add(cDAT)
+                db.session.commit()
+            return 'Saved'
         metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
         for meta in metas:
             actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
@@ -1676,15 +1708,25 @@ def updateHRM():
 def shareSes():
     idthis = request.form.get('id', type=int)
     shareUser = request.form.get('toUser', type=str)
+    type = request.form.get('type', type=str)
     thisUser = db.session.query(User).filter_by(username=shareUser).first()
     toAuth = thisUser.id
-    session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
-    auths = session_instance.authed.split(',')
-    if toAuth in auths:
-        return 'Already Shared'
+    if type == 'dat':
+        dat_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+        auths = dat_instance.authed.split(',')
+        if toAuth in auths:
+            return 'Already Shared'
+        else:
+            dat_instance.authed = dat_instance.authed + ',' + str(toAuth)
+            db.session.commit()
     else:
-        session_instance.authed = session_instance.authed + ',' + str(toAuth)
-        db.session.commit()
+        session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
+        auths = session_instance.authed.split(',')
+        if toAuth in auths:
+            return 'Already Shared'
+        else:
+            session_instance.authed = session_instance.authed + ',' + str(toAuth)
+            db.session.commit()
     return 'Shared'
 
 

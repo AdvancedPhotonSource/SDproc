@@ -126,7 +126,14 @@ $(window).on('unload', function(){
     else
     {
         previous = localStorage.getItem('previous');
-        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2});
+        type = localStorage.getItem('previousType');
+        if (type == 'dat'){
+            var format = 1;
+        }
+        else{
+            var format = 2;
+        }
+        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: format});
     }
 })
 
@@ -205,15 +212,21 @@ function proceed()
     $.post('/SDproc/clear_rowa',function(){
         $.post('/SDproc/clear_cmeta', function(){
             sesID = localStorage.getItem('previous');
-            $.post('/SDproc/set_ses', {id: sesID}, function(data){
-            var parsed = $.parseJSON(data);
-            var files = [];
-                $(parsed).each(function(){
-                    files.push(this);
-                })
-                localStorage.setItem('use_files', JSON.stringify(files));
-                localStorage.setItem('usingSes', 1);
-                window.location.href = ("data");
+            type = localStorage.getItem('previousType');
+            $.post('/SDproc/set_ses', {id: sesID, type: type}, function(data){
+                if (type == 'dat'){
+                    window.location.href = ("modifyDAT");
+                }
+                else{
+                    var parsed = $.parseJSON(data);
+                    var files = [];
+                    $(parsed).each(function(){
+                        files.push(this);
+                    })
+                    localStorage.setItem('use_files', JSON.stringify(files));
+                    localStorage.setItem('usingSes', 1);
+                    window.location.href = ("data");
+                }
             })
         })
     });
@@ -235,7 +248,14 @@ function delFile()
                         {
                             found = 1;
                             var fid = $('td:first', $(row)).attr('id')
-                            $.post( "/SDproc/delete", { id: fid, table: "Session"},
+                            var type = $('td:first', $(row)).attr('data-type')
+                            if (type == 'dat'){
+                                var table = 'File'
+                            }
+                            else{
+                                var table = 'Session'
+                            }
+                            $.post( "/SDproc/delete", { id: fid, table: table},
                             function(){
                             $('#navTable').load("/SDproc/select #navTable>*",function(){
                                 setupClick();
@@ -271,7 +291,7 @@ function setupClick()
         rows.removeClass('highlight');
         rows.removeClass('lightlight');
         row.addClass('highlight');
-        comment($('td:first', $(row)).attr('id'));
+        comment($('td:first', $(row)).attr('id'), $('td:first', $(row)).attr('data-type'));
         $('#finito').prop('disabled', false);
     })
 
@@ -296,12 +316,19 @@ function setupClick()
     })
 }
 
-function comment(id)
+function comment(id, type)
 {
         if (localStorage.getItem('previous') === null)
         {
             localStorage.setItem('previous', id)
-            $.post('/SDproc/show_comment', { idnext: id, format: 2},
+            localStorage.setItem('previousType', type)
+            if (type == 'dat'){
+                var format = 1;
+            }
+            else{
+                var format = 2;
+            }
+            $.post('/SDproc/show_comment', { idnext: id, format: format},
             function(data){
             $('#comment').val(data)
             })
@@ -310,14 +337,21 @@ function comment(id)
         {
             var nextID = id
             previous = localStorage.getItem('previous');
-            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2},
+            if (type == 'dat'){
+                var format = 1;
+            }
+            else{
+                var format = 2;
+            }
+            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: format},
             function(){
-                $.post('/SDproc/show_comment', { idnext: nextID, format: 2},
+                $.post('/SDproc/show_comment', { idnext: nextID, format: format},
                 function(data){
                     $('#comment').val(data)
                 })
             })
             localStorage.setItem('previous', id);
+            localStorage.setItem('previousType', type)
         }
 }
 
@@ -336,9 +370,10 @@ function shareSes(){
                         {
                             found = 1;
                             var fid = $('td:first', $(row)).attr('id');
+                            var type = $('td:first', $(row)).attr('data-type');
                             var nameTable = $('#nameTable');
                             var toUser = $.trim($(table.find('tbody tr.highlight')).text())
-                            $.post( "/SDproc/shareSes", { id: fid, toUser: toUser});
+                            $.post( "/SDproc/shareSes", { id: fid, toUser: toUser, type: type});
                         }
                         });
                         if (found == 0)
