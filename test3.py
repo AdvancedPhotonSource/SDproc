@@ -875,13 +875,16 @@ def generateOutput():
         db.session.add(dfile)
         db.session.commit()
         return datFName
-    return redirect(url_for('sendOut', filename=filename, displayName=datFName))
+    if datFName is not None:
+        return redirect(url_for('sendOut', filename=filename, displayName=datFName))
+    else:
+        return redirect(url_for('sendOut', filename=filename, displayName='None'))
 
 
 @app.route('/outData/<path:filename>/<displayName>', methods=['GET', 'POST'])
 @login_required
 def sendOut(filename, displayName):
-    if displayName is not None:
+    if displayName != 'None' and displayName is not None:
         return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True, attachment_filename=displayName + '.dat')
     else:
         return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True)
