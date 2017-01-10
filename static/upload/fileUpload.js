@@ -300,6 +300,13 @@ function mdaFile()
     $('#formatType').append("<span class='caret'></span>");
 }
 
+function datFile(){
+    $('#formatDelim').prop('disabled', false);
+    $('#formatDelim').attr('placeholder', 'Comment character');
+    $('#formatType').text('dat');
+    $('#formatType').append("<span class='caret'></span>");
+}
+
 function proceed()
 {
     window.location.href = ("select");
@@ -345,7 +352,8 @@ function comment(id)
             localStorage.setItem('previous_upload', id)
             $.post('/SDproc/show_comment', { idnext: id },
             function(data){
-            $('#comment').val(data)
+            $('#comment').val(data);
+            return redirect(url_for('modifyDAT'));
             })
         }
         else

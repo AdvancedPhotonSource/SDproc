@@ -28,15 +28,17 @@ $(document).ready( function() {
 function averageRange(){
     var leftIn = $('#leftIn').val()
     var rightIn = $('#rightIn').val()
-    $.post('/averageDAT', {right: rightIn, left: leftIn}, function(data){
-        $('#process_plot').html(data)
+    $.post('/SDproc/averageDAT', {right: rightIn, left: leftIn}, function(data){
+        var data = JSON.parse(data)
+        $('#process_plot').html(data[0])
+        localStorage.setItem('averageLin', data[1])
     })
 }
 
 function remBackground(){
     if ($('#flatRad').is(':checked')){
         var flatVal = $('#flatVal').val()
-        $.post('/remBackDAT', {flatVal: flatVal}, function(data){
+        $.post('/SDproc/remBackDAT', {flatVal: flatVal}, function(data){
             $('#process_plot').html($(data).find('#process_plot').html())
         })
     }
@@ -45,17 +47,25 @@ function remBackground(){
         var lY = $('#leftY').val()
         var rX = $('#rightX').val()
         var rY = $('#rightY').val()
-        $.post('/remBackDAT', {leftX : lX, leftY : lY, rightX: rX, rightY: rY}, function(data){
+        $.post('/SDproc/remBackDAT', {leftX : lX, leftY : lY, rightX: rX, rightY: rY}, function(data){
             $('#process_plot').html($(data).find('#process_plot').html())
         })
     }
     else if ($('#avRad').is(':checked')){
-        alert('Should I have users chose a line or connect the lines and use that?')
+        if (localStorage.getItem('averageLin') === null){
+            alert('No average found, please create one with the Average Range button')
+        }
+        else{
+            $.post('/SDproc/remBackDAT', {average: localStorage.getItem('averageLin')}, function(data){
+                $('#process_plot').html($(data).find('#process_plot').html())
+            })
+        }
+
     }
 }
 
 function resetPlot(){
-    $.post('/resetDAT', function(data){
+    $.post('/SDproc/resetDAT', function(data){
         $('#process_plot').html($(data).find('#process_plot').html())
     })
 }
@@ -103,8 +113,10 @@ function outputFile(){
         buttons: [{
             label: 'Save to Server',
             action: function(dialogItself){
-                $.post('/generateOutput', {outType: 7, datFName: $('#DATname').val()}, function(){
-                    alert('Saved')
+                $.post('/SDproc/generateOutput', {outType: 7, datFName: $('#DATname').val()}, function(data){
+                    alert('Saved');
+                    $('#sesName').html(data);
+                    dialogItself.close();
                 })
             }
         }, {
@@ -114,6 +126,7 @@ function outputFile(){
                 $('#outType').val(6);
                 $('#datFName').val($('#DATname').val())
                 $('#output-form')[0].submit();
+                dialogItself.close();
             }
         }]
     })

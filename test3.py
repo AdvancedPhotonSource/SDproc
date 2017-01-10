@@ -318,6 +318,11 @@ def getInfo():
 @app.route('/addThing', methods=['GET', 'POST'])
 @login_required
 def addThing():
+    '''
+
+
+    :return:
+    '''
     if request.method == 'POST':
         thing = request.form.get('id', type=str)
         location = request.form.get('from', type=str)
@@ -454,6 +459,8 @@ def upload():
         lastMod = modified(instance.path)
         temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
         modname = [instance.name + temp]
+        if instance.type == 'dat' and instance.name[:-4] != '.dat':
+            instance.name = instance.name + '.dat'
         data.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
                         'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
     if request.method == 'POST':
@@ -846,8 +853,7 @@ def generateOutput():
         colNames = []
         colNames.append("Energy")
         colNames.append("Signal")
-        filename = writeOutput(output, colNames, DAT.DATname, '')
-        datFName = DAT.DATname
+        filename = writeOutput(output, colNames, datFName, '')
     elif outType == 7:
         DAT = db.session.query(currentDAT).one()
         output = []
@@ -857,9 +863,9 @@ def generateOutput():
         colNames = []
         colNames.append("Energy")
         colNames.append("Signal")
-        filename = writeOutput(output, colNames, DAT.DATname, '')
+        filename = writeOutput(output, colNames, datFName, '')
         dfile = dataFile()
-        dfile.name = DAT.DATname
+        dfile.name = datFName
         dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
         dfile.comment = ''
         dfile.authed = current_user.get_id()
@@ -868,7 +874,7 @@ def generateOutput():
         dfile.type = 'dat'
         db.session.add(dfile)
         db.session.commit()
-        return 'Saved'
+        return datFName
     return redirect(url_for('sendOut', filename=filename, displayName=datFName))
 
 
@@ -1651,8 +1657,9 @@ def averageDAT():
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
     plt.close()
-
-    return code
+    averaged = json.dumps([Lx1, Lx2, Ly1, Ly2, Rx1, Rx2, Ry1, Ry2])
+    sending = [code, averaged]
+    return json.dumps(sending)
 
 
 @app.route('/remBackDAT', methods=['GET', 'POST'])
@@ -1666,6 +1673,7 @@ def remBackDAT():
             data[1][i] = data[1][i] - flatVal
         DAT.DAT = json.dumps(data)
         db.session.commit()
+        return redirect(url_for('modifyDAT'))
     leftX = request.form.get('leftX', type=int)
     leftY = request.form.get('leftY', type=int)
     rightX = request.form.get('rightX', type=int)
@@ -1678,6 +1686,24 @@ def remBackDAT():
         slope, intercept = numpy.polyfit(xs, ys, 1)
         for i in range(len(data[1])):
             data[1][i] = data[1][i] - abs((slope * data[0][i]) + intercept)
+        DAT.DAT = json.dumps(data)
+        db.session.commit()
+        return redirect(url_for('modifyDAT'))
+    averageLine = request.form.get('average', type=str)
+    if averageLine != None:
+        cords = json.loads(averageLine)
+        leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[1]]), numpy.array([cords[2], cords[3]]), 1)
+        middleSlope, middleIntercept = numpy.polyfit(numpy.array([cords[1], cords[4]]), numpy.array([cords[3], cords[6]]), 1)
+        rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[4], cords[5]]), numpy.array([cords[6], cords[7]]), 1)
+        DAT = db.session.query(currentDAT).one()
+        data = json.loads(DAT.DAT)
+        for i in range(len(data[1])):
+            if data[0][i] <= cords[1]:
+                data[1][i] = data[1][i] - abs((leftSlope * data[0][i]) + leftIntercept)
+            elif data[0][i] <=cords[4]:
+                data[1][i] = data[1][i] - abs((middleSlope * data[0][i] + middleIntercept))
+            else:
+                data[1][i] = data[1][i] - abs((rightSlope * data[0][i] + rightIntercept))
         DAT.DAT = json.dumps(data)
         db.session.commit()
     return redirect(url_for('modifyDAT'))
@@ -2343,8 +2369,8 @@ def energy_xtal(data, a1, a2, hrm):
     energy = []
     a1Dat = data[a1]
     a2Dat = data[a2]
-    a1Dat = [float(i) for i in a1Dat]
-    a2Dat = [float(i) for i in a2Dat]
+    a1Dat = [hrm['hrm_theta1_sign'] * float(i) for i in a1Dat]
+    a2Dat = [hrm['hrm_theta2_sign'] * float(i) for i in a2Dat]
     hrm_tan1 = math.tan(math.radians(hrm['hrm_bragg1']))
     hrm_tan2 = math.tan(math.radians(hrm['hrm_bragg2']))
 

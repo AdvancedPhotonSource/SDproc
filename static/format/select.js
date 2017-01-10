@@ -487,6 +487,8 @@ $(function (){
             hrm['hrm_geo'] = '++'
             hrm['hrm_alpha1'] = 2.6e-6
             hrm['hrm_alpha2'] = 2.6e-6
+            hrm['hrm_theta1_sign'] = 1
+            hrm['hrm_theta2_sign'] = 1
             $('#HRM').text('Fe-inline-1meV')
             $('#HRM').append("<span class='caret'></span>");
         }
@@ -498,6 +500,8 @@ $(function (){
             hrm['hrm_geo'] = '++'
             hrm['hrm_alpha1'] = 2.6e-6
             hrm['hrm_alpha2'] = 2.6e-6
+            hrm['hrm_theta1_sign'] = 1
+            hrm['hrm_theta2_sign'] = 1
             $('#HRM').text('Sn-nested-1meV')
             $('#HRM').append("<span class='caret'></span>");
         }
@@ -524,6 +528,8 @@ $(function (){
             hrm['hrm_geo'] = '++'
             hrm['hrm_alpha1'] = 2.6e-6
             hrm['hrm_alpha2'] = 0.0
+            hrm['hrm_theta1_sign'] = -1
+            hrm['hrm_theta2_sign'] = -1
             $('#HRM').text('Sn-cryo-1meV')
             $('#HRM').append("<span class='caret'></span>");
         }
