@@ -213,6 +213,7 @@ function proceed()
         $.post('/SDproc/clear_cmeta', function(){
             sesID = localStorage.getItem('previous');
             type = localStorage.getItem('previousType');
+            localStorage.clear();
             $.post('/SDproc/set_ses', {id: sesID, type: type}, function(data){
                 if (type == 'dat'){
                     window.location.href = ("modifyDAT");

@@ -502,7 +502,7 @@ def dataFormat():
         mpld3.plugins.connect(fig, InteractiveLegend([], [], 0, nameID, None))
         code = mpld3.fig_to_html(fig)
         plt.clf()
-        againstE = 'Point'
+        againstE = 'Point #'
     else:
         idthis = request.form.get('idnext', type=int)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
@@ -563,10 +563,10 @@ def dataFormat():
                         normLabels.append(str(columns[i].label.text)[:-2])
             if againstE == 'Energy':
                 etype = data[unicode_to_int(columns[0].data - 1)]
-            elif againstE == 'Extal':
+            elif againstE == 'Energy xtal':
                 etype = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data - 1),
                                                  unicode_to_int(columns[4].data - 1), format_instance.hrm), 1000000)
-            elif againstE == 'ExtalTC':
+            elif againstE == 'Energy xtal w/ T corr.':
                 etype = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
                                                       unicode_to_int(columns[4].data - 1),
                                                       unicode_to_int(columns[5].data - 1),
@@ -586,7 +586,7 @@ def dataFormat():
                 data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
             etype = data[1]
             used = []
-            againstE = 'Point'
+            againstE = 'Point #'
             format = currentMeta()
             format.name = file_instance.name
             format.path = file_instance.path
@@ -600,7 +600,7 @@ def dataFormat():
             format.xtal2T = 15
             format.norm = 7
             format.extra = 1
-            format.against_E = 'Point'
+            format.against_E = 'Point #'
             format.fit_type = 'Unfit'
             format.fit_pos = 0
             format.fit_range = 3
@@ -2027,7 +2027,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Extal' or allagainstE[count1] == 'ExtalTC':
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/ T corr.':
                 xs = alldata[count1][1]
                 xs = numpy.multiply(xs, 1000000)
             plt.plot(xs, ys)
@@ -2199,7 +2199,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Extal' or allagainstE[count1] == 'ExtalTC':
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/ T corr.':
                 xs = alldata[count1][1]
             plt.plot(xs, ys)
             #plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
@@ -2303,7 +2303,7 @@ def plotData(data, used, againstE, additional, lineNames, eType, unit):
         xs = range(1, len(data[i]) + 1)
         ys = data[i - 1]
         plt.xlabel('Point #')
-        if againstE == 'Energy' or againstE == 'Extal' or againstE == 'ExtalTC':
+        if againstE == 'Energy' or againstE == 'Energy xtal' or againstE == 'Energy xtal w/ T corr.':
             xs = [float(x) for x in eType]
             if unit == 'keV':
                 xs = numpy.subtract(xs, xs[0])
@@ -2322,7 +2322,7 @@ def plotData(data, used, againstE, additional, lineNames, eType, unit):
             xs = range(1, len(additional[i]) + 1)
             ys = additional[i]
             plt.xlabel('Point #')
-            if againstE == 'Energy' or againstE == 'Extal' or againstE == 'ExtalTC':
+            if againstE == 'Energy' or againstE == 'Energy xtal' or againstE == 'Energy xtal w/ T corr.':
                 xs = [float(x) for x in eType]
                 if unit == 'keV':
                     xs = numpy.subtract(xs, xs[0])

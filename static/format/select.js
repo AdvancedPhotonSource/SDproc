@@ -52,9 +52,11 @@ $(function (){
             function(data){
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#currentAE').html( $(data).find('#currentAE').html());
                 $.post('/SDproc/show_comment', { idnext: localStorage.getItem('previous2'), format: 1, ses: ses},
                 function(data){
                     $('#comment').val(data)
+                    setPlotAgainst();
                 })
             })
         }
@@ -70,6 +72,7 @@ $(function (){
                 $.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
                 function(data){
                     $('#comment').val(data)
+                    setPlotAgainst();
                 })
             })
         }
@@ -88,7 +91,7 @@ $(function (){
 
 $(document).ready( function() {
     $('#unit').val('meV');
-    setPlotAgainst(localStorage.getItem('plotAgainst'));
+    setPlotAgainst();
     asynchOnLoad()
     if (!localStorage.getItem('previous2') === null)
         localStorage.removeItem("previous2")
@@ -308,6 +311,7 @@ $(function(){
             function(data){
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#currentAE').html( $(data).find('#currentAE').html());
                 localStorage.setItem('justPeakFit', 0);
             })
         });
@@ -576,25 +580,21 @@ function setAE(event){
         $('#againstE').text('Energy');
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('Energy');
-        localStorage.setItem('plotAgainst', 'Energy');
     }
     else if (event.target.text == 'Energy xtal'){
         $('#againstE').text('Energy xtal');
         $('#againstE').append("<span class='caret'></span>");
-        $('#agaE').val('Extal');
-        localStorage.setItem('plotAgainst', 'Energy xtal');
+        $('#agaE').val('Energy xtal');
     }
     else if (event.target.text == 'Energy xtal w/ T corr.'){
         $('#againstE').text('Energy xtal w/ T corr.');
         $('#againstE').append("<span class='caret'></span>");
-        $('#agaE').val('ExtalTC');
-        localStorage.setItem('plotAgainst', 'Energy xtal w/ T corr.');
+        $('#agaE').val('Energy xtal w/ T corr.');
     }
     else {
         $('#againstE').text('Point #');
         $('#againstE').append("<span class='caret'></span>");
-        $('#agaE').val('Point');
-        localStorage.setItem('plotAgainst', 'Point #');
+        $('#agaE').val('Point #');
     }
     $('#meta-form').trigger('change');
 }
@@ -613,23 +613,11 @@ function setUnit(event){
     $('#meta-form').trigger('change');
 }
 
-function setPlotAgainst(storedData){
-    if (storedData == 'Energy'){
-        $('#againstE').text('Energy');
-        $('#againstE').append("<span class='caret'></span>");
-    }
-    else if (storedData == 'Energy xtal'){
-        $('#againstE').text('Energy xtal');
-        $('#againstE').append("<span class='caret'></span>");
-    }
-    else if (storedData == 'Energy xtal w/ T corr.'){
-        $('#againstE').text('Energy xtal w/ T corr.');
-        $('#againstE').append("<span class='caret'></span>");
-    }
-    else {
-        $('#againstE').text('Point #');
-        $('#againstE').append("<span class='caret'></span>");
-    }
+function setPlotAgainst(){
+    var currentAE = $('#currentAE').text();
+    $('#againstE').text(currentAE);
+    $('#againstE').append("<span class='caret'></span>");
+    $('#agaE').val(currentAE);
 }
 
 function logout(){
