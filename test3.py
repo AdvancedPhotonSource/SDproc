@@ -1353,7 +1353,7 @@ def process():
                 fitType = format_instance.fit_type
                 inputCord = format_instance.fit_pos
                 fitRange = format_instance.fit_range
-                if fitType == 'AtMax':
+                if fitType == 'AtMax' or fitType == 'Unfit':
                     xmaxHold = xmax[1]
                     xmax[1] = (ycords[0][xmax[1]] * 1000000)
                     npXcords = numpy.array(ycords[0])
@@ -1564,7 +1564,7 @@ def modifyDAT():
     mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
-    plt.close()
+    plt.close('all')
     return render_template("modifyDAT.html", user=current_user, ses=DAT.DATname, code=code)
 
 
@@ -1602,113 +1602,92 @@ def setDAT():
     db.session.commit()
     return 'Set'
 
-@app.route('/averageDAT', methods=['GET', 'POST'])
-@login_required
-def averageDAT():
-    rightIn = request.form.get('right', type=int)
-    leftIn = request.form.get('left', type=int)
-    DAT = db.session.query(currentDAT).one()
-    leftCords = [[] for _ in xrange(2)]
-    rightCords = [[] for _ in xrange(2)]
-    data = json.loads(DAT.DAT)
-    for i in range(len(data[0])):
-        if data[0][i] <= leftIn:
-            leftCords[0].append(data[0][i])
-            leftCords[1].append(data[1][i])
-        if data[0][i] >= rightIn:
-            rightCords[0].append(data[0][i])
-            rightCords[1].append(data[1][i])
-
-    linRegLeft = stats.linregress(leftCords[0], leftCords[1])
-    Lx1 = data[0][1]
-    Lx2 = leftIn
-    Ly1 = data[1][1]
-    Ly2 = linRegLeft.slope * (Lx2 - Lx1) + Ly1
-
-
-
-    linRegRight = stats.linregress(rightCords[0], rightCords[1])
-
-    Rx1 = rightIn
-    Rx2 = data[0][-1]
-    Ry2 = data[1][-1]
-    Ry1 = linRegRight.slope * (Rx1 - Rx2) + Ry2
-
-    fig = plt.figure(figsize=(10, 7))
-    css = """
-        .legend-box{
-            cursor: pointer;
-        }
-        """
-    labels = []
-    lines = []
-    nameID = str(uuid.uuid4())
-    fig, ax = plt.subplots()
-    xs = data[0]
-    ys = data[1]
-    line = ax.plot(xs, ys, alpha=0, label='Summed')
-    lines.append(line[0])
-    labels.append('Summed')
-
-    line = ax.plot([Lx1, Lx2], [Ly1, Ly2], alpha=0, label='Left Lin Reg')
-    lines.append(line[0])
-    labels.append('Left Lin Reg')
-    line = ax.plot([Rx1, Rx2], [Ry1, Ry2], alpha=0, label='Right Lin Reg')
-    lines.append(line[0])
-    labels.append('Right Lin Reg')
-    mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
-    mpld3.plugins.connect(fig, HideLegend(nameID))
-    code = mpld3.fig_to_html(fig)
-    plt.close()
-    averaged = json.dumps([Lx1, Lx2, Ly1, Ly2, Rx1, Rx2, Ry1, Ry2])
-    sending = [code, averaged]
-    return json.dumps(sending)
-
 
 @app.route('/remBackDAT', methods=['GET', 'POST'])
 @login_required
 def remBackDAT():
+    show = request.form.get('show', type=int)
     flatVal = request.form.get('flatVal', type=int)
     if flatVal != None:
-        DAT = db.session.query(currentDAT).one()
-        data = json.loads(DAT.DAT)
-        for i in range(len(data[1])):
-            data[1][i] = data[1][i] - flatVal
-        DAT.DAT = json.dumps(data)
-        db.session.commit()
-        return redirect(url_for('modifyDAT'))
-    leftX = request.form.get('leftX', type=int)
-    leftY = request.form.get('leftY', type=int)
-    rightX = request.form.get('rightX', type=int)
-    rightY = request.form.get('rightY', type=int)
+        if show == 0:
+            DAT = db.session.query(currentDAT).one()
+            data = json.loads(DAT.DAT)
+            for i in range(len(data[1])):
+                data[1][i] = data[1][i] - flatVal
+            DAT.DAT = json.dumps(data)
+            db.session.commit()
+            return redirect(url_for('modifyDAT'))
+        else:
+            DAT = db.session.query(currentDAT).one()
+            data = json.loads(DAT.DAT)
+            code = addLines(data, flatVal)
+            return code
+    leftX = request.form.get('leftX', type=float)
+    leftY = request.form.get('leftY', type=float)
+    rightX = request.form.get('rightX', type=float)
+    rightY = request.form.get('rightY', type=float)
     if leftX != None:
-        DAT = db.session.query(currentDAT).one()
-        data = json.loads(DAT.DAT)
-        xs = numpy.array([leftX, rightX])
-        ys = numpy.array([leftY, rightY])
-        slope, intercept = numpy.polyfit(xs, ys, 1)
-        for i in range(len(data[1])):
-            data[1][i] = data[1][i] - abs((slope * data[0][i]) + intercept)
-        DAT.DAT = json.dumps(data)
-        db.session.commit()
-        return redirect(url_for('modifyDAT'))
-    averageLine = request.form.get('average', type=str)
-    if averageLine != None:
-        cords = json.loads(averageLine)
-        leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[1]]), numpy.array([cords[2], cords[3]]), 1)
-        middleSlope, middleIntercept = numpy.polyfit(numpy.array([cords[1], cords[4]]), numpy.array([cords[3], cords[6]]), 1)
-        rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[4], cords[5]]), numpy.array([cords[6], cords[7]]), 1)
-        DAT = db.session.query(currentDAT).one()
-        data = json.loads(DAT.DAT)
-        for i in range(len(data[1])):
-            if data[0][i] <= cords[1]:
-                data[1][i] = data[1][i] - abs((leftSlope * data[0][i]) + leftIntercept)
-            elif data[0][i] <=cords[4]:
-                data[1][i] = data[1][i] - abs((middleSlope * data[0][i] + middleIntercept))
-            else:
-                data[1][i] = data[1][i] - abs((rightSlope * data[0][i] + rightIntercept))
-        DAT.DAT = json.dumps(data)
-        db.session.commit()
+        if show == 0:
+            DAT = db.session.query(currentDAT).one()
+            data = json.loads(DAT.DAT)
+            xs = numpy.array([leftX, rightX])
+            ys = numpy.array([leftY, rightY])
+            slope, intercept = numpy.polyfit(xs, ys, 1)
+            tempX = []
+            tempY = []
+            for i in range(len(data[0])):
+                if data[0][i] > leftX and data[0][i] < rightX:
+                    tempX.append(data[0][i])
+                    tempY.append(data[1][i])
+            data[0] = tempX
+            data[1] = tempY
+            for i in range(len(data[1])):
+                data[1][i] = data[1][i] - abs((slope * data[0][i]) + intercept)
+            DAT.DAT = json.dumps(data)
+            db.session.commit()
+            return redirect(url_for('modifyDAT'))
+        else:
+            DAT = db.session.query(currentDAT).one()
+            data = json.loads(DAT.DAT)
+            code = addLines(data, [leftX, rightX, leftY, rightY])
+            return code
+    leftIn = request.form.get('leftIn', type=int)
+    rightIn = request.form.get('rightIn', type=int)
+    if leftIn != None:
+        if show == 0:
+            cords = calcAverageBack(leftIn, rightIn)
+            leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[4]]), numpy.array([cords[1], cords[5]]), 1)
+            middleSlope, middleIntercept = numpy.polyfit(numpy.array([cords[4], cords[2]]), numpy.array([cords[5], cords[3]]), 1)
+            rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[2], cords[6]]), numpy.array([cords[3], cords[7]]), 1)
+            DAT = db.session.query(currentDAT).one()
+            data = json.loads(DAT.DAT)
+            tempX = []
+            tempY = []
+            for i in range(len(data[0])):
+                if data[0][i] > leftIn and data[0][i] < rightIn:
+                    tempX.append(data[0][i])
+                    tempY.append(data[1][i])
+            data[0] = tempX
+            data[1] = tempY
+            for i in range(len(data[1])):
+                if data[0][i] <= cords[4]:
+                    data[1][i] = data[1][i] - abs((leftSlope * data[0][i]) + leftIntercept)
+                elif data[0][i] <=cords[2]:
+                    data[1][i] = data[1][i] - abs((middleSlope * data[0][i] + middleIntercept))
+                else:
+                    data[1][i] = data[1][i] - abs((rightSlope * data[0][i] + rightIntercept))
+            DAT.DAT = json.dumps(data)
+            db.session.commit()
+            return redirect(url_for('modifyDAT'))
+        else:
+            DAT = db.session.query(currentDAT).one()
+            data = json.loads(DAT.DAT)
+            cords = calcAverageBack(leftIn, rightIn)
+            code = addLines(data, cords)
+            leftX = ("%.4f" % cords[5])
+            rightX = ("%.4f" % cords[6])
+            data = json.dumps([code, leftX, rightX])
+            return data
     return redirect(url_for('modifyDAT'))
 
 
@@ -1977,7 +1956,7 @@ def readMda(path):
 
 
 def simplePlot(data, xmax, filename, linenames, legend, sized):
-    plt.close()
+    plt.close('all')
     fig = plt.figure(figsize=(10, 7))
     css = """
     .legend-box{
@@ -2006,12 +1985,12 @@ def simplePlot(data, xmax, filename, linenames, legend, sized):
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, sized, nameID, css))
         mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
-    plt.close()
+    plt.close('all')
     return code
 
 
 def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNames, pltLeg):
-    plt.close()
+    plt.close('all')
     fig = plt.figure(figsize=(10, 7))
     css = """
     .legend-box{
@@ -2178,12 +2157,12 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
-    plt.close()
+    plt.close('all')
     return code, sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, largePadx, ySummed
 
 
 def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNames, pltLeg, binWidth):
-    plt.close()
+    plt.close('all')
     fig = plt.figure(figsize=(10, 7))
     css = """
     .legend-box{
@@ -2280,12 +2259,12 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
-    plt.close()
+    plt.close('all')
     return code, sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, sumXvals, sumYvals
 
 
 def plotData(data, used, againstE, additional, lineNames, eType, unit):
-    plt.close()
+    plt.close('all')
     fig = plt.figure(figsize=(10, 7))
     css = """
     .legend-box{
@@ -2341,7 +2320,7 @@ def plotData(data, used, againstE, additional, lineNames, eType, unit):
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 0, nameID, css))
         mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
-    plt.close()
+    plt.close('all')
     return code
 
 
@@ -2447,6 +2426,99 @@ def norm_factors(data, nCol):
     for i in range(len(nDat)):
         norm.append(ave / nDat[i])
     return norm
+
+
+def calcAverageBack(leftIn, rightIn):
+    DAT = db.session.query(currentDAT).one()
+    leftCords = [[] for _ in xrange(2)]
+    rightCords = [[] for _ in xrange(2)]
+    data = json.loads(DAT.DAT)
+    for i in range(len(data[0])):
+        if data[0][i] <= leftIn:
+            leftCords[0].append(data[0][i])
+            leftCords[1].append(data[1][i])
+        if data[0][i] >= rightIn:
+            rightCords[0].append(data[0][i])
+            rightCords[1].append(data[1][i])
+
+    linRegLeft = stats.linregress(leftCords[0], leftCords[1])
+    Lx1 = data[0][1]
+    Lx2 = leftIn
+    Ly1 = data[1][1]
+    Ly2 = linRegLeft.slope * (Lx2 - Lx1) + Ly1
+
+    linRegRight = stats.linregress(rightCords[0], rightCords[1])
+
+    Rx1 = rightIn
+    Rx2 = data[0][-1]
+    Ry2 = data[1][-1]
+    Ry1 = linRegRight.slope * (Rx1 - Rx2) + Ry2
+
+    fig = plt.figure(figsize=(10, 7))
+    css = """
+        .legend-box{
+            cursor: pointer;
+        }
+        """
+    labels = []
+    lines = []
+    nameID = str(uuid.uuid4())
+    fig, ax = plt.subplots()
+    xs = data[0]
+    ys = data[1]
+    line = ax.plot(xs, ys, alpha=0, label='Summed')
+    lines.append(line[0])
+    labels.append('Summed')
+
+    line = ax.plot([Lx1, Lx2], [Ly1, Ly2], alpha=0, label='Left Lin Reg')
+    lines.append(line[0])
+    labels.append('Left Lin Reg')
+    line = ax.plot([Rx1, Rx2], [Ry1, Ry2], alpha=0, label='Right Lin Reg')
+    lines.append(line[0])
+    labels.append('Right Lin Reg')
+    mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
+    mpld3.plugins.connect(fig, HideLegend(nameID))
+    code = mpld3.fig_to_html(fig)
+    plt.close('all')
+    averaged = [Lx1, Lx2, Rx1, Rx2, Ly1, Ly2, Ry1, Ry2]
+    sending = averaged
+    return sending
+
+def addLines(line1, line2):
+    fig = plt.figure(figsize=(10, 7))
+    css = """
+            .legend-box{
+                cursor: pointer;
+            }
+            """
+    labels = []
+    lines = []
+    nameID = str(uuid.uuid4())
+    fig, ax = plt.subplots()
+    xs = line1[0]
+    ys = line1[1]
+    line = ax.plot(xs, ys, alpha=0, label='Summed')
+    lines.append(line[0])
+    labels.append('Summed')
+    xs = []
+    ys = []
+    try:
+        for i in range(len(line2)):
+            if i < len(line2)/2:
+                xs.append(line2[i])
+            else:
+                ys.append(line2[i])
+        line = ax.plot(xs, ys, alpha=0, label='Background')
+    except TypeError:
+        line = ax.plot(line1[0], [line2] * len(line1[0]), alpha=0, label='Background')
+
+    lines.append(line[0])
+    labels.append('Background')
+    mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
+    mpld3.plugins.connect(fig, HideLegend(nameID))
+    code = mpld3.fig_to_html(fig)
+    plt.close('all')
+    return code
 
 
 class HideLegend(mpld3.plugins.PluginBase):

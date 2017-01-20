@@ -56,15 +56,15 @@
 
 .flatLabel{
     position: relative;
-    top: 15px;
+    top: 20px;
     left: 20px;
 }
 
 .remFlat{
     position: relative;
-    top: 10px;
+    top: 25px;
     width: 350px;
-    left: 60px;
+    left: 50px;
 }
 
 .linearRad{
@@ -79,7 +79,14 @@
 
 .remLin{
     position: relative;
-    top: 30px;
+    top: 40px;
+    width: 450px;
+    left: 50px;
+}
+
+.remGiven{
+    position: relative;
+    top: 50px;
     width: 350px;
     left: 50px;
 }
@@ -136,4 +143,54 @@ body{
 html{
     position: relative;
     min-height: 100%;
+}
+
+.leftGroup{
+    position: relative;
+    height: 250px;
+    width: 500px;
+    margin-top: 200px;
+    margin-left: -150px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
+}
+
+.remLinText{
+    position: relative;
+    top: 6px;
+    margin: 10px;
+}
+
+#leftButtons{
+    position: relative;
+    top: 20px;
+    right: 70px;
+}
+
+.singleLeftButton{
+    margin: 20px;
+}
+
+.output{
+    position: relative;
+    left: 400px;
+}
+
+.LGLabel{
+    position: relative;
+    top: 200px;
+    left: 30px;
+}
+
+.yCalcLabel{
+    position: relative;
+    float: right;
+    top: 40px;
+    right: 64px;
+}
+
+.calcRightYLabel{
+    margin-left: 30px;
 }

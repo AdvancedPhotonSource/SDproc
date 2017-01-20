@@ -64,8 +64,6 @@ with context %}
     <link href="/static/modifyDAT/modifyDAT.css" rel="stylesheet">
     <script type="text/javascript" src="/static/modifyDAT/modifyDAT.js"></script>
     <script type="text/javascript" src="/static/mpld3.v0.2.js"></script>
-
-
 </head>
 <body role="document">
 <div id="remBackModal" class="modal fade" role="dialog">
@@ -76,25 +74,7 @@ with context %}
                 <h4 class="modal-title">Remove Background</h4>
             </div>
             <div class="remBackModalBody">
-                <label for="flatRad" class="flatLabel floatL">Remove Flat Value</label>
-                <div class="input-group remFlat">
-                    <span class="input-group-addon">
-                        <input type="radio" id="flatRad" name="methodRad" aria-label="...">
-                    </span>
-                    <input type="text" class="form-control" id="flatVal" placeholder="Y-Value" aria-label="...">
-                </div>
-                <label for="linearRad" class="linLabel floatL">Remove Linear Line</label>
-                <div class="input-group remLin">
-                    <span class="input-group-addon">
-                        <input type="radio" id="linearRad" name="methodRad" aria-label="...">
-                    </span>
-                    <input type="text" class="form-control" id="leftX" style="width:25%" placeholder="Left X" aria-label="...">
-                    <input type="text" class="form-control" id="leftY" style="width:25%" placeholder="Left Y" aria-label="...">
-                    <input type="text" class="form-control" id="rightX" style="width:25%" placeholder="Right X" aria-label="...">
-                    <input type="text" class="form-control" id="rightY" style="width:25%" placeholder="Right Y" aria-label="...">
-                </div>
-                <label for="avRad" class="avLabel">Remove Averaged Line</label>
-                <input type="radio" class="avRad" id='avRad' name="methodRad" aria-label="...">
+
             </div>
             <div class="remBackModalFooter">
                 <div class="col-xs-4">
@@ -108,37 +88,6 @@ with context %}
                     </span>
                 </div>
                 <div class="col-xs-4">
-                    <span class="centerBlock">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div id="getAvModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Remove Background</h4>
-            </div>
-            <div class="remBackModalBody">
-                <label class="leftIn" style="margin-top:30px;">Left Inpoint</label>
-                <br/>
-                <input type="text" id="leftIn" class="floatL leftIn form-control" placeholder="X-Point from plot(meV)">
-
-                <label class="rightIn">Right Inpoint</label>
-                <br/>
-                <input type="text" id="rightIn" class="floatL rightIn form-control" placeholder="X-Point from plot(meV)">
-            </div>
-            <div class="remBackModalFooter">
-                <div class="col-xs-6">
-                    <span class="centerBlock">
-                        <button type="button" class="btn btn-primary btn-default" data-dismiss="modal" onclick="averageRange()">Average</button>
-                    </span>
-                </div>
-                <div class="col-xs-6">
                     <span class="centerBlock">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </span>
@@ -223,13 +172,44 @@ with context %}
     </div>
     <div id="mainContent">
         <div id="leftCol" class="floatL">
-            <div class="buttons">
-                <div>
-                    <button id="averageRange" type="button" class="btn btn-primary btn-md" title="Average the extremities of the plot" data-toggle="modal" data-target="#getAvModal">Average Range</button>
+            <label for="leftGroup" class="LGLabel">Remove Background</label>
+            <div id="leftGroup" class="leftGroup">
+                <label for="flatRad" class="flatLabel">Flat Value</label>
+                <div class="input-group remFlat">
+                    <span class="input-group-addon">
+                        <input type="radio" id="flatRad" name="methodRad" aria-label="...">
+                    </span>
+                    <input type="text" class="form-control" id="flatVal" placeholder="Y-Value" aria-label="...">
                 </div>
-                <div>
-                    <button id="remBackground" type="button" class="btn btn-primary btn-md" title="Remove various types of background from plot" data-toggle="modal" data-target="#remBackModal">Remove Background</button>
+                <label for="calcRad" class="linLabel">Calculated Average</label>
+                <div class="yCalcLabel" class="yCalcLabel">
+                    <font id="calcLeftYLabel">Left Y</font>
+                    <font id="calcRightYLabel" class="calcRightYLabel">Right Y</font>
                 </div>
+                <div class="input-group remLin">
+                    <span class="input-group-addon">
+                        <input type="radio" id="calcRad" name="methodRad" aria-label="...">
+                    </span>
+                    <input type="text" class="form-control" id="calcLeftX" style="width:25%" placeholder="Left X" aria-label="...">
+                    <input type="text" class="form-control" id="calcRightX" style="width:25%" placeholder="Right X" aria-label="...">
+                    <font id="calcLeftY" class="remLinText" size="3"></font>
+                    <font id="calcRightY" class="remLinText" size="3"></font>
+                </div>
+                <label for="givRad" class="avLabel">Given Average</label>
+                <div class="input-group remGiven">
+                    <span class="input-group-addon">
+                        <input type="radio" id="givRad" name="methodRad" aria-label="...">
+                    </span>
+                    <input type="text" class="form-control" id="leftX" style="width:25%" placeholder="Left X" aria-label="...">
+                    <input type="text" class="form-control" id="leftY" style="width:25%" placeholder="Left Y" aria-label="...">
+                    <input type="text" class="form-control" id="rightX" style="width:25%" placeholder="Right X" aria-label="...">
+                    <input type="text" class="form-control" id="rightY" style="width:25%" placeholder="Right Y" aria-label="...">
+                </div>
+            </div>
+            <div id="leftButtons">
+                <button type="button" class="btn btn-primary btn-default singleLeftButton" onclick="remBackground(0)">Apply</button>
+                <button type="button" class="btn btn-primary btn-default singleLeftButton" onclick="remBackground(1)">Show</button>
+                <button type="button" class="btn btn-primary btn-default singleLeftButton" onclick="resetPlot()">Reset</button>
             </div>
         </div>
         <div id="rightCol" class="floatR">

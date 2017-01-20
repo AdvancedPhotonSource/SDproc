@@ -23,44 +23,81 @@ $(document).ready( function() {
         $('#rightY').prop('disabled', true);
         $('#flatVal').prop('disabled', true);
     }
+    $('#calcLeftYLabel').hide()
+    $('#calcRightYLabel').hide()
 })
 
-function averageRange(){
-    var leftIn = $('#leftIn').val()
-    var rightIn = $('#rightIn').val()
-    $.post('/SDproc/averageDAT', {right: rightIn, left: leftIn}, function(data){
-        var data = JSON.parse(data)
-        $('#process_plot').html(data[0])
-        localStorage.setItem('averageLin', data[1])
-    })
-}
-
-function remBackground(){
+function showLine(){
     if ($('#flatRad').is(':checked')){
         var flatVal = $('#flatVal').val()
-        $.post('/SDproc/remBackDAT', {flatVal: flatVal}, function(data){
+        $.post('/SDproc/showLineDAT', {flatVal: flatVal}, function(data){
             $('#process_plot').html($(data).find('#process_plot').html())
         })
     }
-    else if ($('#linearRad').is(':checked')){
+    else if ($('#calcRad').is(':checked')){
+        var leftIn = $('#leftIn').val()
+        var rightIn = $('#rightIn').val()
+        $.post('/SDproc/showLineDAT', {right: rightIn, left: leftIn}, function(data){
+            var data = JSON.parse(data)
+            $('#process_plot').html(data[0])
+            localStorage.setItem('averageLin', data[1])
+            $('#calcLeftY').text('Left Y: ');
+            $('#calcRightY').text('Right Y: ');
+        })
+    }
+    else if ($('givRad').is(':checked')){
         var lX = $('#leftX').val()
         var lY = $('#leftY').val()
         var rX = $('#rightX').val()
         var rY = $('#rightY').val()
-        $.post('/SDproc/remBackDAT', {leftX : lX, leftY : lY, rightX: rX, rightY: rY}, function(data){
-            $('#process_plot').html($(data).find('#process_plot').html())
+    }
+    else{
+        alert('Please select an option to show.');
+    }
+}
+
+function remBackground(show){
+    if ($('#flatRad').is(':checked')){
+        var flatVal = $('#flatVal').val()
+        $.post('/SDproc/remBackDAT', {show: show, flatVal: flatVal}, function(data){
+            if (show == 0){
+                $('#process_plot').html($(data).find('#process_plot').html())
+            }
+            else{
+                $('#process_plot').html($(data))
+            }
         })
     }
-    else if ($('#avRad').is(':checked')){
-        if (localStorage.getItem('averageLin') === null){
-            alert('No average found, please create one with the Average Range button')
+    else if ($('#givRad').is(':checked')){
+        var lX = $('#leftX').val()
+        var lY = $('#leftY').val()
+        var rX = $('#rightX').val()
+        var rY = $('#rightY').val()
+        $.post('/SDproc/remBackDAT', {show: show, leftX : lX, leftY : lY, rightX: rX, rightY: rY}, function(data){
+            if (show == 0){
+                $('#process_plot').html($(data).find('#process_plot').html())
+            }
+            else{
+                $('#process_plot').html($(data))
+            }
+        })
+    }
+    else if ($('#calcRad').is(':checked')){
+        var leftIn = $('#calcLeftX').val()
+        var rightIn = $('#calcRightX').val()
+        $.post('/SDproc/remBackDAT', {show: show, leftIn: leftIn, rightIn: rightIn}, function(data){
+        if (show == 0){
+            $('#process_plot').html($(data).find('#process_plot').html())
         }
         else{
-            $.post('/SDproc/remBackDAT', {average: localStorage.getItem('averageLin')}, function(data){
-                $('#process_plot').html($(data).find('#process_plot').html())
-            })
+            var data = JSON.parse(data)
+            $('#process_plot').html($(data[0]))
+            $('#calcLeftY').text(data[1])
+            $('#calcRightY').text(data[2])
+            $('#calcLeftYLabel').show()
+            $('#calcRightYLabel').show()
         }
-
+        })
     }
 }
 
@@ -78,20 +115,26 @@ $(function (){
             $('#leftY').prop('disabled', true);
             $('#rightX').prop('disabled', true);
             $('#rightY').prop('disabled', true);
+            $('#calcLeftX').prop('disabled', true);
+            $('#calcRightX').prop('disabled', true);
         }
-        if ($('#linearRad').is(':checked')){
+        if ($('#calcRad').is(':checked')){
             $('#flatVal').prop('disabled', true);
-            $('#leftX').prop('disabled', false);
-            $('#leftY').prop('disabled', false);
-            $('#rightX').prop('disabled', false);
-            $('#rightY').prop('disabled', false);
-        }
-        if ($('#avRad').is(':checked')){
+            $('#calcLeftX').prop('disabled', false);
+            $('#calcRightX').prop('disabled', false);
             $('#leftX').prop('disabled', true);
             $('#leftY').prop('disabled', true);
             $('#rightX').prop('disabled', true);
             $('#rightY').prop('disabled', true);
+        }
+        if ($('#givRad').is(':checked')){
+            $('#leftX').prop('disabled', false);
+            $('#leftY').prop('disabled', false);
+            $('#rightX').prop('disabled', false);
+            $('#rightY').prop('disabled', false);
             $('#flatVal').prop('disabled', true);
+            $('#calcLeftX').prop('disabled', true);
+            $('#calcRightX').prop('disabled', true);
         }
     })
 })
