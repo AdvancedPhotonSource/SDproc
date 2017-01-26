@@ -67,7 +67,7 @@ import json
 import math
 import numpy
 import uuid
-from sqlalchemy import desc
+from sqlalchemy import desc, or_, and_
 import mda
 from scipy import stats
 
@@ -262,6 +262,27 @@ def solveNotif():
         db.session.delete(notif)
         user = db.session.query(User).filter_by(username=notif.originUser).first()
         db.session.delete(user)
+        sessions = db.session.query(sessionFiles).filter(sessionFiles.user == user).all()
+        for session in sessions:
+            auths = session.authed.split(',')
+            auths.remove(str(user.id))
+            if len(auths) == 0:
+                db.session.delete(session)
+                instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=session.id).all()
+                for instance in instances:
+                    meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                    db.session.delete(meta)
+                    db.session.deleta(instance)
+            else:
+                session.authed = ','.join(auths)
+        files = db.session.query(dataFile).filter(dataFile.user == user).all()
+        for file in files:
+            auths = session.quthed.split(',')
+            auths.remove(str(user.id))
+            if len(auths) == 0:
+                db.session.delete(file)
+            else:
+                file.authed = ','.join(auths)
     db.session.commit()
     return 'Solved'
 
@@ -505,14 +526,15 @@ def dataFormat():
         againstE = 'Point #'
     else:
         idthis = request.form.get('idnext', type=int)
-        file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+        file_instance = db.session.query(dataFile).filter(dataFile.id == idthis).first()
         try:
             fpath = file_instance.path
         except AttributeError:
             flash('Please select a file')
             return redirect(url_for('dataFormat'))
-
-        format_instance = db.session.query(currentMeta).filter_by(path=fpath).first()
+        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                    currentMeta.file_id == file_instance.id,
+                                                                    currentMeta.session == current_session)).first()
         if format_instance is not None:
             againstE = format_instance.against_E
             form = populate_from_instance(format_instance)
@@ -609,6 +631,8 @@ def dataFormat():
                    'hrm_geo': '++', 'hrm_alpha1': 2.6e-6, 'hrm_alpha2': 2.6e-6}
             hrm = json.dumps(hrm)
             format.hrm = hrm
+            format.session = current_session
+            format.user = current_user
 
             # used.append(1)
             used.append(11)
@@ -633,8 +657,9 @@ def save_graph():
     if idthis is not None:
         againstE = request.form.get("agaE", type=str)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-
-        format_instance = db.session.query(currentMeta).filter_by(file_id=file_instance.id).first()
+        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                    currentMeta.file_id == file_instance.id,
+                                                                    currentMeta.session == current_session)).first()
 
         format_instance.energy = form.energy.data
         format_instance.xtal1A = form.xtal1A.data
@@ -686,7 +711,7 @@ def saveSession():
     db.session.add(session_file)
     db.session.commit()
 
-    for instance in db.session.query(currentMeta):
+    for instance in db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all():
         form = populate_from_instance(instance)
         session_instance = sessionMeta()
         form.populate_obj(session_instance)
@@ -731,7 +756,9 @@ def generateOutput():
     colNames = []
     if outType == 1:
         file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
-        format_instance = db.session.query(currentMeta).filter_by(file_id=int(id)).first()
+        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                    currentMeta.file_id == int(id),
+                                                                    currentMeta.session == current_session)).first()
         if str(file_instance.type) == 'mda':
             data, name, unusedpath = readMda(file_instance.path)
         else:
@@ -845,7 +872,7 @@ def generateOutput():
             data = DATfile.read()
         return data
     elif outType == 6:
-        DAT = db.session.query(currentDAT).one()
+        DAT = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).first()
         output = []
         data = json.loads(DAT.DAT)
         output.append(data[0])
@@ -855,7 +882,7 @@ def generateOutput():
         colNames.append("Signal")
         filename = writeOutput(output, colNames, datFName, '')
     elif outType == 7:
-        DAT = db.session.query(currentDAT).one()
+        DAT = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).first()
         output = []
         data = json.loads(DAT.DAT)
         output.append(data[0])
@@ -979,6 +1006,27 @@ def delete_file():
         if table == 'User':
             instance = db.session.query(User).filter_by(username=delUser).first()
             db.session.delete(instance)
+            sessions = db.session.query(sessionFiles).filter(sessionFiles.user == instance).all()
+            for session in sessions:
+                auths = session.authed.split(',')
+                auths.remove(str(user.id))
+                if len(auths) == 0:
+                    db.session.delete(session)
+                    instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=session.id).all()
+                    for instance in instances:
+                        meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                        db.session.delete(meta)
+                        db.session.deleta(instance)
+                else:
+                    session.authed = ','.join(auths)
+            files = db.session.query(dataFile).filter(dataFile.user == instance).all()
+            for file in files:
+                auths = session.quthed.split(',')
+                auths.remove(str(user.id))
+                if len(auths) == 0:
+                    db.session.delete(file)
+                else:
+                    file.authed = ','.join(auths)
         db.session.commit()
     return 'Deleted'
 
@@ -994,15 +1042,17 @@ def save_comment():
             instance = db.session.query(dataFile).filter_by(id=idprev).first()
             instance.comment = comment
             db.session.commit()
-        if idprev is not None and formatting == 1:
+        elif idprev is not None and formatting == 1:
             instance = db.session.query(dataFile).filter_by(id=idprev).first()
-            format_instance = db.session.query(currentMeta).filter_by(path=instance.path).first()
+            format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                        currentMeta.file_id == instance.id,
+                                                                        currentMeta.session == current_session)).first()
             if format_instance is None:
                 instance.comment = comment
             else:
                 format_instance.comment = comment
             db.session.commit()
-        if idprev is not None and formatting == 2:
+        elif idprev is not None and formatting == 2:
             instance = db.session.query(sessionFiles).filter_by(id=idprev).first()
             instance.comment = comment
             db.session.commit()
@@ -1025,7 +1075,9 @@ def show_comment():
             if usingSes != 1:
                 setBaseComment(idnext)
             instance = db.session.query(dataFile).filter_by(id=idnext).first()
-            format_instance = db.session.query(currentMeta).filter_by(file_id=instance.id).first()
+            format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                        currentMeta.file_id == instance.id,
+                                                                        currentMeta.session == current_session)).first()
             if format_instance is None:
                 send_comment = instance.comment
             elif format_instance.comment is not None:
@@ -1033,7 +1085,9 @@ def show_comment():
             else:
                 setBaseComment(idnext)
                 instance = db.session.query(dataFile).filter_by(id=idnext).first()
-                format_instance = db.session.query(currentMeta).filter_by(file_id=instance.id).first()
+                format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                            currentMeta.file_id == instance.id,
+                                                                            currentMeta.session == current_session)).first()
                 send_comment = format_instance.comment
         if idnext is not None and formatting == 2:
             instance = db.session.query(sessionFiles).filter_by(id=idnext).first()
@@ -1084,7 +1138,7 @@ def add_entry():
             meta.user = user
             meta.plot = db.session.query(logBook).filter_by(name="Process Entry").first().plot
             files = []
-            for instance in db.session.query(currentMeta):
+            for instance in db.session.query(currentMeta).filter(currentMeta.user == current_user).all():
                 fintance = db.session.query(dataFile).filter_by(id=instance.file_id).first()
                 files.append(fintance.name)
             files = json.dumps(files)
@@ -1096,7 +1150,9 @@ def add_entry():
             return 'Added'
         idthis = request.form.get('id', type=int)
         file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-        format_instance = db.session.query(currentMeta).filter_by(path=file_instance.path).first()
+        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                    currentMeta.file_id == file_instance.id,
+                                                                    currentMeta.session == current_session)).first()
         if format_instance != None:
             form = populate_from_instance(format_instance)
             meta = logBook()
@@ -1138,7 +1194,9 @@ def clearPart_cmeta():
     idthis = request.form.get('id', type=int)
     if idthis in usedArgs:
         usedArgs.remove(idthis)
-    deleting = db.session.query(currentMeta).filter_by(file_id=idthis).first()
+    deleting = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                         currentMeta.file_id == idthis,
+                                                         currentMeta.session == current_session)).first()
     db.session.delete(deleting)
     db.session.commit()
     return 'Cleared'
@@ -1156,7 +1214,7 @@ def set_ses():
             with open(dat.path, 'r') as DATfile:
                 data = DATfile.read()
                 cDAT = currentDAT()
-
+                cDAT.user = current_user
                 xs = []
                 ys = []
                 user = db.session.query(User).filter_by(username=current_user.username).first()
@@ -1177,6 +1235,7 @@ def set_ses():
                 db.session.add(cDAT)
                 db.session.commit()
             return 'Saved'
+        allSes = db.session.query(sessionFiles).filter_by(id=sesID).first()
         metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
         for meta in metas:
             actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
@@ -1191,13 +1250,14 @@ def set_ses():
             newCurrent.fit_pos = actualMeta.fit_pos
             newCurrent.fit_range = actualMeta.fit_range
             newCurrent.hrm = actualMeta.hrm
+            newCurrent.user = current_user
+            newCurrent.session = allSes.name
             db.session.add(newCurrent)
             db.session.commit()
 
             files.append(newCurrent.file_id)
-        global current_session
-        allSes = db.session.query(sessionFiles).filter_by(id=sesID).first()
         current_session = allSes.name
+        global current_session
         data = json.dumps(files)
         return data
     return 'Set'
@@ -1231,7 +1291,9 @@ def process():
             except AttributeError:
                 flash('Please select a file')
                 return redirect(url_for('waitProc'))
-            format_instance = db.session.query(currentMeta).filter_by(file_id=fid).first()
+            format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                        currentMeta.file_id == file_instance.id,
+                                                                        currentMeta.session == current_session)).first()
             againstE = format_instance.against_E
             form = populate_from_instance(format_instance)
             columns, bools = splitForm(form)
@@ -1322,7 +1384,9 @@ def process():
                 except AttributeError:
                     flash('Unable to find file')
                     return redirect(url_for('waitProc'))
-                format_instance = db.session.query(currentMeta).filter_by(file_id=fid).first()
+                format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                            currentMeta.file_id == file_instance.id,
+                                                                            currentMeta.session == current_session)).first()
                 againstE = format_instance.against_E
                 form = populate_from_instance(format_instance)
                 columns, bools = splitForm(form)
@@ -1423,7 +1487,9 @@ def peak_at_max():
     sendOut = request.form.get('sendOut', type=int)
     unit = request.form.get('unit', type=str)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-    format_instance = db.session.query(currentMeta).filter_by(file_id=idthis).first()
+    format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                currentMeta.file_id == file_instance.id,
+                                                                currentMeta.session == current_session)).first()
     if str(file_instance.type) == 'mda':
         data, name, unusedpath = readMda(file_instance.path)
     else:
@@ -1538,7 +1604,7 @@ def peak_at_max():
 @login_required
 def modifyDAT():
     try:
-        DAT = db.session.query(currentDAT).one()
+        DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
     except Exception, e:
         code = 'No DAT selected'
         return render_template("modifyDAT.html", user=current_user, ses=current_session, code=code)
@@ -1580,7 +1646,7 @@ def setDAT():
     db.session.commit()
 
     cDAT = currentDAT()
-
+    cDAT.user = current_user
     xs = []
     ys = []
     user = db.session.query(User).filter_by(username=current_user.username).first()
@@ -1610,7 +1676,7 @@ def remBackDAT():
     flatVal = request.form.get('flatVal', type=int)
     if flatVal != None:
         if show == 0:
-            DAT = db.session.query(currentDAT).one()
+            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             for i in range(len(data[1])):
                 data[1][i] = data[1][i] - flatVal
@@ -1628,7 +1694,7 @@ def remBackDAT():
     rightY = request.form.get('rightY', type=float)
     if leftX != None:
         if show == 0:
-            DAT = db.session.query(currentDAT).one()
+            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             xs = numpy.array([leftX, rightX])
             ys = numpy.array([leftY, rightY])
@@ -1647,7 +1713,7 @@ def remBackDAT():
             db.session.commit()
             return redirect(url_for('modifyDAT'))
         else:
-            DAT = db.session.query(currentDAT).one()
+            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             code = addLines(data, [leftX, rightX, leftY, rightY])
             return code
@@ -1659,7 +1725,7 @@ def remBackDAT():
             leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[4]]), numpy.array([cords[1], cords[5]]), 1)
             middleSlope, middleIntercept = numpy.polyfit(numpy.array([cords[4], cords[2]]), numpy.array([cords[5], cords[3]]), 1)
             rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[2], cords[6]]), numpy.array([cords[3], cords[7]]), 1)
-            DAT = db.session.query(currentDAT).one()
+            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             tempX = []
             tempY = []
@@ -1680,7 +1746,7 @@ def remBackDAT():
             db.session.commit()
             return redirect(url_for('modifyDAT'))
         else:
-            DAT = db.session.query(currentDAT).one()
+            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             cords = calcAverageBack(leftIn, rightIn)
             code = addLines(data, cords)
@@ -1694,7 +1760,7 @@ def remBackDAT():
 @app.route('/resetDAT', methods=['GET', 'POST'])
 @login_required
 def resetDAT():
-    DAT = db.session.query(currentDAT).one()
+    DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
     DAT.DAT = DAT.originDAT
     db.session.commit()
     return redirect(url_for('modifyDAT'))
@@ -1705,7 +1771,9 @@ def resetDAT():
 def updateHRM():
     idthis = request.form.get('idnum', type=int)
     hrm = request.form.get('hrm', type=str)
-    format_instance = db.session.query(currentMeta).filter_by(file_id=idthis).first()
+    format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                currentMeta.file_id == idthis,
+                                                                currentMeta.session == current_session)).first()
     format_instance.hrm = hrm
     db.session.commit()
     return 'Updated'
@@ -1891,7 +1959,9 @@ def run_once_with_args(f):
 @run_once_with_args
 def setBaseComment(idnext):
     file_instance = db.session.query(dataFile).filter_by(id=idnext).first()
-    format_instance = db.session.query(currentMeta).filter_by(path=file_instance.path).first()
+    format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                currentMeta.file_id == file_instance.id,
+                                                                currentMeta.session == current_session)).first()
     if format_instance is not None:
         format_instance.comment = file_instance.comment
         db.session.commit()
@@ -2429,7 +2499,7 @@ def norm_factors(data, nCol):
 
 
 def calcAverageBack(leftIn, rightIn):
-    DAT = db.session.query(currentDAT).one()
+    DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
     leftCords = [[] for _ in xrange(2)]
     rightCords = [[] for _ in xrange(2)]
     data = json.loads(DAT.DAT)
@@ -2441,18 +2511,25 @@ def calcAverageBack(leftIn, rightIn):
             rightCords[0].append(data[0][i])
             rightCords[1].append(data[1][i])
 
-    linRegLeft = stats.linregress(leftCords[0], leftCords[1])
-    Lx1 = data[0][1]
-    Lx2 = leftIn
-    Ly1 = data[1][1]
-    Ly2 = linRegLeft.slope * (Lx2 - Lx1) + Ly1
+    try:
+        linRegLeft = stats.linregress(leftCords[0], leftCords[1])
+        Lx1 = data[0][1]
+        Lx2 = leftIn
+        Ly1 = data[1][1]
+        Ly2 = linRegLeft.slope * (Lx2 - Lx1) + Ly1
+    except ValueError:
+        print('No points less than left value')
+        raise ValueError('Average can not be found when there are no points smaller than the given left to average.')
 
-    linRegRight = stats.linregress(rightCords[0], rightCords[1])
-
-    Rx1 = rightIn
-    Rx2 = data[0][-1]
-    Ry2 = data[1][-1]
-    Ry1 = linRegRight.slope * (Rx1 - Rx2) + Ry2
+    try:
+        linRegRight = stats.linregress(rightCords[0], rightCords[1])
+        Rx1 = rightIn
+        Rx2 = data[0][-1]
+        Ry2 = data[1][-1]
+        Ry1 = linRegRight.slope * (Rx1 - Rx2) + Ry2
+    except ValueError:
+        print('No points greater than right value')
+        raise ValueError('Average can not be found when there are no points greater than the given right to average.')
 
     fig = plt.figure(figsize=(10, 7))
     css = """

@@ -195,6 +195,8 @@ class currentDAT(db.Model):
     __tablename__ = 'currentDAT'
     id = db.Column(db.Integer, primary_key=True)
 
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref=db.backref('cUserDAT', lazy='dynamic'))
     DATname = db.Column(db.String())
     DAT = db.Column(db.String())
     originDAT = db.Column(db.String())
@@ -262,3 +264,7 @@ class sessionFilesMeta(db.Model):
     sessionFilesMeta_id = db.Column(db.Integer, primary_key=True)
     sessionFiles_id = db.Column(db.ForeignKey('sessionFiles.id'))
     sessionMeta_id = db.Column(db.ForeignKey('sessionMeta.id'))
+
+
+#class userFiles(db.Model):
+#    userFiles_id = db.Column(db.Integer, primary_key=True)
