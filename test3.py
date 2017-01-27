@@ -136,6 +136,7 @@ def login():
             clear_cmeta()
             clear_rowa_wrapper()
             current_user.current_session = "None"
+            db.session.commit()
             return redirect(url_for('index'))
         if user.approved == 2:
             refusePrompt = "Your account has been frozen"
