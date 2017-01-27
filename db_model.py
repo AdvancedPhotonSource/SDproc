@@ -61,7 +61,7 @@ class User(db.Model):
     institution = db.Column(db.String())
     reason = db.Column(db.String())
     commentChar = db.Column(db.String())
-
+    current_session = db.Column(db.String())
     approved = db.Column(db.Integer())
 
     isAdmin = db.Column(db.Integer())
