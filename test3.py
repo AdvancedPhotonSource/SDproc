@@ -59,7 +59,7 @@ import mpld3
 import os
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from app import app
-from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta, notification, currentDAT
+from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta, notification, currentDAT, userFiles
 from forms import InputForm, CommentForm
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -276,10 +276,13 @@ def solveNotif():
                     db.session.deleta(instance)
             else:
                 session.authed = ','.join(auths)
-        files = db.session.query(dataFile).filter(dataFile.user == user).all()
-        for file in files:
-            auths = session.quthed.split(',')
+        fileIDs = db.session.query(userFiles).filter(userFiles.user_id == user.id).all()
+        for id in fileIDs:
+            file = db.session.query(dataFile).filter(dataFile.id == id.file_id).first()
+            auths = file.authed.split(',')
             auths.remove(str(user.id))
+            userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == file.id)).first()
+            db.session.delete(userFile)
             if len(auths) == 0:
                 db.session.delete(file)
             else:
@@ -359,6 +362,11 @@ def addThing():
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
+                    userFile = userFiles()
+                    userFile.user_id = user.id
+                    userFile.file_id = instance.id
+                    db.session.add(userFile)
+                    db.session.commit()
             if table == '#userSessionTable':
                 instance = db.session.query(sessionFiles).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
@@ -375,6 +383,11 @@ def addThing():
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
+                    userFile = userFiles()
+                    userFile.user_id = user.id
+                    userFile.file_id = instance.id
+                    db.session.add(userFile)
+                    db.session.commit()
             if table == '#sessionUserTable':
                 instance = db.session.query(sessionFiles).filter_by(id=location).first()
                 auths = instance.authed.split(',')
@@ -401,6 +414,9 @@ def removeThing():
                 instance = db.session.query(dataFile).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
                 auths.remove(str(user.id))
+                userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
+                db.session.delete(userFile)
+                db.session.commit()
                 if len(auths) == 0:
                     db.session.delete(instance)
                 else:
@@ -424,6 +440,9 @@ def removeThing():
                 file_instance = db.session.query(dataFile).filter_by(id=location).first()
                 auths = file_instance.authed.split(',')
                 auths.remove(str(user.id))
+                userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == file_instance.id)).first()
+                db.session.delete(userFile)
+                db.session.commit()
                 if len(auths) == 0:
                     db.session.delete(file_instance)
                 else:
@@ -628,7 +647,8 @@ def dataFormat():
             format.fit_range = 3
             format.file_id = idthis
             hrm = {'hrm_e0': 14412500.0, 'hrm_bragg1': 18.4704, 'hrm_bragg2': 77.5328,
-                   'hrm_geo': '++', 'hrm_alpha1': 2.6e-6, 'hrm_alpha2': 2.6e-6}
+                   'hrm_geo': '++', 'hrm_alpha1': 2.6e-6, 'hrm_alpha2': 2.6e-6,
+                   'hrm_theta1_sign': 1, 'hrm_theta2_sign': 1}
             hrm = json.dumps(hrm)
             format.hrm = hrm
             format.session = current_user.current_session
@@ -724,12 +744,15 @@ def saveSession():
         session_instance.fit_pos = instance.fit_pos
         session_instance.fit_range = instance.fit_range
         session_instance.hrm = instance.hrm
+        session_instance.session = session_file.name
         db.session.add(session_instance)
         db.session.commit()
 
         session_file_instance = sessionFilesMeta()
         session_file_instance.sessionFiles_id = session_file.id
         session_file_instance.sessionMeta_id = session_instance.id
+
+        instance.session = session_file.name
 
         db.session.add(session_file_instance)
         db.session.commit()
@@ -843,6 +866,10 @@ def generateOutput():
             dfile.comChar = user_instance.commentChar
             dfile.type = 'dat'
             db.session.add(dfile)
+            userFile = userFiles()
+            userFile.file_id = dfile.id
+            userFile.user_id = current_user.get_id()
+            db.session.add(userFile)
             db.session.commit()
         with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
             data = DATfile.read()
@@ -867,6 +894,10 @@ def generateOutput():
             dfile.comChar = user_instance.commentChar
             dfile.type = 'dat'
             db.session.add(dfile)
+            userFile = userFiles()
+            userFile.file_id = dfile.id
+            userFile.user_id = current_user.get_id()
+            db.session.add(userFile)
             db.session.commit()
         with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
             data = DATfile.read()
@@ -900,6 +931,10 @@ def generateOutput():
         dfile.comChar = user_instance.commentChar
         dfile.type = 'dat'
         db.session.add(dfile)
+        userFile = userFiles()
+        userFile.file_id = dfile.id
+        userFile.user_id = current_user.get_id()
+        db.session.add(userFile)
         db.session.commit()
         return datFName
     if datFName is not None:
@@ -967,6 +1002,10 @@ def addFile():
                 dfile.comment = ''
                 dfile.authed = current_user.get_id()
                 db.session.add(dfile)
+                userFile = userFiles()
+                userFile.file_id = dfile.id
+                userFile.user_id = current_user.get_id()
+                db.session.add(userFile)
                 db.session.commit()
     return 'Added'
 
@@ -983,6 +1022,9 @@ def delete_file():
             instance = db.session.query(dataFile).filter_by(id=idnum).first()
             auths = instance.authed.split(',')
             auths.remove(str(user.id))
+            userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
+            db.session.delete(userFile)
+            db.session.commit()
             if len(auths) == 0:
                 db.session.delete(instance)
             else:
@@ -1004,12 +1046,12 @@ def delete_file():
             else:
                 instance.authed = ','.join(auths)
         if table == 'User':
-            instance = db.session.query(User).filter_by(username=delUser).first()
-            db.session.delete(instance)
-            sessions = db.session.query(sessionFiles).filter(sessionFiles.user == instance).all()
+            user_instance = db.session.query(User).filter_by(username=delUser).first()
+            db.session.delete(user_instance)
+            sessions = db.session.query(sessionFiles).filter(sessionFiles.user == user_instance).all()
             for session in sessions:
                 auths = session.authed.split(',')
-                auths.remove(str(user.id))
+                auths.remove(str(user_instance.id))
                 if len(auths) == 0:
                     db.session.delete(session)
                     instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=session.id).all()
@@ -1019,10 +1061,13 @@ def delete_file():
                         db.session.deleta(instance)
                 else:
                     session.authed = ','.join(auths)
-            files = db.session.query(dataFile).filter(dataFile.user == instance).all()
-            for file in files:
-                auths = session.quthed.split(',')
-                auths.remove(str(user.id))
+            fileIDs = db.session.query(userFiles).filter(userFiles.user_id == user_instance.id).all()
+            for id in fileIDs:
+                file = db.session.query(dataFile).filter(dataFile.id == id.file_id).first()
+                auths = file.authed.split(',')
+                auths.remove(str(user_instance.id))
+                userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user_instance.id, userFiles.file_id == file.id)).first()
+                db.session.delete(userFile)
                 if len(auths) == 0:
                     db.session.delete(file)
                 else:
@@ -1179,10 +1224,12 @@ def clear_rowa_wrapper():
 @login_required
 def clear_cmeta():
     current_user.current_session = 'None'
-    meta = db.metadata
-    for table in (meta.sorted_tables):
-        if table.name == 'current_meta' or table.name == 'currentDAT':
-            db.session.execute(table.delete())
+    deleting = db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all()
+    for i in deleting:
+        db.session.delete(i)
+    deleting = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).all()
+    for i in deleting:
+        db.session.delete(i)
     db.session.commit()
     return 'Cleared'
 
@@ -1793,6 +1840,10 @@ def shareSes():
             return 'Already Shared'
         else:
             dat_instance.authed = dat_instance.authed + ',' + str(toAuth)
+            userFile = userFiles()
+            userFile.file_id = idthis
+            userFile.user_id = thisUser.id
+            db.session.add(userFile)
             db.session.commit()
     else:
         session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
@@ -1818,6 +1869,10 @@ def shareFile():
         return 'Already Shared'
     else:
         file_instance.authed = file_instance.authed + ',' + str(toAuth)
+        userFile = userFiles()
+        userFile.file_id = idthis
+        userFile.user_id = thisUser.id
+        db.session.add(userFile)
         db.session.commit()
     return 'Shared'
 

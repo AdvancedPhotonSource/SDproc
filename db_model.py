@@ -210,6 +210,7 @@ class sessionMeta(db.Model):
     path = db.Column(db.String())
     comment = db.Column(db.String())
     file_id = db.Column(db.Integer())
+    session = db.Column(db.String())
 
     fit_type = db.Column(db.String())
     fit_pos = db.Column(db.Float())
@@ -266,5 +267,7 @@ class sessionFilesMeta(db.Model):
     sessionMeta_id = db.Column(db.ForeignKey('sessionMeta.id'))
 
 
-#class userFiles(db.Model):
-#    userFiles_id = db.Column(db.Integer, primary_key=True)
+class userFiles(db.Model):
+    userFiles_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.ForeignKey('user.id'))
+    file_id = db.Column(db.ForeignKey('data_file.id'))

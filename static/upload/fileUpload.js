@@ -43,6 +43,7 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 */
 $(document).ready(function(){
+    localStorage.clear();
     var rows = $('tr.item');
     rows.removeClass("highlight")
     rows.removeClass("lightlight")
@@ -133,7 +134,7 @@ $(window).on('unload', function(){
     else
     {
         previous = localStorage.getItem('previous_upload');
-        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val()});
+        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val()})
     }
 })
 
