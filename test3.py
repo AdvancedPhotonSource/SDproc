@@ -717,13 +717,14 @@ def saveSession():
     checked = request.form.get("checked", type=int)
     namechk = request.form.get("name", type=str)
     if checked == 0:
-        instance = db.session.query(sessionFiles).filter_by(name=namechk).first()
+        instance = db.session.query(sessionFiles).filter(and_(sessionFiles.user_id == current_user.get_id(), sessionFiles.name == namechk)).first()
         if instance:
             data = str(instance.id)
             return data
 
     session_file = sessionFiles()
     session_file.user = current_user
+    session_file.user_id == current_user.get_id()
     session_file.authed = current_user.get_id()
     session_file.name = request.form.get("name", type=str)
     session_file.comment = request.form.get("comment", type=str)
@@ -1002,6 +1003,7 @@ def addFile():
                 dfile.comment = ''
                 dfile.authed = current_user.get_id()
                 db.session.add(dfile)
+                temp = db.session.query(userFiles).all()
                 userFile = userFiles()
                 userFile.file_id = dfile.id
                 userFile.user_id = current_user.get_id()
@@ -1047,8 +1049,7 @@ def delete_file():
                 instance.authed = ','.join(auths)
         if table == 'User':
             user_instance = db.session.query(User).filter_by(username=delUser).first()
-            db.session.delete(user_instance)
-            sessions = db.session.query(sessionFiles).filter(sessionFiles.user == user_instance).all()
+            sessions = db.session.query(sessionFiles).filter(sessionFiles.user_id == user_instance.id).all()
             for session in sessions:
                 auths = session.authed.split(',')
                 auths.remove(str(user_instance.id))
@@ -1058,7 +1059,7 @@ def delete_file():
                     for instance in instances:
                         meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
                         db.session.delete(meta)
-                        db.session.deleta(instance)
+                        db.session.delete(instance)
                 else:
                     session.authed = ','.join(auths)
             fileIDs = db.session.query(userFiles).filter(userFiles.user_id == user_instance.id).all()
@@ -1072,6 +1073,7 @@ def delete_file():
                     db.session.delete(file)
                 else:
                     file.authed = ','.join(auths)
+            db.session.delete(user_instance)
         db.session.commit()
     return 'Deleted'
 
@@ -1391,6 +1393,7 @@ def process():
                 npXcords = numpy.multiply(npXcords, 1000000)
                 center = atMax(ycords, npXcords, xmax, fitRange)
                 xmax[1] = temp
+                ycords[0] = numpy.multiply(ycords[0], 1000000)
                 moveXcords(ycords, center)
                 format_instance.fit_type = 'AtMax'
                 format_instance.fit_pos = center
@@ -1403,14 +1406,9 @@ def process():
             allFileNames.append(file_instance.name)
             if output == 1:
                 outputData = []
-                colNames = []
-                outputData.append(ycords[0])
-                colNames.append(file_instance.name)
-                if current_user.current_session is not "None":
-                    filename = writeOutput(outputData, colNames, current_user.current_session)
-                else:
-                    filename = writeOutput(outputData, colNames, 'ProcessOut')
-                return redirect(url_for('sendOut', filename=filename))
+                outputData.append(ycords[0].tolist())
+                outputData.append(ycords[1])
+                return json.dumps(outputData)
             code = simplePlot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
         if idthis is None:
             jidlist = json.loads(idlist)
@@ -1697,7 +1695,10 @@ def setDAT():
     ys = []
     user = db.session.query(User).filter_by(username=current_user.username).first()
     data = DAT.split("\n")
-    data = [x for x in data if not x.startswith(user.commentChar)]
+    try:
+        data = [x for x in data if not x.startswith(user.commentChar)]
+    except TypeError:
+        data = [x for x in data if not x.startswith('#')]
     for i in data:
         if not i:
             continue

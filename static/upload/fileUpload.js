@@ -43,7 +43,7 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 */
 $(document).ready(function(){
-    localStorage.clear();
+    localStorage.removeItem('previous_upload');
     var rows = $('tr.item');
     rows.removeClass("highlight")
     rows.removeClass("lightlight")
