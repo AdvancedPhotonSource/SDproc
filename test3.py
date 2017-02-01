@@ -157,14 +157,14 @@ def profile():
                            'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
                            'commentChar': current_user.commentChar})
 
-    notifications = notification.query.order_by('id')
-    for instance in notifications:
-        userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
-        if userInfo != None:
-            notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
-                                 'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
-                                 'fullName': userInfo.fullName, 'institution': userInfo.institution,
-                                 'reason': userInfo.reason})
+    #notifications = notification.query.order_by('id')
+    #for instance in notifications:
+    #    userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
+    #    if userInfo != None:
+    #        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
+    #                             'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
+    #                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
+    #                             'reason': userInfo.reason})
     return render_template('profile.html', user=current_user, notifications=notifData, userProf=thisProfile)
 
 
