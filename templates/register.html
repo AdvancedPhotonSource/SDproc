@@ -147,6 +147,20 @@
         </div>
     </div>
 </form>
+<br/>
+<br/>
+<div class="text-center">
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    Password Strength Error:
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+</div>
 <footer>
     <div class="text-center">
         <p>Copyright (c) UChicago Argonne, LLC. All rights reserved.</p>

@@ -104,22 +104,28 @@ def register():
     if request.method == 'POST' and form.validate():
         user = User()
         form.populate_obj(user)
-        user.set_password(form.password.data)
-        user.approved = 0
-        user.isAdmin = 0
+        strength = user.is_strong_pass(form.password.data)
+        if strength['password_ok']:
+            user.set_password(form.password.data)
+            user.approved = 0
+            user.isAdmin = 0
 
-        db.session.add(user)
+            db.session.add(user)
 
-        notif = notification()
-        notif.originUser = user.username
-        notif.type = 'Create Account'
-        notif.timestamp = getTime()
+            notif = notification()
+            notif.originUser = user.username
+            notif.type = 'Create Account'
+            notif.timestamp = getTime()
 
-        db.session.add(notif)
+            db.session.add(notif)
 
-        db.session.commit()
+            db.session.commit()
 
-        return redirect(url_for('login'))
+            return redirect(url_for('login'))
+        else:
+            for key, value in strength.iteritems():
+                if value:
+                    flash(key)
     return render_template('register.html', form=form)
 
 

@@ -46,6 +46,7 @@ __author__ = 'caschmitz'
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import app
+import re
 from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 
@@ -87,6 +88,21 @@ class User(db.Model):
     def get_id(self):
         return self.id
 
+    def is_strong_pass(self, pw):
+        length_error = len(pw) < 8
+        digit_error = re.search(r"\d", pw) is None
+        uppercase_error = re.search(r"[A-Z]", pw) is None
+        lowercase_error = re.search(r"[a-z]", pw) is None
+        symbol_error = re.search(r"\W", pw) is None
+        password_ok = not(length_error or digit_error or uppercase_error or lowercase_error or symbol_error)
+        return {
+            'password_ok' : password_ok,
+            'Length at least 8' : length_error,
+            'At least one digit' : digit_error,
+            'At least one uppercase' : uppercase_error,
+            'At least one lowercase' : lowercase_error,
+            'At least one symbol' : symbol_error,
+        }
 
 class notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -271,3 +287,7 @@ class userFiles(db.Model):
     userFiles_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.ForeignKey('user.id'))
     file_id = db.Column(db.ForeignKey('data_file.id'))
+
+
+class loginAttempts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)

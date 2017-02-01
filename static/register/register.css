@@ -75,3 +75,7 @@ html{
     position: relative;
     min-height: 100%;
 }
+
+.flashes{
+    margin-top: 20px;
+}
