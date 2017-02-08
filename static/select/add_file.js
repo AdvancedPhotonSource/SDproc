@@ -338,14 +338,21 @@ function comment(id, type)
         {
             var nextID = id
             previous = localStorage.getItem('previous');
-            if (type == 'dat'){
-                var format = 1;
+            var prevType = localStorage.getItem('previousType');
+            if (prevType == 'dat'){
+                var format = '';
             }
             else{
                 var format = 2;
             }
             $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: format},
             function(){
+                if (type == 'dat'){
+                    var format = 1;
+                }
+                else{
+                    var format = 2;
+                }
                 $.post('/SDproc/show_comment', { idnext: nextID, format: format},
                 function(data){
                     $('#comment').val(data)

@@ -212,6 +212,7 @@ class currentDAT(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    file_id = db.Column(db.Integer, db.ForeignKey('data_file.id'))
     user = db.relationship('User', backref=db.backref('cUserDAT', lazy='dynamic'))
     DATname = db.Column(db.String())
     DAT = db.Column(db.String())

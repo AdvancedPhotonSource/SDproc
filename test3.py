@@ -487,7 +487,7 @@ def index():
     for Dinstance in DATsessions:
         lastMod = modified(Dinstance.path)
         data.insert(0,
-                    {'name': Dinstance.name, 'id': Dinstance.id, 'comment': Dinstance.comment, 'authed': Dinstance.authed,
+                    {'name': Dinstance.name + '.dat', 'id': Dinstance.id, 'comment': Dinstance.comment, 'authed': Dinstance.authed,
                     'modified': lastMod, 'type': 'dat'})
     if request.method == 'POST':
         return redirect(url_for('dataFormat'))
@@ -506,7 +506,7 @@ def upload():
         lastMod = modified(instance.path)
         temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
         modname = [instance.name + temp]
-        if instance.type == 'dat' and instance.name[:-4] != '.dat':
+        if instance.type == 'dat' and instance.name[-4:] != '.dat':
             instance.name = instance.name + '.dat'
         data.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
                         'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
@@ -1002,6 +1002,8 @@ def addFile():
                 file.save(os.path.join((app.config['UPLOAD_DIR'] + '/rawData'), pathfilename))
                 dfile = dataFile()
                 dfile.name = filename
+                if dfile.name[-4:] == '.dat':
+                    dfile.name = dfile.name[:-4]
                 sideVals = request.form.listvalues()
                 dfile.comChar = sideVals[0][0]
                 dfile.type = sideVals[1][0]
@@ -1009,7 +1011,6 @@ def addFile():
                 dfile.comment = ''
                 dfile.authed = current_user.get_id()
                 db.session.add(dfile)
-                temp = db.session.query(userFiles).all()
                 userFile = userFiles()
                 userFile.file_id = dfile.id
                 userFile.user_id = current_user.get_id()
@@ -1030,6 +1031,7 @@ def delete_file():
             instance = db.session.query(dataFile).filter_by(id=idnum).first()
             auths = instance.authed.split(',')
             auths.remove(str(user.id))
+            temp = db.session.query(userFiles).all()
             userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
             db.session.delete(userFile)
             db.session.commit()
@@ -1109,6 +1111,12 @@ def save_comment():
             instance = db.session.query(sessionFiles).filter_by(id=idprev).first()
             instance.comment = comment
             db.session.commit()
+        elif formatting == 3:
+            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+            instance = db.session.query(dataFile).filter_by(id=DAT.file_id).first()
+            if instance is not None:
+                instance.comment = comment
+                db.session.commit()
     return 'Saved'
 
 
@@ -1144,6 +1152,11 @@ def show_comment():
                 send_comment = format_instance.comment
         if idnext is not None and formatting == 2:
             instance = db.session.query(sessionFiles).filter_by(id=idnext).first()
+            if instance is not None:
+                send_comment = instance.comment
+        if formatting == 3:
+            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+            instance = db.session.query(dataFile).filter_by(id=DAT.file_id).first()
             if instance is not None:
                 send_comment = instance.comment
         return send_comment
@@ -1269,11 +1282,16 @@ def set_ses():
                 data = DATfile.read()
                 cDAT = currentDAT()
                 cDAT.user = current_user
+                cDAT.file_id = dat.id
                 xs = []
                 ys = []
                 user = db.session.query(User).filter_by(username=current_user.username).first()
                 data = data.split("\n")
-                data = [x for x in data if not x.startswith(user.commentChar)]
+                try:
+                    data = [x for x in data if not x.startswith(user.commentChar)]
+                except TypeError:
+                    data = [x for x in data if not x.startswith('#')]
+                    flash('No comment preference set, defaulting to #')
                 for i in data:
                     if not i:
                         continue
@@ -1656,6 +1674,9 @@ def modifyDAT():
     try:
         DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
     except Exception, e:
+        code = 'No DAT selected'
+        return render_template("modifyDAT.html", user=current_user, ses=current_user.current_session, code=code)
+    if DAT == None:
         code = 'No DAT selected'
         return render_template("modifyDAT.html", user=current_user, ses=current_user.current_session, code=code)
     user = db.session.query(User).filter_by(username=current_user.username).first()

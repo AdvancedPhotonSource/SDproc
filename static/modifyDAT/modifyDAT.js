@@ -25,6 +25,10 @@ $(document).ready( function() {
     }
     $('#calcLeftYLabel').hide()
     $('#calcRightYLabel').hide()
+
+    $.post('/SDproc/show_comment', {format: 3}, function(data){
+        $('#comment').val(data)
+    })
 })
 
 function showLine(){
@@ -174,3 +178,7 @@ function outputFile(){
         }]
     })
 }
+
+$(window).on('unload', function(){
+    $.post( "/SDproc/save_comment", {comment: $('#comment').val(), format: 3})
+})

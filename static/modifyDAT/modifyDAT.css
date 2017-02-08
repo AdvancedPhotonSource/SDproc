@@ -149,7 +149,7 @@ html{
     position: relative;
     height: 250px;
     width: 500px;
-    margin-top: 200px;
+    margin-top: 100px;
     margin-left: -150px;
     border-style: solid;
     border-width: 1px;
@@ -180,7 +180,7 @@ html{
 
 .LGLabel{
     position: relative;
-    top: 200px;
+    top: 100px;
     left: 30px;
 }
 
@@ -193,4 +193,10 @@ html{
 
 .calcRightYLabel{
     margin-left: 30px;
+}
+
+.comment{
+    position: relative;
+    width: 350px;
+    right: 40px;
 }
