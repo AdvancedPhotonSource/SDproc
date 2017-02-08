@@ -1011,6 +1011,7 @@ def addFile():
                 dfile.comment = ''
                 dfile.authed = current_user.get_id()
                 db.session.add(dfile)
+                db.session.commit()
                 userFile = userFiles()
                 userFile.file_id = dfile.id
                 userFile.user_id = current_user.get_id()
