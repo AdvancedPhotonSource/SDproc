@@ -2,6 +2,11 @@ $(document).ready( function() {
     if (jQuery.trim($('#process_plot').text()) == "No DAT selected"){
         alert('Please select or generate a DAT file');
     }
+    else{
+        $.post('/SDproc/show_comment', {format: 3}, function(data){
+            $('#comment').val(data)
+        })
+    }
     if ($('#flatRad').is(':checked')){
         $('#flatVal').prop('disabled', false);
         $('#leftX').prop('disabled', true);
@@ -25,10 +30,6 @@ $(document).ready( function() {
     }
     $('#calcLeftYLabel').hide()
     $('#calcRightYLabel').hide()
-
-    $.post('/SDproc/show_comment', {format: 3}, function(data){
-        $('#comment').val(data)
-    })
 })
 
 function showLine(){
@@ -180,5 +181,10 @@ function outputFile(){
 }
 
 $(window).on('unload', function(){
-    $.post( "/SDproc/save_comment", {comment: $('#comment').val(), format: 3})
+    if (jQuery.trim($('#process_plot').text()) == "No DAT selected"){
+        return;
+    }
+    else{
+        $.post( "/SDproc/save_comment", {comment: $('#comment').val(), format: 3})
+    }
 })

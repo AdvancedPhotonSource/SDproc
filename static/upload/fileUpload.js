@@ -47,7 +47,8 @@ $(document).ready(function(){
     var rows = $('tr.item');
     rows.removeClass("highlight")
     rows.removeClass("lightlight")
-
+    $('#uploadBtn').prop('disabled', true);
+    resetForm();
     setupRows();
     setupClick();
 });
@@ -141,7 +142,14 @@ $(window).on('unload', function(){
 function resetForm()
 {
     $('#fileForm')[0].reset();
+    $('#uploadBtn').prop('disabled', true);
 }
+
+$(function(){
+    $("input:file").change(function(){
+        $('#uploadBtn').prop('disabled', false);
+    });
+})
 
 function sendfileForm()
 {
