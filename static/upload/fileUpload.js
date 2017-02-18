@@ -51,6 +51,15 @@ $(document).ready(function(){
     resetForm();
     setupRows();
     setupClick();
+
+    if(localStorage.getItem("usingDAT") == 1){
+        $("#navData").addClass('disabled');
+        $('#navProcess').addClass('disabled');
+    }
+    else{
+        $('#navData').removeClass('disabled');
+        $('#navProcess').removeClass('disabled');
+    }
 });
 
 

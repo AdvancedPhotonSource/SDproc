@@ -84,6 +84,7 @@ function startProc(){
     $('#procButton').hide();
     $('#settingsBtn').show();
     $('#outputBtn').show();
+    $('#continue').show();
     setcDAT();
 }
 
@@ -93,6 +94,7 @@ $(document).ready( function() {
     $('#procButton').show();
     $('#settingsBtn').hide();
     $('#outputBtn').hide();
+    $('#continue').hide();
     $('#linearRad').prop("checked", true)
     $('#binWidth').attr('placeholder', 'Input width of bins');
     $('#binWidth').prop('disabled', true);
@@ -234,6 +236,10 @@ function setcDAT(){
             })
         })
     }
+}
+
+function advance(){
+    window.location.href = ("modifyDAT");
 }
 
 function outputFile(){

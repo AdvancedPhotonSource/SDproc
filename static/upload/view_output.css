@@ -219,3 +219,8 @@ html{
     position: relative;
     min-height: 100%;
 }
+
+.disabled{
+    pointer-events: none;
+    opacity: 1;
+}

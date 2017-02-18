@@ -538,8 +538,9 @@ def dataFormat():
         lastMod = modified(instance.path)
         temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
         modname = [instance.name + temp]
-        fdata.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
-                         'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+        if instance.type != 'dat':
+            fdata.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
+                            'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
     if findPlot != 1:
         form = InputForm(request.form)

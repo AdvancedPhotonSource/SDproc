@@ -51,6 +51,14 @@ $(document).ready(function(){
 
     setupClick();
 
+    if(localStorage.getItem("usingDAT") == 1){
+        $("#navData").addClass('disabled');
+        $('#navProcess').addClass('disabled');
+    }
+    else{
+        $('#navData').removeClass('disabled');
+        $('#navProcess').removeClass('disabled');
+    }
 
     $('#ssName').keyup(function(e){
 
@@ -209,27 +217,39 @@ function newSession()
 
 function proceed()
 {
-    $.post('/SDproc/clear_rowa',function(){
-        $.post('/SDproc/clear_cmeta', function(){
-            sesID = localStorage.getItem('previous');
-            type = localStorage.getItem('previousType');
-            localStorage.clear();
-            $.post('/SDproc/set_ses', {id: sesID, type: type}, function(data){
-                if (type == 'dat'){
-                    window.location.href = ("modifyDAT");
-                }
-                else{
-                    var parsed = $.parseJSON(data);
-                    var files = [];
-                    $(parsed).each(function(){
-                        files.push(this);
-                    })
-                    localStorage.setItem('use_files', JSON.stringify(files));
-                    localStorage.setItem('usingSes', 1);
-                    window.location.href = ("data");
-                }
+    previous = localStorage.getItem('previous');
+    type = localStorage.getItem('previousType');
+    if (type == 'dat'){
+        var format = 1;
+    }
+    else{
+        var format = 2;
+    }
+    $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: format}, function(){
+        $.post('/SDproc/clear_rowa',function(){
+            $.post('/SDproc/clear_cmeta', function(){
+                sesID = localStorage.getItem('previous');
+                type = localStorage.getItem('previousType');
+                localStorage.clear();
+                $.post('/SDproc/set_ses', {id: sesID, type: type}, function(data){
+                    if (type == 'dat'){
+                        localStorage.setItem("usingDAT", 1);
+                        window.location.href = ("modifyDAT");
+                    }
+                    else{
+                        localStorage.setItem("usingDAT", 0);
+                        var parsed = $.parseJSON(data);
+                        var files = [];
+                        $(parsed).each(function(){
+                            files.push(this);
+                        })
+                        localStorage.setItem('use_files', JSON.stringify(files));
+                        localStorage.setItem('usingSes', 1);
+                        window.location.href = ("data");
+                    }
+                })
             })
-        })
+        });
     });
 }
 
@@ -404,8 +424,13 @@ function logout(){
     }
     else{
         previous = localStorage.getItem('previous');
-        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 2}, function(){
-            window.location.href = ("logout")
-        });
+        type = localStorage.getItem('previousType');
+        if (type == 'dat'){
+            var format = 1;
+        }
+        else{
+            var format = 2;
+        }
+        $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: format});
     }
 }

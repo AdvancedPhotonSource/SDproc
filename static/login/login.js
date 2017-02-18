@@ -45,3 +45,14 @@
 $(window).on('unload', function(){
     localStorage.clear();
 })
+
+$(document).ready(function(){
+    if(localStorage.getItem("usingDAT") == 1){
+        $("#navData").addClass('diabled');
+        $('#navProcess').addClass('diabled');
+    }
+    else{
+        $('#navData').removeClass('disabled');
+        $('#navProcess').removeClass('disabled');
+    }
+};

@@ -190,3 +190,9 @@ html{
     position: relative;
     min-height: 100%;
 }
+
+.continue{
+    position: relative;
+    margin-top: 30px;
+    margin-right: 250px;
+}

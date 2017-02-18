@@ -60,3 +60,14 @@ function updateProf(){
         $('#profileInfo').load(location.href+" #profileInfo>*","");
     });
 }
+
+$(document).ready(function(){
+    if(localStorage.getItem("usingDAT") == 1){
+        $("#navData").addClass('disabled');
+        $('#navProcess').addClass('disabled');
+    }
+    else{
+        $('#navData').removeClass('disabled');
+        $('#navProcess').removeClass('disabled');
+    }
+});

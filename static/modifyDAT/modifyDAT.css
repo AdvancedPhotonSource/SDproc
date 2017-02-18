@@ -200,3 +200,8 @@ html{
     width: 350px;
     right: 40px;
 }
+
+.disabled{
+    pointer-events: none;
+    opacity: 1;
+}
