@@ -94,11 +94,18 @@ def load_user(user_id):
 
 @app.route('/', methods=['GET', 'POST'])
 def toLogin():
+    '''Ensures users will be redirected to login page even without /login'''
     return redirect(url_for('login'))
 
 
 @app.route('/reg', methods=['GET', 'POST'])
 def register():
+    '''
+    Template generator method for the register page.
+
+     Accepts register form, creates baseline user, sends notification to admin requesting account approval.
+     :return:
+    '''
     from forms import register_form
     form = register_form(request.form)
     if request.method == 'POST' and form.validate():
@@ -131,6 +138,14 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    '''
+    Template generator method for the login page
+
+    Accepts login form and ensure that the user has permission to login.
+
+    This is done by using Flask's builtin login_user after checking that the user is approved in the database
+    :return:
+    '''
     from forms import login_form
     form = login_form(request.form)
     if request.method == 'POST' and form.validate():
@@ -156,6 +171,14 @@ def login():
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    '''
+    Template generator method for the profile page.
+
+    Sends information on the current user and their notifications as template.
+
+    This is done by querying respective databases.
+    :return:
+    '''
     notifData = []
     thisProfile = []
 
@@ -177,6 +200,12 @@ def profile():
 @app.route('/updateProf', methods=['GET', 'POST'])
 @login_required
 def updateProf():
+    '''
+    Updates the current user's profile in the database with any new information they may have added.
+
+    This is done by accepting request information (AJAX generally) and updating the User database accordingly
+    :return:
+    '''
     user_instance = db.session.query(User).filter_by(username=current_user.username).first()
     comChar = request.form.get('comChar', type=str)
     password = request.form.get('pass', type=str)
@@ -195,6 +224,15 @@ def updateProf():
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
+    '''
+    Template generator method for the admin page.
+
+    Gets all sessions, files, users, and notifications.
+
+    This is done by querying each respective sqlite database.
+    Information is sent with the template to be parsed as needed by the user.
+    :return:
+    '''
     if current_user.isAdmin != 1:
         return redirect(url_for('index'))
     names = db.session.query(User)
@@ -232,6 +270,14 @@ def admin():
 @app.route('/freeze', methods=['GET', 'POST'])
 @login_required
 def freeze():
+    '''
+    Freezes the designated user's account so that they may no longer login
+
+    This is done by setting 'aUser'.approved to be 2.
+
+    Only accessable by admins.
+    :return:
+    '''
     user = request.form.get('user', type=str)
     freeze = request.form.get('freeze', type=int)
     user_instance = db.session.query(User).filter_by(username=user).first()
@@ -246,6 +292,14 @@ def freeze():
 @app.route('/notifInfo', methods=['GET', 'POST'])
 @login_required
 def notifInfo():
+    '''
+    Supplementary template generator method for admin.
+
+    Provides additional information about a notification.
+
+    This is done by querying the sqlite database 'notification' based on the ID given.
+    :return:
+    '''
     notifID = request.form.get('id', type=int)
     notifInfo = db.session.query(notification).filter_by(id=notifID).first()
     userInfo = db.session.query(User).filter_by(username=notifInfo.originUser).first()
@@ -258,6 +312,14 @@ def notifInfo():
 @app.route('/solveNotif', methods=['GET', 'POST'])
 @login_required
 def solveNotif():
+    '''
+    Resolves a notification based on the action taken.
+
+    This is done by updating the User based on if they were accepted or not.
+
+    Only currently setup to handle account creation requests.
+    :return:
+    '''
     id = request.form.get('id', type=int)
     action = request.form.get('action', type=int)
     notif = db.session.query(notification).filter_by(id=id).first()
@@ -300,6 +362,14 @@ def solveNotif():
 @app.route('/getInfo', methods=['GET', 'POST'])
 @login_required
 def getInfo():
+    '''
+    Supplementary template generator for the admin page.
+
+    Provides additional information about a file/session/user
+
+    This is done through queries on their corresponding databases.
+    :return:
+    '''
     table = request.form.get('table', type=str)
     id = request.form.get('id', type=int)
     user = request.form.get('user', type=str)
@@ -350,8 +420,9 @@ def getInfo():
 @login_required
 def addThing():
     '''
+    Helper method for the /admin page used to add something to the user/file/session database.
 
-
+    This is done by taking the ID of something that already exists in the database and updating the authentication list.
     :return:
     '''
     if request.method == 'POST':
@@ -409,6 +480,13 @@ def addThing():
 @app.route('/removeThing', methods=['GET', 'POST'])
 @login_required
 def removeThing():
+    '''
+    Updates the user/file/session database with a deletion as requested by the admin page
+
+    This is done by getting information from a request and deleting the appropriate thing from the authentication list.
+    If this changes leaves the authentication list empty then the thing is deleted from the database.
+    :return:
+    '''
     if request.method == 'POST':
         thing = request.form.get('id', type=str)
         location = request.form.get('from', type=str)
@@ -474,6 +552,14 @@ def removeThing():
 @app.route('/select', methods=['GET', 'POST'])
 @login_required
 def index():
+    '''
+    Template generator method for the select page.
+
+    Sends all sessions and DAT files in a template for the user to use so long as they are authenticated.
+
+    This is done with a database query and authenticated in view_output.html.
+    :return:
+    '''
     user = current_user
     data = []
     sessions = sessionFiles.query.all()
@@ -497,6 +583,14 @@ def index():
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
+    '''
+    Template generator method for the upload page.
+
+    Sends all files in a template for the user to use so long as they are authenticated.
+
+    this is done with a database query and authenticated in upload.html.
+    :return:
+    '''
     user = current_user
     data = []
     files = dataFile.query.order_by('id')
@@ -518,6 +612,7 @@ def upload():
 @app.route('/logout')
 @login_required
 def logout():
+    '''Logs out a user by clearing session information'''
     session.clear()
     return redirect(url_for('login'))
 
@@ -525,6 +620,14 @@ def logout():
 @app.route('/data', methods=['GET', 'POST'])
 @login_required
 def dataFormat():
+    '''
+    Template generator for the data page.
+
+    Has a multitude of options that allow the user to display file information in the form of a plot.
+    Options are saved to a live-updated session for each respective file that persists through temporarily leaving the page.
+    Defaults are assigned to all files within this method.
+    :return:
+    '''
     user = current_user
     thisSession = current_user.current_session
     findPlot = request.form.get('plot', type=int)
@@ -679,6 +782,13 @@ def dataFormat():
 @app.route('/save_graph', methods=['GET', 'POST'])
 @login_required
 def save_graph():
+    '''
+    Updates the current session with information that the user has supplied on the data page.
+
+    This session is stored temporarily for each file and is updated whenever a change is made on the data page.
+    The data is passed in the InputForm that is defined in forms.py and saved in the currentMeta database table.
+    :return:
+    '''
     form = InputForm(request.form)
     idthis = request.form.get("idnum", type=int)
     if idthis is not None:
@@ -721,6 +831,13 @@ def save_graph():
 @app.route('/save_ses', methods=['GET', 'POST'])
 @login_required
 def saveSession():
+    '''
+    This saves the current session so that the user may resume from the select page whenever they want.
+
+    The currentMeta table is parsed and saved into the sessionFiles and sessionFilesMeta tables for more permanence.
+    A check is done to ensure that the user cannot save the session under a name that has already been created.
+    :return:
+    '''
     checked = request.form.get("checked", type=int)
     namechk = request.form.get("name", type=str)
     if checked == 0:
@@ -776,6 +893,13 @@ def saveSession():
 @app.route('/generateOutput', methods=['GET', 'POST'])
 @login_required
 def generateOutput():
+    '''
+    This pulls data from a request to determine which type of file needs to be generated and redirects the file to output.
+
+    The outType that is sent from the request data determines which type of output to compile the given data into.
+    If the output is being saved to the server a copy is made in app.config['UPLOAD_DIR'].  Otherwise the file is sent to /sendOut where it is downloaded to the user's computer.
+    :return:
+    '''
     form = InputForm(request.form)
     id = request.form.get('idnum', type=str)
     outType = request.form.get('outType', type=int)
@@ -954,6 +1078,14 @@ def generateOutput():
 @app.route('/outData/<path:filename>/<displayName>', methods=['GET', 'POST'])
 @login_required
 def sendOut(filename, displayName):
+    '''
+    Sends the file to the user for doanloading using flask's send_from_directory
+    :param filename:
+    The absolute name of the file that is saved in the database.
+    :param displayName:
+    The simplistic name of the file that the user chose.
+    :return:
+    '''
     if displayName != 'None' and displayName is not None:
         return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True, attachment_filename=displayName + '.dat')
     else:
@@ -963,6 +1095,12 @@ def sendOut(filename, displayName):
 @app.route('/db')
 @login_required
 def sesData():
+    '''
+    Template generator for the logbook page.
+
+    Queries the database of the loggedUser to get all instances of plots they have logged.
+    :return:
+    '''
     data = []
     user = current_user
     if user.is_authenticated():
@@ -993,6 +1131,14 @@ def sesData():
 @app.route('/addf', methods=['POST'])
 @login_required
 def addFile():
+    '''
+    Adds a file to the manage file page based on a file that the user selects from their local machine.
+
+    Files are restricted to the extensions defined in ALLOWED_EXTENSIONS.  Usage of the for loop allows the user to
+        shift/control click multiple files to upload simultaneously.
+    After upload the files are stored in UPLOAD_DIR/rawData so that the server has its own copy to reference.
+    :return:
+    '''
     if request.method == 'POST':
         temp1 = request.files.listvalues()
         for file in temp1:
@@ -1024,6 +1170,13 @@ def addFile():
 @app.route('/delete', methods=['GET', 'POST'])
 @login_required
 def delete_file():
+    '''
+    General delete function that is used for deleting entries from the database.
+
+    Files, metadata, sessions, and users are all deleted in this function.
+    The authentication list is updated if there are still users that need to have access to the session/file after a deletion is made.
+    :return:
+    '''
     if request.method == 'POST':
         idnum = request.form.get('id', type=int)
         delUser = request.form.get('delUser', type=str)
@@ -1091,6 +1244,16 @@ def delete_file():
 @app.route('/save_comment', methods=['GET', 'POST'])
 @login_required
 def save_comment():
+    '''
+    General function that is called when saving any type of comment.
+
+    Session comments, file comments, and DAT comments are all saved here.  Generally this function is called upon navigating away from the comment box.
+
+    ***There is currently the issue that if a user is commenting a shared file/session while a different user also
+    commenting the same shared file/session the comment that is saved belongs to the user that navigated away last.
+    Not sure hot to fix this issue without an immense amount of work.***
+    :return:
+    '''
     if request.method == 'POST':
         comment = request.form.get('comment', type=str)
         idprev = request.form.get('idprev', type=int)
@@ -1125,6 +1288,13 @@ def save_comment():
 @app.route('/show_comment', methods=['GET', 'POST'])
 @login_required
 def show_comment():
+    '''
+    General function that is called when showing any comment.
+
+    This function is usually called when a user selects something that has a comment associated with it.
+    Similar to save_comment this function is used for all types of comments.
+    :return:
+    '''
     if request.method == 'POST':
         send_comment = ''
         idnext = request.form.get('idnext', type=int)
@@ -1168,6 +1338,12 @@ def show_comment():
 @app.route('/make_name', methods=['GET', 'POST'])
 @login_required
 def make_name():
+    '''
+    This function takes a file by id and returns the name assigned to it.
+
+    This is needed as otherwise the entire filename would be displayed to users with the extensive datetime at the end.
+    :return:
+    '''
     if request.method == 'POST':
         idthis = request.form.get('id', type=int)
         instance = db.session.query(dataFile).filter_by(id=idthis).first()
@@ -1181,6 +1357,14 @@ def make_name():
 @app.route('/del_entry', methods=['GET', 'POST'])
 @login_required
 def delete_entry():
+    '''
+    Simple delete function for the logbook.
+
+    This function handles both mass deletion and singular deletion from the logbook.
+
+    *Should probably be moved to within /delete*
+    :return:
+    '''
     user = current_user
     if request.method == 'POST':
         idthis = request.form.get('id', type=int)
@@ -1198,6 +1382,13 @@ def delete_entry():
 @app.route('/add_entry', methods=['GET', 'POST'])
 @login_required
 def add_entry():
+    '''
+    Adds an entry to the logbook.
+
+    This function handles standard logging from the format page and the logs from the sum page.
+    Data is pulled from the user's currentMeta to log relevant information to the table.
+    :return:
+    '''
     user = current_user
     if request.method == 'POST':
         process = request.form.get('process', type=int)
@@ -1239,6 +1430,7 @@ def add_entry():
 @app.route('/clear_rowa', methods=['GET', 'POST'])
 @login_required
 def clear_rowa_wrapper():
+    '''Simple function to clear the run_once_with_args decorator for loading the base comments of files.'''
     setBaseComment(-1)
     return 'Cleared'
 
@@ -1246,6 +1438,12 @@ def clear_rowa_wrapper():
 @app.route('/clear_cmeta', methods=['GET', 'POST'])
 @login_required
 def clear_cmeta():
+    '''
+    Function that clears the current user's currentMeta Table.
+
+    This is usually called when starting a new session or resuming an old one so that prexisting data does not cause conflicts.
+    :return:
+    '''
     current_user.current_session = 'None'
     deleting = db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all()
     for i in deleting:
@@ -1260,6 +1458,12 @@ def clear_cmeta():
 @app.route('/clearPart_cmeta', methods=['GET', 'POST'])
 @login_required
 def clearPart_cmeta():
+    '''
+    Function that deletes a single file from the current users currentMeta table.
+
+    This is called when removing a file on the format page.
+    :return:
+    '''
     idthis = request.form.get('id', type=int)
     if idthis in usedArgs:
         usedArgs.remove(idthis)
@@ -1274,6 +1478,12 @@ def clearPart_cmeta():
 @app.route('/set_ses', methods=['GET', 'POST'])
 @login_required
 def set_ses():
+    '''
+    Function that updates currentMeta/currentDAT based on which type of session is selected by the user.
+
+    By setting these tables the user is then able to view/alter the information on the corresponding tabs.
+    :return:
+    '''
     if request.method == 'POST':
         files = []
         sesID = request.form.get('id', type=int)
@@ -1340,6 +1550,12 @@ def set_ses():
 @app.route('/close_plots', methods=['GET', 'POST'])
 @login_required
 def close_plots():
+    '''
+    Closes all existing plots.
+
+    As the program is generating a large number of plots quite regularly this is a function to easily allow them to be closed.
+    :return:
+    '''
     if request.method == 'POST':
         plt.close("all")
     return 'Closed'
@@ -1348,6 +1564,12 @@ def close_plots():
 @app.route('/process', methods=['GET', 'POST'])
 @login_required
 def process():
+    '''
+    Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their currentMeta.
+
+    Summing can be done with a binning or interpolation method.  Maxes are extracted the same either way.
+    :return:
+    '''
     user = current_user
     idthis = request.form.get('idnext', type=int)
     idlist = request.form.get('idList', type=str)
@@ -1549,6 +1771,12 @@ def process():
 @app.route('/peakFit', methods=['GET', 'POST'])
 @login_required
 def peak_at_max():
+    '''
+    Peak fitting function that uses either the file defaults or what the user has done to the file on the format page.
+
+    Currently peak fitting is done using a centroid analysis.  All files are peak fitted before being summed up on the sum page.
+    :return:
+    '''
     idthis = request.form.get('idnum', type=int)
     fitType = request.form.get('fitType', type=int)
     inputCord = request.form.get('inputCord', type=float)
@@ -1673,6 +1901,14 @@ def peak_at_max():
 @app.route('/modifyDAT', methods=['GET', 'POST'])
 @login_required
 def modifyDAT():
+    '''
+    Template function for the modifyDAT page.
+
+    Essentially just plotting the DAT information stored in the user's currentDAT.
+
+    Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
+    :return:
+    '''
     try:
         DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
     except Exception, e:
@@ -1710,6 +1946,14 @@ def modifyDAT():
 @app.route('/setDAT', methods=['GET', 'POST'])
 @login_required
 def setDAT():
+    '''
+    Updates the current DAT file that the user is viewing with a DAT file that was selected.
+
+    This is usually called from the /select page when choosing a DAT file.
+
+    Sets the user's currentDAT.
+    :return:
+    '''
     DAT = request.form.get('DAT', type=str)
     DName = request.form.get('DName', type=str)
     meta = db.metadata
@@ -1748,6 +1992,15 @@ def setDAT():
 @app.route('/remBackDAT', methods=['GET', 'POST'])
 @login_required
 def remBackDAT():
+    '''
+    Removes the background data from a DAT file based on user specifications.
+
+    Either removes a flat value, a linear value, or a averaged linear value from the DAT data stored in currentDAT.
+
+    Updates currentDAT with the data for the new line.
+    :return:
+    Calls /modifyDAT as that will plot the altered currentDAT.
+    '''
     show = request.form.get('show', type=int)
     flatVal = request.form.get('flatVal', type=int)
     if flatVal != None:
@@ -1836,6 +2089,7 @@ def remBackDAT():
 @app.route('/resetDAT', methods=['GET', 'POST'])
 @login_required
 def resetDAT():
+    '''Reverts the currentDAT back to how it was originally'''
     DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
     DAT.DAT = DAT.originDAT
     db.session.commit()
@@ -1845,6 +2099,12 @@ def resetDAT():
 @app.route('/updateHRM', methods=['GET', 'POST'])
 @login_required
 def updateHRM():
+    '''
+    Sets the HRM to one of the static parameter sets shown in static/format/select.js
+
+    HRM is used primarily with energy_xtal, energy_xtal_temp, and temp_corr on the /format page.
+    :return:
+    '''
     idthis = request.form.get('idnum', type=int)
     hrm = request.form.get('hrm', type=str)
     format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
@@ -1858,6 +2118,14 @@ def updateHRM():
 @app.route('/shareSes', methods=['GET', 'POST'])
 @login_required
 def shareSes():
+    '''
+    Shares a session with another user.
+
+    Similar to the admin sharing feature, but for users.
+
+    *Should probably be implemented with other sharing features*
+    :return:
+    '''
     idthis = request.form.get('id', type=int)
     shareUser = request.form.get('toUser', type=str)
     type = request.form.get('type', type=str)
@@ -1889,6 +2157,14 @@ def shareSes():
 @app.route('/shareFile', methods=['GET', 'POST'])
 @login_required
 def shareFile():
+    '''
+    Shares a file with another user.
+
+    Similar to the admin sharing feature, but for users.
+
+    *Should probably be implemented with other sharing features*
+    :return:
+    '''
     idthis = request.form.get('id', type=int)
     shareUser = request.form.get('toUser', type=str)
     thisUser = db.session.query(User).filter_by(username=shareUser).first()
