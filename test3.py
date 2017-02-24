@@ -2870,23 +2870,29 @@ def calcAverageBack(leftIn, rightIn):
         if data[0][i] >= rightIn:
             rightCords[0].append(data[0][i])
             rightCords[1].append(data[1][i])
-
     try:
         linRegLeft = stats.linregress(leftCords[0], leftCords[1])
+        (slope, intercept, rvalue, pvalue, stderr) = linRegLeft
         Lx1 = data[0][1]
         Lx2 = leftIn
         Ly1 = data[1][1]
-        Ly2 = linRegLeft.slope * (Lx2 - Lx1) + Ly1
+        try:
+            Ly2 = linRegLeft.slope * (Lx2 - Lx1) + Ly1
+        except AttributeError:
+            Ly2 = slope * (Lx2 - Lx1) + Ly1
     except ValueError:
         print('No points less than left value')
         raise ValueError('Average can not be found when there are no points smaller than the given left to average.')
-
     try:
         linRegRight = stats.linregress(rightCords[0], rightCords[1])
+        (slope, intercept, rvalue, pvalue, stderr) = linRegRight
         Rx1 = rightIn
         Rx2 = data[0][-1]
         Ry2 = data[1][-1]
-        Ry1 = linRegRight.slope * (Rx1 - Rx2) + Ry2
+        try:
+            Ry1 = linRegRight.slope * (Rx1 - Rx2) + Ry2
+        except AttributeError:
+            Ry1 = slope * (Rx1 - Rx2) + Ry2
     except ValueError:
         print('No points greater than right value')
         raise ValueError('Average can not be found when there are no points greater than the given right to average.')
