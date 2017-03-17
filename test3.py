@@ -756,9 +756,10 @@ def dataFormat():
             format.fit_pos = 0
             format.fit_range = 3
             format.file_id = idthis
+
             hrm = {'hrm_e0': 14412500.0, 'hrm_bragg1': 18.4704, 'hrm_bragg2': 77.5328,
                    'hrm_geo': '++', 'hrm_alpha1': 2.6e-6, 'hrm_alpha2': 2.6e-6,
-                   'hrm_theta1_sign': 1, 'hrm_theta2_sign': 1}
+                   'hrm_theta1_sign': -1, 'hrm_theta2_sign': 1}
             hrm = json.dumps(hrm)
             format.hrm = hrm
             format.session = current_user.current_session
@@ -2184,6 +2185,12 @@ def shareFile():
 
 
 def writeOutput(output, colNames, name, lname):
+    '''
+    Writes a .txt output file based on the location that the user is requesting the output from.
+
+    Leave the name of the file(s) as a comment on the top of the file using the user's comment character as saved on their profile
+    If the user does not have a comment character saved on their profile it defaults to #
+    '''
     comChar = current_user.commentChar
     if comChar == None:
         comChar = '#'
@@ -2222,6 +2229,11 @@ def writeOutput(output, colNames, name, lname):
 
 
 def atMax(ycords, npXcords, xmax, fitRange):
+    '''
+    Finds the center of the npXcords that fall within the fitRange
+
+    Calls centroid to get the actual center while this primarily does the bounding to collect the points to pass to centroid.
+    '''
     leftBound = (find_nearest(npXcords, xmax[1] - (fitRange / 2)))
     rightBound = (find_nearest(npXcords, xmax[1] + (fitRange / 2)))
     targetRange = [x for x in npXcords if x >= leftBound]
