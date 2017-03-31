@@ -55,4 +55,4 @@ $(document).ready(function(){
         $('#navData').removeClass('disabled');
         $('#navProcess').removeClass('disabled');
     }
-};
+});

@@ -118,6 +118,91 @@ with context %}
         </div>
     </div>
 </nav>
+<div id="hrmModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="hrmTitle">HRMs</h4>
+            </div>
+            <div class="ModalBody" id="hrmID">
+                <div class="hrmTable text-center">
+                    <table id="hrmTable">
+                        <tbody class="hrmBody">
+                            {% if hrms %}
+                                {% for post in hrms %}
+                                    <tr class="item" onclick="showHRM({{ post.id }})">
+                                        <td id="{{ post.id }}">{{ post.name }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                No HRMs Detected
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="text-center singleGroup">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="addHRM()">Add HRM</button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="editHRM()">Edit HRM</button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="removeHRM()">Remove HRM</button>
+                    </div>
+                </div>
+                <div class="row" id="hrmDetails">
+                    <table class="hrmDetailTable" id="hrmDetailTable" style="display: none;">
+                        <tbody class="hrmDetailBody">
+                            {% if hrmData %}
+                                <tr>
+                                    <td><b class="pull-left">Name: </b><div id="hrmName">{{ hrmData.name }}</div></td>
+                                    <td><b class="pull-left">hrm_e0: </b><div id="hrm_e0">{{ hrmData.hrm_e0 }}</div></td>
+                                    <td><b class="pull-left">hrm_geo: </b><div id="hrm_geo">{{ hrmData.hrm_geo }}</div></td>
+                                </tr>
+                                <tr>
+                                    <td><b class="pull-left">hrm_bragg1: </b><div id="hrm_bragg1">{{ hrmData.hrm_bragg1 }}</div></td>
+                                    <td><b class="pull-left">hrm_alpha1: </b><div id="hrm_alpha1">{{ hrmData.hrm_alpha1 }}</div></td>
+                                    <td><b class="pull-left">hrm_theta1_sign: </b><div id="hrm_theta1_sign">{{ hrmData.hrm_theta1_sign }}</div></td>
+                                </tr>
+                                <tr>
+                                    <td><b class="pull-left">hrm_bragg2: </b><div id="hrm_bragg2">{{ hrmData.hrm_bragg2 }}</div></td>
+                                    <td><b class="pull-left">hrm_alpha2: </b><div id="hrm_alpha2">{{ hrmData.hrm_alpha2 }}</div></td>
+                                    <td><b class="pull-left">hrm_theta2_sign: </b><div id="hrm_theta2_sign">{{ hrmData.hrm_theta2_sign }}</div></td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <div class="hrmDetailEdit" id="hrmDetailEdit" style="display: none;">
+                        <table class="hrmDetailTable">
+                            <tbody class="hrmDetailEdit">
+                                <tr>
+                                    <td><b class="pull-left">Name: </b><div contenteditable id="ehrmName">Name</div></td>
+                                    <td><b class="pull-left">hrm_e0: </b><div contenteditable id="ehrm_e0">e0</div></td>
+                                    <td><b class="pull-left">hrm_geo: </b><div contenteditable id="ehrm_geo">geo</div></td>
+                                </tr>
+                                <tr>
+                                    <td><b class="pull-left">hrm_bragg1: </b><div contenteditable id="ehrm_bragg1">bragg1</div></td>
+                                    <td><b class="pull-left">hrm_alpha1: </b><div contenteditable id="ehrm_alpha1">alpha1</div></td>
+                                    <td><b class="pull-left">hrm_theta1_sign: </b><div contenteditable id="ehrm_theta1_sign">theta1 sign</div></td>
+                                </tr>
+                                <tr>
+                                    <td><b class="pull-left">hrm_bragg2: </b><div contenteditable id="ehrm_bragg2">bragg2</div></td>
+                                    <td><b class="pull-left">hrm_alpha2: </b><div contenteditable id="ehrm_alpha2">alpha2</div></td>
+                                    <td><b class="pull-left">hrm_theta2_sign: </b><div contenteditable id="ehrm_theta2_sign">theta2 sign</div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-primary finishHrm" onclick="commitHRM()">Add/Update</button>
+                        <button type="button" class="btn btn-default cancelHrm" onclick="cancelHRM()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="ModalFooter ssModalFooter">
+                    <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="notifModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -598,6 +683,9 @@ with context %}
         <div class="navGroup" id="navGroup">
             <div class="buttonGroup">
                 <div class="btn-group" role="group" aria-label="...">
+                    <div class="hrmButton">
+                        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#hrmModal">HRM</button>
+                    </div>
                     <button type="button" class="btn btn-default" onclick="Users()">Users</button>
                     <button type="button" class="btn btn-default" onclick="Files()">Files</button>
                     <button type="button" class="btn btn-default" onclick="Sessions()">Sessions</button>

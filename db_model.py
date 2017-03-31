@@ -292,3 +292,18 @@ class userFiles(db.Model):
 
 class loginAttempts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+
+
+class HRM(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String())
+    hrm_e0 = db.Column(db.Float())
+    hrm_bragg1 = db.Column(db.Float())
+    hrm_bragg2 = db.Column(db.Float())
+    hrm_geo = db.Column(db.String())
+    hrm_alpha1 = db.Column(db.Float())
+    hrm_alpha2 = db.Column(db.Float())
+    hrm_theta1_sign = db.Column(db.Integer())
+    hrm_theta2_sign = db.Column(db.Integer())
+

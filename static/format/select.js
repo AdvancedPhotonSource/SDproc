@@ -483,62 +483,9 @@ $(function (){
     $('#HRMdd li a').on('click', function(event){
         var hrm = event.target.text;
         previous = localStorage.getItem('previous2');
-        if (hrm == 'Fe-inline-1meV'){
-            var hrm = {};
-            hrm['hrm_e0'] = 14412500.0
-            hrm['hrm_bragg1'] = 18.4704
-            hrm['hrm_bragg2'] = 77.5328
-            hrm['hrm_geo'] = '++'
-            hrm['hrm_alpha1'] = 2.6e-6
-            hrm['hrm_alpha2'] = 2.6e-6
-            hrm['hrm_theta1_sign'] = -1
-            hrm['hrm_theta2_sign'] = 1
-            $('#HRM').text('Fe-inline-1meV')
+        $.post('/SDproc/updateHRM', {idnum: previous, hrm: hrm}, function(data){
+            $('#HRM').text(data)
             $('#HRM').append("<span class='caret'></span>");
-        }
-        else if (hrm == 'Sn-nested-1meV'){
-            var hrm = {};
-            hrm['hrm_e0'] = 23880000.0
-            hrm['hrm_bragg1'] = 19.3395
-            hrm['hrm_bragg2'] = 83.4616
-            hrm['hrm_geo'] = '++'
-            hrm['hrm_alpha1'] = 2.6e-6
-            hrm['hrm_alpha2'] = 2.6e-6
-            hrm['hrm_theta1_sign'] = 1
-            hrm['hrm_theta2_sign'] = 1
-            $('#HRM').text('Sn-nested-1meV')
-            $('#HRM').append("<span class='caret'></span>");
-        }
-        else if (hrm == 'Eu-nested-1meV'){
-            alert('Not yet implemented')
-            $('#HRM').text('Eu-nested-1meV')
-            $('#HRM').append("<span class='caret'></span>");
-        }
-        else if (hrm == 'Dy-nested-1meV'){
-            alert('Not yet implemented')
-            $('#HRM').text('Dy-nested-1meV')
-            $('#HRM').append("<span class='caret'></span>");
-        }
-        else if (hrm == 'IXS-cryo-1meV'){
-            alert('Not yet implemented')
-            $('#HRM').text('IXS-cryo-1meV')
-            $('#HRM').append("<span class='caret'></span>");
-        }
-        else if (hrm == 'Sn-cryo-1meV'){
-            var hrm = {};
-            hrm['hrm_e0'] = 23880000.0
-            hrm['hrm_bragg1'] = 9.122
-            hrm['hrm_bragg2'] = 81.107
-            hrm['hrm_geo'] = '++'
-            hrm['hrm_alpha1'] = 2.6e-6
-            hrm['hrm_alpha2'] = 0.0
-            hrm['hrm_theta1_sign'] = -1
-            hrm['hrm_theta2_sign'] = -1
-            $('#HRM').text('Sn-cryo-1meV')
-            $('#HRM').append("<span class='caret'></span>");
-        }
-        hrm = JSON.stringify(hrm);
-        $.post('/SDproc/updateHRM', {idnum: previous, hrm: hrm}, function(){
             $('#meta-form').trigger('change');
         })
     })
@@ -631,3 +578,60 @@ function logout(){
         });
     }
 }
+
+
+/*        if (hrm == 'Fe-inline-1meV'){
+            var hrm = {};
+            hrm['hrm_e0'] = 14412500.0
+            hrm['hrm_bragg1'] = 18.4704
+            hrm['hrm_bragg2'] = 77.5328
+            hrm['hrm_geo'] = '++'
+            hrm['hrm_alpha1'] = 2.6e-6
+            hrm['hrm_alpha2'] = 2.6e-6
+            hrm['hrm_theta1_sign'] = -1
+            hrm['hrm_theta2_sign'] = 1
+            $('#HRM').text('Fe-inline-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'Sn-nested-1meV'){
+            var hrm = {};
+            hrm['hrm_e0'] = 23880000.0
+            hrm['hrm_bragg1'] = 19.3395
+            hrm['hrm_bragg2'] = 83.4616
+            hrm['hrm_geo'] = '++'
+            hrm['hrm_alpha1'] = 2.6e-6
+            hrm['hrm_alpha2'] = 2.6e-6
+            hrm['hrm_theta1_sign'] = 1
+            hrm['hrm_theta2_sign'] = 1
+            $('#HRM').text('Sn-nested-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'Eu-nested-1meV'){
+            alert('Not yet implemented')
+            $('#HRM').text('Eu-nested-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'Dy-nested-1meV'){
+            alert('Not yet implemented')
+            $('#HRM').text('Dy-nested-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'IXS-cryo-1meV'){
+            alert('Not yet implemented')
+            $('#HRM').text('IXS-cryo-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+        else if (hrm == 'Sn-cryo-1meV'){
+            var hrm = {};
+            hrm['hrm_e0'] = 23880000.0
+            hrm['hrm_bragg1'] = 9.122
+            hrm['hrm_bragg2'] = 81.107
+            hrm['hrm_geo'] = '++'
+            hrm['hrm_alpha1'] = 2.6e-6
+            hrm['hrm_alpha2'] = 0.0
+            hrm['hrm_theta1_sign'] = -1
+            hrm['hrm_theta2_sign'] = -1
+            $('#HRM').text('Sn-cryo-1meV')
+            $('#HRM').append("<span class='caret'></span>");
+        }
+*/

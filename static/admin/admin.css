@@ -80,6 +80,10 @@
     margin-bottom: 60px;
 }
 
+.hrmButton{
+    margin-bottom: 10px;
+}
+
 .highlight{background-color: #7498c9;}
 
 .lightlight{background-color: #e6f2ff;}
@@ -87,6 +91,33 @@
 
 .modFiltInput{
     width: 20%;
+}
+
+.hrmDetailTable{
+    position: relative;
+    height: auto;
+    width: 95% !important;
+    left: 2.5%;
+    margin-top: 20px;
+}
+
+.finishHrm{
+    position: relative;
+    margin-top: 20px;
+    left: 35%;
+}
+
+.cancelHrm{
+    position: relative;
+    margin-top: 20px;
+    left: 50%;
+}
+
+.borderedEntry{
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
 }
 
 .userFileTable{

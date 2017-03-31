@@ -467,12 +467,11 @@ with context %}
                         aria-expanded="false">Fe-inline-1meV<span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu hrmMenu" id="HRMdd">
-                    <li><a>Fe-inline-1meV</a></li>
-                    <li><a>Sn-nested-1meV</a></li>
-                    <li><a>Eu-nested-1meV</a></li>
-                    <li><a>Dy-nested-1meV</a></li>
-                    <li><a>IXS-cryo-1meV</a></li>
-                    <li><a>Sn-cryo-1meV</a></li>
+                    {% if hrm %}
+                        {% for post in hrm %}
+                            <li><a>{{  post.name }}</a></li>
+                        {% endfor %}
+                    {% endif %}
                 </ul>
             </div>
             <div class="saveSes">

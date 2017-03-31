@@ -648,6 +648,100 @@ function showInfo(notifID){
     })
 }
 
+function showHRM(hrmID){
+    $('#hrmDetailTable').load('/SDproc/hrmInfo'+" #hrmDetailTable>*", { id: hrmID}, function(){
+        $('#hrmDetailEdit').hide();
+        $('#hrmDetailTable').show();
+    })
+}
+
+function addHRM(){
+    clearHighlight();
+    $('#hrmDetailTable').hide();
+    $('#hrmDetailEdit').show();
+}
+
+function editHRM(){
+    var found = 0;
+    var hrmid = 0;
+    $("#hrmTable tr.item").each(function(){
+        var row = $(this);
+        if ($(row).hasClass( "highlight" )){
+            found = 1;
+            hrmid = $('td:first', $(row)).attr('id');
+        }
+    });
+    if (found == 1){
+        $('#hrmDetailTable').hide();
+        $('#ehrmName').text($('#hrmName').text())
+        $('#ehrm_e0').text($('#hrm_e0').text())
+        $('#ehrm_geo').text($('#hrm_geo').text())
+        $('#ehrm_bragg1').text($('#hrm_bragg1').text())
+        $('#ehrm_bragg2').text($('#hrm_bragg2').text())
+        $('#ehrm_alpha1').text($('#hrm_alpha1').text())
+        $('#ehrm_alpha2').text($('#hrm_alpha2').text())
+        $('#ehrm_theta1_sign').text($('#hrm_theta1_sign').text())
+        $('#ehrm_theta2_sign').text($('#hrm_theta2_sign').text())
+        $('#hrmDetailEdit').show();
+    }
+    else{
+        alert("No HRM selected");
+    }
+}
+
+function cancelHRM(){
+    $('#hrmDetailTable').hide();
+    $('#hrmDetailEdit').hide();
+}
+
+function commitHRM(){
+    var hrmid;
+    $("#hrmTable tr.item").each(function(){
+        var row = $(this);
+        if ($(row).hasClass( "highlight" )){
+            hrmid = $('td:first', $(row)).attr('id');
+        }
+    });
+    $.post("/SDproc/addHRM", { id: hrmid, name: $('#ehrmName').text(), hrm_e0: $('#ehrm_e0').text(), hrm_bragg1: $('#ehrm_bragg1').text(),
+                            hrm_bragg2: $('#ehrm_bragg2').text(), hrm_geo: $('#ehrm_geo').text(), hrm_alpha1: $('#ehrm_alpha1').text(),
+                            hrm_alpha2: $('#ehrm_alpha2').text(), hrm_theta1_sign: $('#ehrm_theta1_sign').text(),
+                            hrm_theta2_sign: $('#ehrm_theta2_sign').text()}, function(){
+                                    $('#hrmDetailTable').hide();
+                                    $('#hrmDetailEdit').hide();
+                                    $('#hrmTable').load("/SDproc/admin #hrmTable>*", function(){
+                                        setupClick();
+                                        setupRows();
+                                        $('#hrmModal').modal('show');
+                                    });
+                            });
+}
+
+function removeHRM(){
+    var found = 0;
+    var hrmid = 0;
+    $("#hrmTable tr.item").each(function(){
+        var row = $(this);
+        if ($(row).hasClass( "highlight" )){
+            found = 1;
+            hrmid = $('td:first', $(row)).attr('id');
+        }
+    });
+    if (found == 1){
+        $.post("/SDproc/removeThing", { id: hrmid, table: "HRM"}, function(){
+            $('#hrmDetailTable').hide();
+            $('#hrmDetailEdit').hide();
+            $('#hrmTable').load("/SDproc/admin #hrmTable>*", function(){
+                setupClick();
+                setupRows();
+                $('#hrmModal').modal('show');
+            });
+        });
+    }
+    else{
+        alert("No HRM selected");
+    }
+}
+
 function delUser(){
     BootstrapDialog.show({
         title: 'Delete User?',
@@ -707,4 +801,8 @@ function decline(task){
             Users();
         });
     })
+}
+
+function viewHRM(){
+
 }
