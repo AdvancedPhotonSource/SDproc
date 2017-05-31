@@ -103,7 +103,16 @@ $(document).ready( function() {
     $('#logbtn').text('Add to Logbook');
     $('#logbtn').prop('disabled', false);
     localStorage.setItem('justPeakFit', 0);
-})
+});
+
+$(document).keypress( function(event) {
+     if (event.which == '13') {
+        event.preventDefault();
+        if ("activeElement" in document) {
+            document.activeElement.blur();
+        }
+      }
+});
 
 function asynchOnLoad(){
     var deferred = new $.Deferred(), completed = deferred.then(function(){

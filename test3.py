@@ -765,31 +765,31 @@ def dataFormat():
                 if bools[i].data:
                     if columns[i].data == None:
                         if i == 1:
-                            energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
-                                                 unicode_to_int(columns[4].data - 1), format_instance.hrm)
+                            energy = energy_xtal(data, unicode_to_int(columns[3].data),
+                                                 unicode_to_int(columns[4].data), format_instance.hrm)
                             additional.append(energy)
                             addLabels.append('Energy Xtal')
                             energy = numpy.divide(energy, 1000000)
                         elif i == 2:
-                            energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                                      unicode_to_int(columns[4].data - 1),
-                                                      unicode_to_int(columns[5].data - 1),
-                                                      unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                            energy = energy_xtal_temp(data, unicode_to_int(columns[3].data),
+                                                      unicode_to_int(columns[4].data),
+                                                      unicode_to_int(columns[5].data),
+                                                      unicode_to_int(columns[6].data), format_instance.hrm)
                             additional.append(energy)
                             addLabels.append('Energy Xtal Tcorr.')
                             energy = numpy.divide(energy, 1000000)
                         elif i == 7:
-                            energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
-                                               unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                            energy = temp_corr(data, unicode_to_int(columns[5].data),
+                                               unicode_to_int(columns[6].data), format_instance.hrm)
                             additional.append(energy)
                             addLabels.append('Temp. corr')
                         elif i == 9:
-                            signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
-                                                       unicode_to_int(columns[10].data - 1))
+                            signal = signal_normalized(data, unicode_to_int(columns[8].data),
+                                                       unicode_to_int(columns[10].data))
                             additional.append(signal)
                             addLabels.append('Signal Normalized')
                         else:
-                            norm = norm_factors(data, unicode_to_int(columns[10].data - 1))
+                            norm = norm_factors(data, unicode_to_int(columns[10].data))
                             additional.append(norm)
                             addLabels.append('Normalized')
                         continue
@@ -799,13 +799,13 @@ def dataFormat():
             if againstE == 'Energy':
                 etype = data[unicode_to_int(columns[0].data - 1)]
             elif againstE == 'Energy xtal':
-                etype = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data - 1),
-                                                 unicode_to_int(columns[4].data - 1), format_instance.hrm), 1000000)
+                etype = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data),
+                                                 unicode_to_int(columns[4].data), format_instance.hrm), 1000000)
             elif againstE == 'Energy xtal w/ T corr.':
-                etype = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                                      unicode_to_int(columns[4].data - 1),
-                                                      unicode_to_int(columns[5].data - 1),
-                                                      unicode_to_int(columns[6].data - 1), format_instance.hrm),
+                etype = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data),
+                                                      unicode_to_int(columns[4].data),
+                                                      unicode_to_int(columns[5].data),
+                                                      unicode_to_int(columns[6].data), format_instance.hrm),
                                      1000000)
             else:
                 etype = 0
@@ -827,14 +827,14 @@ def dataFormat():
             format.path = file_instance.path
             # format.ebool = True
             format.sbool = True
-            format.energy = 1
-            format.signal = 11
-            format.xtal1A = 2
-            format.xtal2A = 3
-            format.xtal1T = 12
-            format.xtal2T = 15
-            format.norm = 7
-            format.extra = 1
+            format.energy = 0
+            format.signal = 10
+            format.xtal1A = 1
+            format.xtal2A = 2
+            format.xtal1T = 11
+            format.xtal2T = 14
+            format.norm = 6
+            format.extra = 0
             format.against_E = 'Point #'
             format.fit_type = 'Unfit'
             format.fit_pos = 0
@@ -851,7 +851,7 @@ def dataFormat():
             format.user = current_user
 
             # used.append(1)
-            used.append(11)
+            used.append(10)
             labels = [['Signal']]
             code = plotData(data, used, 'Point', None, labels, etype, unit)
             format.plot = code
@@ -860,7 +860,7 @@ def dataFormat():
 
             code = format.plot
             form = populate_from_instance(format)
-    return render_template("data_format.html", user=user, code=code, form=form, againstE=againstE, data=fdata,
+    return render_template("data_format.html", user=user, code=code, form=formFormat1BasedIndex(form), againstE=againstE, data=fdata,
                            ses=thisSession, hrm=hrmData)
 
 
@@ -1008,29 +1008,29 @@ def generateOutput():
             if bools[i].data:
                 if columns[i].data == None:
                     if i == 1:
-                        energy = energy_xtal(data, unicode_to_int(columns[3].data - 1),
-                                             unicode_to_int(columns[4].data - 1), format_instance.hrm)
+                        energy = energy_xtal(data, unicode_to_int(columns[3].data),
+                                             unicode_to_int(columns[4].data), format_instance.hrm)
                         output.append(energy)
                         colNames.append('Energy xtal')
                     elif i == 2:
-                        energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                                  unicode_to_int(columns[4].data - 1),
-                                                  unicode_to_int(columns[5].data - 1),
-                                                  unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                        energy = energy_xtal_temp(data, unicode_to_int(columns[3].data),
+                                                  unicode_to_int(columns[4].data),
+                                                  unicode_to_int(columns[5].data),
+                                                  unicode_to_int(columns[6].data), format_instance.hrm)
                         output.append(energy)
                         colNames.append('Energy xtal temp')
                     elif i == 7:
-                        energy = temp_corr(data, unicode_to_int(columns[5].data - 1),
-                                           unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                        energy = temp_corr(data, unicode_to_int(columns[5].data),
+                                           unicode_to_int(columns[6].data), format_instance.hrm)
                         output.append(energy)
                         colNames.append('Temp Corr')
                     elif i == 9:
-                        signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
-                                                   unicode_to_int(columns[10].data - 1))
+                        signal = signal_normalized(data, unicode_to_int(columns[8].data),
+                                                   unicode_to_int(columns[10].data))
                         output.append(signal)
                         colNames.append('Signal Normalized')
                     else:
-                        norm = norm_factors(data, unicode_to_int(columns[10].data - 1))
+                        norm = norm_factors(data, unicode_to_int(columns[10].data))
                         output.append(norm)
                         colNames.append('Norm Factors')
                     continue
@@ -1197,6 +1197,9 @@ def sesData():
         for instance in instances:
             form = populate_from_instance(instance)
             columns, bools = splitForm(form)
+            for column in columns:
+                if column.data:
+                    column.data += 1
             plot = instance.plot
             if instance.comment:
                 comment = instance.comment
@@ -1207,7 +1210,7 @@ def sesData():
                 data.append({'plot': plot, 'comment': comment, 'name': instance.name, 'time': instance.timestamp,
                              'ses': instance.session, 'id': instance.id})
             except ValueError:
-                data.append({'form': form, 'plot': plot, 'id': instance.id, 'comment': comment, 'columns': columns,
+                data.append({'form': formFormat1BasedIndex(form), 'plot': plot, 'id': instance.id, 'comment': comment, 'columns': columns,
                              'bools': bools, 'name': instance.name, 'time': instance.timestamp,
                              'ses': instance.session})
     return render_template("session.html", data=data)
@@ -1695,22 +1698,22 @@ def process():
                 legendNames.append(columns[8].id)
             else:
                 if bools[1].data:
-                    energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
+                    energy = energy_xtal(data, unicode_to_int(columns[3].data), unicode_to_int(columns[4].data),
                                          format_instance.hrm)
                     additional.append(energy)
                     legendNames.append(columns[1].id)
                 elif bools[2].data:
-                    energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                              unicode_to_int(columns[4].data - 1), unicode_to_int(columns[5].data - 1),
-                                              unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                    energy = energy_xtal_temp(data, unicode_to_int(columns[3].data),
+                                              unicode_to_int(columns[4].data), unicode_to_int(columns[5].data),
+                                              unicode_to_int(columns[6].data), format_instance.hrm)
                     additional.append(energy)
                     legendNames.append(columns[2].id)
                 else:
                     used.append(unicode_to_int(columns[0].data))
                     legendNames.append(columns[0].id)
                 if bools[9].data:
-                    signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
-                                               unicode_to_int(columns[10].data - 1))
+                    signal = signal_normalized(data, unicode_to_int(columns[8].data),
+                                               unicode_to_int(columns[10].data))
                     additional.append(signal)
                     legendNames.append(columns[9].id)
                 else:
@@ -1772,19 +1775,19 @@ def process():
                 else:
                     data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
                 if bools[1].data:
-                    energy = energy_xtal(data, unicode_to_int(columns[3].data - 1), unicode_to_int(columns[4].data - 1),
+                    energy = energy_xtal(data, unicode_to_int(columns[3].data), unicode_to_int(columns[4].data),
                                          format_instance.hrm)
                     used.append(energy)
                 elif bools[2].data:
-                    energy = energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                              unicode_to_int(columns[4].data - 1), unicode_to_int(columns[5].data - 1),
-                                              unicode_to_int(columns[6].data - 1), format_instance.hrm)
+                    energy = energy_xtal_temp(data, unicode_to_int(columns[3].data),
+                                              unicode_to_int(columns[4].data), unicode_to_int(columns[5].data),
+                                              unicode_to_int(columns[6].data), format_instance.hrm)
                     used.append(energy)
                 else:
                     used.append(unicode_to_int(columns[0].data))
                 if bools[9].data:
-                    signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
-                                               unicode_to_int(columns[10].data - 1))
+                    signal = signal_normalized(data, unicode_to_int(columns[8].data),
+                                               unicode_to_int(columns[10].data))
                     used.append(signal)
                     allLegendNames.append(columns[9].id)
                 else:
@@ -1883,22 +1886,22 @@ def peak_at_max():
     additional = []
     legendNames = []
     if bools[1].data:
-        energy = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data - 1),
-                                          unicode_to_int(columns[4].data - 1), format_instance.hrm), 1000000)
+        energy = numpy.divide(energy_xtal(data, unicode_to_int(columns[3].data),
+                                          unicode_to_int(columns[4].data), format_instance.hrm), 1000000)
         additional.append(energy)
         legendNames.append(columns[1].id)
     elif bools[2].data:
-        energy = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data - 1),
-                                               unicode_to_int(columns[4].data - 1), unicode_to_int(columns[5].data - 1),
-                                               unicode_to_int(columns[6].data - 1), format_instance.hrm), 1000000)
+        energy = numpy.divide(energy_xtal_temp(data, unicode_to_int(columns[3].data),
+                                               unicode_to_int(columns[4].data), unicode_to_int(columns[5].data),
+                                               unicode_to_int(columns[6].data), format_instance.hrm), 1000000)
         additional.append(energy)
         legendNames.append(columns[2].id)
     else:
         used.append(unicode_to_int(columns[0].data))
         legendNames.append(columns[0].id)
     if bools[9].data:
-        signal = signal_normalized(data, unicode_to_int(columns[8].data - 1),
-                                   unicode_to_int(columns[10].data - 1))
+        signal = signal_normalized(data, unicode_to_int(columns[8].data),
+                                   unicode_to_int(columns[10].data))
         additional.append(signal)
         legendNames.append(columns[9].id)
     else:
@@ -1979,7 +1982,7 @@ def peak_at_max():
     if sendOut == 1:
         ycords[0] = ycords[0].tolist()
         return json.dumps(ycords)
-    return render_template("data_format.html", user=current_user, ses=current_user.current_session, code=code, form=form,
+    return render_template("data_format.html", user=current_user, ses=current_user.current_session, code=code, form=formFormat1BasedIndex(form),
                            shiftVal=str(abs(ycords[0][0])))
 
 
@@ -2361,10 +2364,20 @@ def splitForm(form):
     bools = []
     for field in form:
         if field.type == 'IntegerField':
+            if field.data:
+                field.data -= 1
             columns.append(field)
         else:
             bools.append(field)
     return columns, bools
+
+
+def formFormat1BasedIndex(form):
+    for field in form:
+        if field.type == 'IntegerField':
+            if field.data is not None:
+                field.data += 1
+    return form
 
 
 def modified(path):
