@@ -51,19 +51,19 @@ import flask.ext.wtf.html5 as html5
 
 class InputForm(Form):
     # Fields
-    energy = IntegerField(label='Energy: ', default=0, validators=[validators.InputRequired()])
+    energy = IntegerField(label='Energy: ', default=1, validators=[validators.InputRequired()])
     energyCalc = IntegerField(label='Energy calculated')
     energyTempCalc = IntegerField(label='Energy calculated w/ T corr.')
-    xtal1A = IntegerField(label='Xtal 1 angle: ', default=1, validators=[validators.InputRequired()])
-    xtal2A = IntegerField(label='Xtal 2 angle: ', default=2, validators=[validators.InputRequired()])
-    xtal1T = IntegerField(label='Xtal 1 temp: ', default=11, validators=[validators.InputRequired()])
-    xtal2T = IntegerField(label='Xtal 2 temp: ', default=14, validators=[validators.InputRequired()])
+    xtal1A = IntegerField(label='Xtal 1 angle: ', default=2, validators=[validators.InputRequired()])
+    xtal2A = IntegerField(label='Xtal 2 angle: ', default=3, validators=[validators.InputRequired()])
+    xtal1T = IntegerField(label='Xtal 1 temp: ', default=12, validators=[validators.InputRequired()])
+    xtal2T = IntegerField(label='Xtal 2 temp: ', default=15, validators=[validators.InputRequired()])
     tempCorr = IntegerField(label='Temp. corr')
-    signal = IntegerField(label='Signal: ', default=10, validators=[validators.InputRequired()])
+    signal = IntegerField(label='Signal: ', default=11, validators=[validators.InputRequired()])
     signalNorm = IntegerField(label='Signal normalized')
-    norm = IntegerField(label='Norm.: ', default=6, validators=[validators.InputRequired()])
+    norm = IntegerField(label='Norm.: ', default=7, validators=[validators.InputRequired()])
     normFac = IntegerField(label='Norm. factors')
-    extra = IntegerField(label='Extra: ', default=0, validators=[validators.InputRequired()])
+    extra = IntegerField(label='Extra: ', default=1, validators=[validators.InputRequired()])
 
     #columns = [energy, energyCalc, xtal1A, xtal2A, xtal1T, xtal2T, tempCorr, signal, signalNorm, norm, normFac, extra]
 
