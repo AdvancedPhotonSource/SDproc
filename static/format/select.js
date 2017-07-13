@@ -45,6 +45,7 @@
 $(function (){
         $('#sel1').on('change', function(event){
         var ses = localStorage.getItem('usingSes');
+        $('#fileName').text(this.textContent)
         if (localStorage.getItem('previous2') === null)
         {
             localStorage.setItem('previous2', this.value);
@@ -102,6 +103,8 @@ $(document).ready( function() {
     $('#pWInput').prop('disabled', false);
     $('#logbtn').text('Add to Logbook');
     $('#logbtn').prop('disabled', false);
+    $('#commentGroup').removeClass('logCommentGroup');
+    $('#commentGroup').addClass('commentGroup');
     localStorage.setItem('justPeakFit', 0);
 });
 
@@ -262,6 +265,8 @@ function log(){
     function(){
         $('#logbtn').text('Added');
         $('#logbtn').prop('disabled', true);
+        $('#commentGroup').removeClass('commentGroup');
+        $('#commentGroup').addClass('logCommentGroup');
     })
 }
 
@@ -326,6 +331,8 @@ $(function(){
         });
         $('#logbtn').text('Add to Logbook');
         $('#logbtn').prop('disabled', false);
+        $('#commentGroup').removeClass('logCommentGroup');
+        $('#commentGroup').addClass('commentGroup');
     });
 })
 
@@ -345,6 +352,8 @@ $(function(){
         })
         $('#logbtn').text('Add to Logbook');
         $('#logbtn').prop('disabled', false);
+        $('#commentGroup').removeClass('logCommentGroup');
+        $('#commentGroup').addClass('commentGroup');
     })
 })
 
@@ -542,10 +551,10 @@ function setAE(event){
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('Energy xtal');
     }
-    else if (event.target.text == 'Energy xtal w/ T corr.'){
-        $('#againstE').text('Energy xtal w/ T corr.');
+    else if (event.target.text == 'Energy xtal w/T'){
+        $('#againstE').text('Energy xtal w/T');
         $('#againstE').append("<span class='caret'></span>");
-        $('#agaE').val('Energy xtal w/ T corr.');
+        $('#agaE').val('Energy xtal w/T');
     }
     else {
         $('#againstE').text('Point #');
@@ -574,6 +583,10 @@ function setPlotAgainst(){
     $('#againstE').text(currentAE);
     $('#againstE').append("<span class='caret'></span>");
     $('#agaE').val(currentAE);
+}
+
+function headerFile(){
+
 }
 
 function logout(){

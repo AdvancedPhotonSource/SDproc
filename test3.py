@@ -769,7 +769,7 @@ def dataFormat():
                             energy = energy_xtal(data, unicode_to_int(basedColumns[3].data),
                                                  unicode_to_int(basedColumns[4].data), format_instance.hrm)
                             additional.append(energy)
-                            addLabels.append('Energy Xtal')
+                            addLabels.append('Energy xtal')
                             energy = numpy.divide(energy, 1000000)
                         elif i == 2:
                             energy = energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
@@ -777,7 +777,7 @@ def dataFormat():
                                                       unicode_to_int(basedColumns[5].data),
                                                       unicode_to_int(basedColumns[6].data), format_instance.hrm)
                             additional.append(energy)
-                            addLabels.append('Energy Xtal Tcorr.')
+                            addLabels.append('Energy xtal w/T')
                             energy = numpy.divide(energy, 1000000)
                         elif i == 7:
                             energy = temp_corr(data, unicode_to_int(basedColumns[5].data),
@@ -802,7 +802,7 @@ def dataFormat():
             elif againstE == 'Energy xtal':
                 etype = numpy.divide(energy_xtal(data, unicode_to_int(basedColumns[3].data),
                                                  unicode_to_int(basedColumns[4].data), format_instance.hrm), 1000000)
-            elif againstE == 'Energy xtal w/ T corr.':
+            elif againstE == 'Energy xtal w/T':
                 etype = numpy.divide(energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
                                                       unicode_to_int(basedColumns[4].data),
                                                       unicode_to_int(basedColumns[5].data),
@@ -1661,7 +1661,7 @@ def process():
     idthis = request.form.get('idnext', type=int)
     idlist = request.form.get('idList', type=str)
     pltLeg = request.form.get('pltLeg', type=int)
-    binWidth = request.form.get('binWidth', type=int)
+    binWidth = request.form.get('binWidth', type=float)
     output = request.form.get('output', type=int)
     endmax = 'No File Selected'
     senddata = []
@@ -2552,7 +2552,7 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/ T corr.':
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/T':
                 xs = alldata[count1][1]
                 xs = numpy.multiply(xs, 1000000)
             plt.plot(xs, ys)
@@ -2725,7 +2725,7 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/ T corr.':
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/T':
                 xs = alldata[count1][1]
             plt.plot(xs, ys)
             #plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
@@ -2829,7 +2829,7 @@ def plotData(data, used, againstE, additional, lineNames, eType, unit):
         xs = range(1, len(data[i]) + 1)
         ys = data[i]
         plt.xlabel('Point #')
-        if againstE == 'Energy' or againstE == 'Energy xtal' or againstE == 'Energy xtal w/ T corr.':
+        if againstE == 'Energy' or againstE == 'Energy xtal' or againstE == 'Energy xtal w/T':
             xs = [float(x) for x in eType]
             if unit == 'keV':
                 xs = numpy.subtract(xs, xs[0])
@@ -2848,7 +2848,7 @@ def plotData(data, used, againstE, additional, lineNames, eType, unit):
             xs = range(1, len(additional[i]) + 1)
             ys = additional[i]
             plt.xlabel('Point #')
-            if againstE == 'Energy' or againstE == 'Energy xtal' or againstE == 'Energy xtal w/ T corr.':
+            if againstE == 'Energy' or againstE == 'Energy xtal' or againstE == 'Energy xtal w/T':
                 xs = [float(x) for x in eType]
                 if unit == 'keV':
                     xs = numpy.subtract(xs, xs[0])
