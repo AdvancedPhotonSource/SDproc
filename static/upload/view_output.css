@@ -57,22 +57,17 @@ td {
 
 .lightlight{background-color: #e6f2ff;}
 
-@media (min-width: 768px){
-    .margin-info{
-        margin-top: -90px;
-        margin-right: -50px;
-    }
-}
-
-@media (max-width: 767px){
-    .margin-info{
-        margin-top: -50px;
-        margin-right: -10px;
-    }
+.margin-info{
+    position: absolute;
+    padding-right: 20px;
+    right: 0;
+    top: 0;
+    font-size: 12px;
 }
 
 .margin-text{
-    font-size: 100% !important;
+    color: gray;
+    margin: 0 auto;
 }
 
 .ssModalFooter{

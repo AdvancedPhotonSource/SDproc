@@ -78,18 +78,6 @@ with context %}
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                {% if user.isAdmin == 1 %}
-                <li>
-                    <a href="admin">
-                        Admin
-                    </a>
-                </li>
-                {% endif %}
-                <li>
-                    <a href="profile">
-                        Profile
-                    </a>
-                </li>
                 <li>
                     <a href="upload">
                         Manage Files
@@ -115,6 +103,29 @@ with context %}
                         Modify DAT
                     </a>
                 </li>
+                <li>
+                    <a href="profile">
+                        Profile
+                    </a>
+                </li>
+                {% if user.isAdmin == 1 %}
+                <li>
+                    <a href="admin">
+                        Admin
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <div class="margin-info pull-right">
+                    <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
+                        <br/>
+                        <a href="/db">Logbook</a>
+                        <br/>
+                        <a onclick="logout()">Logout</a>
+                        <br/>
+                    </p>
+                </div>
             </ul>
         </div>
     </div>
@@ -164,15 +175,6 @@ with context %}
         <h1>
             Select How to Proceed
         </h1>
-        <div class="pull-right margin-info">
-            <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
-                <br/>
-                <a href="/db">Logbook</a>
-                <br/>
-                <a onclick="logout()">Logout</a>
-                <br/>
-            </p>
-        </div>
         <p>
             Choose to start a new session or continue a previous session.
         </p>
@@ -189,6 +191,7 @@ with context %}
 <div class="text-center">
     <div class="allCols">
         <div class="text-center floatL navBlock">
+            <div class="searchLabel">Search:</div>
             <input type="text" class="form-control navFiltInput" placeholder="Session Name" id="navName">
             <div class="navTable" id="navTable">
                 <br/>

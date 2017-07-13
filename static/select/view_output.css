@@ -72,18 +72,17 @@ select[multiple].scan-list{
 
 .lightlight{background-color: #e6f2ff;}
 
-@media (min-width: 768px){
-    .margin-info{
-        margin-top: -90px;
-        margin-right: -50px;
-    }
+.margin-info{
+    position: absolute;
+    padding-right: 20px;
+    right: 0;
+    top: 0;
+    font-size: 12px;
 }
 
-@media (max-width: 767px){
-    .margin-info{
-        margin-top: -50px;
-        margin-right: -10px;
-    }
+.margin-text{
+    color: gray;
+    margin: 0 auto;
 }
 
 @media (min-width: 1220px){
@@ -93,10 +92,6 @@ select[multiple].scan-list{
     .navBlock{
         margin-right: 220px;
     }
-}
-
-.margin-text{
-    font-size: 100% !important;
 }
 
 .stretcher{
@@ -149,6 +144,13 @@ select[multiple].scan-list{
     border-width: 1px;
     border-color: #3d75c0;
     border-radius: 5px;
+}
+
+.searchLabel{
+    float: left;
+    margin-top: 8px;
+    margin-left: 90px;
+    font-weight: bold;
 }
 
 .navTable{

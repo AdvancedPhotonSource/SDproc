@@ -75,18 +75,17 @@ select[multiple].scan-list{
     padding: 0 24px
 }
 
-@media (min-width: 768px){
-    .margin-info{
-        margin-top: 60px;
-        margin-right: 10px;
-    }
+.margin-info{
+    position: absolute;
+    padding-right: 20px;
+    right: 0;
+    top: 0;
+    font-size: 12px;
 }
 
-@media (max-width: 767px){
-    .margin-info{
-        margin-top: -50px;
-        margin-right: -10px;
-    }
+.margin-text{
+    color: gray;
+    margin: 0 auto;
 }
 
 

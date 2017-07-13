@@ -65,8 +65,15 @@ select[multiple].scan-list{
 
 .margin-info{
     position: absolute;
-    top:60px;
-    right:10px;
+    padding-right: 20px;
+    right: 0;
+    top: 0;
+    font-size: 12px;
+}
+
+.margin-text{
+    color: gray;
+    margin: 0 auto;
 }
 
 .bootbtn{

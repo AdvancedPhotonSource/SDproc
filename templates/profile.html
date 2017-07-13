@@ -74,18 +74,6 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                {% if user.isAdmin == 1 %}
-                <li>
-                    <a href="admin">
-                        Admin
-                    </a>
-                </li>
-                {% endif %}
-                <li class="active">
-                    <a href="profile">
-                        Profile
-                    </a>
-                </li>
                 <li>
                     <a href="upload">
                         Manage Files
@@ -111,6 +99,29 @@
                         Modify DAT
                     </a>
                 </li>
+                <li class="active">
+                    <a href="profile">
+                        Profile
+                    </a>
+                </li>
+                {% if user.isAdmin == 1 %}
+                <li>
+                    <a href="admin">
+                        Admin
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <div class="margin-info pull-right">
+                    <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
+                        <br/>
+                        <a href="/db">Logbook</a>
+                        <br/>
+                        <a onclick="logout()">Logout</a>
+                        <br/>
+                    </p>
+                </div>
             </ul>
         </div>
     </div>
@@ -149,15 +160,6 @@
             </div>
         </div>
     </div>
-</div>
-<div class="pull-right margin-info">
-    <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
-        <br/>
-        <a href="/db">Logbook</a>
-        <br/>
-        <a href="/logout">Logout</a>
-        <br/>
-    </p>
 </div>
 <div class="text-center">
     <div class="pageInfo">
