@@ -257,8 +257,14 @@ with context %}
                     </div>
                 </div>
                 <div class="selectorGroup">
-                        <label for="sel1">Select files to view:</label>
-                        <select multiple class="form-control selector" id="sel1"></select>
+                        <label id="sel1Label" for="sel1">Select = View | Check = Add to sum</label>
+                        <div class="pane" id="pane">
+                            <table id="sel1" cellspacing="0" style="text-align: center; margin: auto;">
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- <select size="7" class="form-control selector" id="sel1"></select> -->
                 </div>
             </div>
             <div class="inline">
@@ -397,8 +403,10 @@ with context %}
                             <span class="pull-left">
                                 {{ form.nfbool }}
                             </span>
-                            <label style="width:300px;">{{ form.normFac.label }}</label>
-                            At each data point
+                            <label style="margin-left:-50px;width:300px;">{{ form.normFac.label }}</label>
+                            <div style="margin-right:30px;float:right;">
+                                At each data point
+                            </div>
                         </div>
                         <div class="floatClear"></div>
                         <div>
@@ -447,16 +455,36 @@ with context %}
                 <div class="peakWidth">
                         <input type="text" id="pWInput" class="form-control" aria-label="..." placeholder="Peak fit range (meV)">
                 </div>
-                <div class="fitMeth">
+                <div class="peakSignal dropup">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="peakSignalType" aria-haspopup="true"
+                            aria-expanded="false">Signal<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu centMenu" id="peakSignalDD">
+                        <li><a onclick="setPeakSignal(event)">Signal</a></li>
+                        <li><a onclick="setPeakSignal(event)">Signal Normalized</a></li>
+                    </ul>
+                </div>
+                <div class="peakEnergy dropup">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="peakEnergyType" aria-haspopup="true"
+                            aria-expanded="false">Energy<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu centMenu" id="peakEnergyDD">
+                        <li><a onclick="setPeakEnergy(event)">Energy</a></li>
+                        <li><a onclick="setPeakEnergy(event)">Energy xtal</a></li>
+                        <li><a onclick="setPeakEnergy(event)">Energy xtal w/T</a></li>
+                        <li><a onclick="setPeakEnergy(event)">Energy Fitted</a></li>
+                    </ul>
+                </div>
+                <div class="fitMeth dropup">
                     <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="fitMethod" aria-haspopup="true"
                             aria-expanded="false">Centroid<span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu centMenu" id="fitMethdd">
+                    <ul class="dropdown-menu centMenu" id="fitMethodDD">
                         <li><a>None yet implemented</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="fitBtn">
+            <div class="fitBtn" id="fitBtn">
                 <button class="btn btn-primary btn-md" onclick="fitPeak(0)" title="Apply selected fitting technique to plot">
                     Fit
                 </button>

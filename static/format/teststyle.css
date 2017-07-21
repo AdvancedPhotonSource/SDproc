@@ -191,6 +191,16 @@ select[multiple].scan-list{
     border-width: 1px;
 }
 
+.pane{
+    display: inline-block;
+    overflow-y: scroll;
+    max-height: 113px;
+}
+
+.fileNameCell{
+    width:300px;
+}
+
 /*----------------Main Page Left Section---------*/
 .fileGroup{
     position: relative;
@@ -202,7 +212,7 @@ select[multiple].scan-list{
 .commentGroup{
     position: relative;
     margin-left: 18.5%;
-    margin-top: 10px;
+    margin-top: 23px;
     width: 600px;
 }
 
@@ -259,13 +269,56 @@ select[multiple].scan-list{
     border-radius: 5px;
     width: 510px;
     right: 10px;
+    height: 165px;
 }
 
 .fitBtn{
     position: relative;
     display: inline-block;
-    top: -78px;
+    top: -95px;
     right: -100px;
+}
+
+.fitBtnShifted{
+    position: relative;
+    display: inline-block;
+    top: -95px;
+    left: 180px;
+}
+
+.peakWidth{
+    position: relative;
+    width: 488px;
+    top: 34px;
+    left: 10px;
+}
+
+.fitMeth{
+    position: absolute;
+    display: inline-block;
+    left: 410px;
+    bottom: 16px;
+}
+
+.peakSignal{
+    float: left;
+    position: absolute;
+    margin-top: 25px;
+    margin-left: 10px;
+}
+
+.peakEnergy{
+    float: left;
+    position: absolute;
+    margin-top: 25px;
+    left: 200px;
+}
+
+.shiftVal{
+    position: relative;
+    display: inline-block;
+    top: -95px;
+    left: 200px;
 }
 
 /*----------Right Column Main Window------------*/
@@ -293,20 +346,6 @@ select[multiple].scan-list{
     position: relative;
     bottom: 150px;
     left: 1000px;
-}
-
-.fitMeth{
-    position: relative;
-    display: inline-block;
-    left: 200px;
-    bottom: 20px;
-}
-
-.peakWidth{
-    position: relative;
-    width: 380px;
-    top: 34px;
-    left: 10px;
 }
 
 .splitInput.input-group input{
@@ -352,13 +391,6 @@ body{
 
 .hrmMenu{
     margin-left: 200px;
-}
-
-.shiftVal{
-    position: relative;
-    display: inline-block;
-    top: -327px;
-    left: 90px;
 }
 
 .setSize{

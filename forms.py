@@ -53,7 +53,7 @@ class InputForm(Form):
     # Fields
     energy = IntegerField(label='Energy: ', default=1, validators=[validators.InputRequired()])
     energyCalc = IntegerField(label='Energy calculated')
-    energyTempCalc = IntegerField(label='Energy calculated w/ T corr.')
+    energyTempCalc = IntegerField(label='Energy calculated w/T')
     xtal1A = IntegerField(label='Xtal 1 angle: ', default=2, validators=[validators.InputRequired()])
     xtal2A = IntegerField(label='Xtal 2 angle: ', default=3, validators=[validators.InputRequired()])
     xtal1T = IntegerField(label='Xtal 1 temp: ', default=12, validators=[validators.InputRequired()])

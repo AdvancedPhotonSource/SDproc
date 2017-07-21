@@ -42,10 +42,54 @@
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 */
-$(function (){
-        $('#sel1').on('change', function(event){
+function sel1Clicker(){
+    $('#sel1').on('click', 'tr.file', function(e){
+        var rows = $('tr.file');
+        rows.removeClass('highlight');
+        $(this).addClass('highlight');
         var ses = localStorage.getItem('usingSes');
-        $('#fileName').text(this.textContent)
+        $('#fileName').text($('td:first', $(this)).text());
+        if (localStorage.getItem('previous2') === null)
+        {
+            localStorage.setItem('previous2', $(this).data('value'));
+            $.post('/SDproc/data', { idnext: $(this).data('value') , plot: 1},
+            function(data){
+                $('#metaForm_id').html( $(data).find('#metaForm_id').html());
+                $('#plot_spot').html( $(data).find('#plot_spot').html());
+                $('#currentAE').html( $(data).find('#currentAE').html());
+                $.post('/SDproc/show_comment', { idnext: localStorage.getItem('previous2'), format: 1, ses: ses},
+                function(data){
+                    $('#comment').val(data)
+                    setPlotAgainst();
+                })
+            })
+        }
+        else
+        {
+            var nextID = $(this).data('value')
+            previous = localStorage.getItem('previous2');
+            $('#idnum').val(previous);
+            localStorage.setItem('previous2', $(this).data('value'));
+            $('#meta-form').submit();
+            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1},
+            function(){
+                $.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
+                function(data){
+                    $('#comment').val(data)
+                    setPlotAgainst();
+                })
+            })
+        }
+    })
+}
+
+
+/*
+$(function (){
+        var rows = $('tr.file').not(':first');
+        rows.on('click', function(event){
+        var ses = localStorage.getItem('usingSes');
+        $('#fileName').text($('td:first', $(this)).text());
         if (localStorage.getItem('previous2') === null)
         {
             localStorage.setItem('previous2', this.value);
@@ -79,23 +123,22 @@ $(function (){
         }
     });
 
-    /*$('#sel1').on('dblclick', function(){
+    $('#sel1').on('dblclick', function(){
         if (this.previousElementSibling !== null)
         {
             var prevID = this.previousSibling.value
             $.post
         }
     })
-    */
+
 })
+*/
 
 
 $(document).ready( function() {
     $('#unit').val('meV');
     setPlotAgainst();
-    asynchOnLoad()
-    if (!localStorage.getItem('previous2') === null)
-        localStorage.removeItem("previous2")
+    asynchOnLoad();
     $('#fitType').text('Fit around max');
     $('#fitType').append("<span class='caret'></span>");
     $('#peakLocation').attr('placeholder', 'Peak found automatically');
@@ -105,6 +148,8 @@ $(document).ready( function() {
     $('#logbtn').prop('disabled', false);
     $('#commentGroup').removeClass('logCommentGroup');
     $('#commentGroup').addClass('commentGroup');
+    $('#fitBtn').removeClass('fitBtnShifted');
+    $('#fitBtn').addClass('fitBtn');
     localStorage.setItem('justPeakFit', 0);
 });
 
@@ -119,34 +164,63 @@ $(document).keypress( function(event) {
 
 function asynchOnLoad(){
     var deferred = new $.Deferred(), completed = deferred.then(function(){
-        $('#sel1 option:first').prop('selected', true);
-        $('#sel1').trigger('change');
+        //$('#sel1 tr.file:first').addClass('highlight');
+        sel1Clicker();
+        if ($('#sel1 tbody').children().length == 0){
+            $('#pane').hide();
+            $('#sel1Label').text('Add files');
+        }
+        else{
+            $('#pane').show();
+            $('#sel1Label').text('Select = View | Check = Add to sum');
+        }
+        $('#sel1 tr.file:first').trigger('click');
         return 1;
     });
     var saved_files = JSON.parse(localStorage.getItem('use_files'));
-    $(saved_files).each(function(){
-        var temp = this
-        $.post("/SDproc/make_name", {id: this},
-        function(data){
-        $('#sel1')
-            .append($('<option></option')
-            .text(data)
-            .attr('value', temp))
-
-        saved_files = removeID(temp.valueOf(), saved_files);
-        if (saved_files.length == 0){
-            deferred.resolve();
-        }
+    if (saved_files == null){
+        deferred.resolve();
+    }
+    $.each(saved_files, function(index, value){
+        var temp = index
+        $.post("/SDproc/make_name", {id: index}, function(data){
+            if (value == 'checked'){
+                $('#sel1 > tbody:last-child')
+                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data + '<td><input onclick="modifySum(this)" checked type="checkbox"></td></tr>')
+            }
+            else{
+                $('#sel1 > tbody:last-child')
+                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data + '<td><input onclick="modifySum(this)" type="checkbox"></td></tr>')
+            }
+            saved_files = removeID(temp.valueOf(), saved_files);
+            if (Object.keys(saved_files).length == 0){
+                deferred.resolve();
+            }
         })
     })
     return deferred.promise()
 }
 
+function modifySum(checkbox){
+    files = JSON.parse(localStorage.getItem('use_files'));
+    if ($(checkbox).is(':checked')){
+        files[String($(checkbox).parent().parent().data('value'))] = 'checked';
+        localStorage.setItem('use_files', JSON.stringify(files))
+    }
+    else{
+        files[String($(checkbox).parent().parent().data('value'))] = 'unchecked';
+        localStorage.setItem('use_files', JSON.stringify(files))
+    }
+
+}
+
 function removeID(id, idArray){
-    var result = $.grep(idArray, function(n, i){
-        return (n !== id);
-    })
-    return result;
+    //var result = $.grep(idArray, function(n, i){
+    //    return (n !== id);
+    //})
+    //return result;
+    delete idArray[id];
+    return idArray;
 }
 
 
@@ -175,27 +249,26 @@ $(function()
         rows.removeClass('highlight');
         rows.removeClass('lightlight');
         row.addClass('highlight');
-        $('#sel1')
-            .append($('<option></option>')
-            .text($('td:first', $(row)).text())
-            .attr('value', $('td:first', $(row)).attr('id')))
+        $('#sel1 > tbody:last-child')
+            .append('<tr style="cursor: pointer;" data-value="'+$('td:first', $(row)).attr('id')+'" class="file"><td class="fileNameCell">' + $('td:first', $(row)).text() + '</td><td><input checked onclick="modifySum(this)" type="checkbox"></td></tr>')
         row.removeClass('highlight');
         if (localStorage.getItem('use_files') === null)
         {
-            var files = [];
-            files.push($('td:first', $(row)).attr('id'));
+            var files = {};
+            files[$('td:first', $(row)).attr('id')] = 'checked';
             localStorage.setItem('use_files', JSON.stringify(files));
         }
         else
         {
             var files = JSON.parse(localStorage.getItem('use_files'));
-            files.push($('td:first', $(row)).attr('id'));
+            files[$('td:first', $(row)).attr('id')] = 'checked';
             localStorage.setItem('use_files', JSON.stringify(files));
         }
+        $('#pane').show();
+        $('#sel1Label').text('Select = View | Check = Add to sum');
         $('#fileModal').modal('toggle');
-        $('#sel1 option').prop('selected', false);
-        $('#sel1 option:last').prop('selected', true);
-        $('#sel1').trigger('change');
+        $('#sel1 tr:last').addClass('highlight');
+        $('#sel1 tr:last').trigger('click');
     })
 
     rows.on('mouseenter', function(e)
@@ -277,28 +350,31 @@ function deleteCmeta(){
     else{
         selected = localStorage.getItem('previous2')
         $.post('/SDproc/clearPart_cmeta', {id: selected}, function(){
-            $('#sel1 > option:selected').each(function(){
+            $('#sel1 > tr').each(function(){
+                if (!this.hasClass('highlight')){
+                    return;
+                }
                 localStorage.removeItem('previous2');
                 var sel = parseInt(selected);
                 if (this.previousElementSibling !== null){
-                    $(this.previousSibling).prop('selected', 'True');
+                    $(this.previousSibling).addClass('highlight');
                     $(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
                     var result = $.grep(saved_files, function(n,i){
                         return (n !== String(sel));
                     })
                     localStorage.setItem('use_files', JSON.stringify(result));
-                    $("#sel1").trigger('change');
+                    $(this).trigger('click');
                 }
                 else if (this.nextElementSibling !== null){
-                    $(this.nextSibling).prop('selected', 'True');
+                    $(this.nextSibling).addClass('highlight');
                     $(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
                     var result = $.grep(saved_files, function(n,i){
                         return (n !== String(sel));
                     })
                     localStorage.setItem('use_files', JSON.stringify(result));
-                    $("#sel1").trigger("change");
+                    $(this).trigger("click");
                 }
                 else{
                     $('#comment').val('');
@@ -310,6 +386,10 @@ function deleteCmeta(){
                     localStorage.setItem('use_files', JSON.stringify(result));
                 }
             })
+            if ($('#sel1 tbody').children().length == 0){
+                $('#pane').hide();
+                $('#sel1Label').text('Add files');
+            }
         })
     }
 }
@@ -396,6 +476,8 @@ function nearestPeak(){
 
 var waitPeak = $.Deferred();
 function fitPeak(sendOut){
+    $('#fitBtn').removeClass('fitBtn');
+    $('#fitBtn').addClass('fitBtnShifted');
     previous = localStorage.getItem('previous2');
     $('#a1bool').removeProp('checked');
     $('#a2bool').removeProp('checked');
@@ -423,7 +505,8 @@ function fitPeak(sendOut){
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
         if ($.isNumeric(range)){
-            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range, sendOut: sendOut, unit: unit}, function(data){
+            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range, sendOut: sendOut, unit: unit,
+            signalType: $('#peakSignalType').text(), energyType: $('#peakEnergyType').text()}, function(data){
                 if (sendOut == 1){
                     localStorage.setItem('peakData', data);
                     waitPeak.resolve();
@@ -443,7 +526,9 @@ function fitPeak(sendOut){
         var range = $('#pWInput').val()
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
-                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range, sendOut: sendOut, unit: unit}, function(data){
+                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range,
+                sendOut: sendOut, unit: unit, signalType: $('#peakSignalType').text(),
+                energyType: $('#peakEnergyType').text()}, function(data){
                 if (sendOut == 1){
                     localStorage.setItem('peakData', data);
                     waitPeak.resolve();
@@ -470,7 +555,9 @@ function fitPeak(sendOut){
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
                 if ($.isNumeric(localRange)){
-                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range, localRange: localRange, sendOut: sendOut, unit: unit}, function(data){
+                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range,
+                    localRange: localRange, sendOut: sendOut, unit: unit, signalType: $('#peakSignalType').text(),
+                    energyType: $('#peakEnergyType').text()}, function(data){
                         if (sendOut == 1){
                             localStorage.setItem('peakData', data);
                             waitPeak.resolve();
@@ -562,6 +649,36 @@ function setAE(event){
         $('#agaE').val('Point #');
     }
     $('#meta-form').trigger('change');
+}
+
+function setPeakSignal(event){
+    if (event.target.text == 'Signal Normalized'){
+        $('#peakSignalType').text('Signal Normalized');
+        $('#peakSignalType').append("<span class='caret'></span>");
+    }
+    else{
+        $('#peakSignalType').text('Signal');
+        $('#peakSignalType').append("<span class='caret'></span>");
+    }
+}
+
+function setPeakEnergy(event){
+    if (event.target.text == 'Energy Fitted'){
+        $('#peakEnergyType').text('Energy Fitted');
+        $('#peakEnergyType').append("<span class='caret'></span>");
+    }
+    else if (event.target.text == 'Energy xtal'){
+        $('#peakEnergyType').text('Energy xtal');
+        $('#peakEnergyType').append("<span class='caret'></span>");
+    }
+    else if (event.target.text == 'Energy xtal w/T'){
+        $('#peakEnergyType').text('Energy xtal w/T');
+        $('#peakEnergyType').append("<span class='caret'></span>");
+    }
+    else{
+        $('#peakEnergyType').text('Energy');
+        $('#peakEnergyType').append("<span class='caret'></span>");
+    }
 }
 
 function setUnit(event){

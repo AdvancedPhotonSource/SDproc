@@ -1872,6 +1872,8 @@ def peak_at_max():
     fitRange = request.form.get('inputRange', type=float)
     localRange = request.form.get('localRange', type=float)
     sendOut = request.form.get('sendOut', type=int)
+    signalType = request.form.get('signal', type=str)
+    energyType = request.form.get('energy', type=str)
     unit = request.form.get('unit', type=str)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
@@ -1887,21 +1889,23 @@ def peak_at_max():
     used = []
     additional = []
     legendNames = []
-    if bools[1].data:
+    if energyType == 'Energy xtal':
         energy = numpy.divide(energy_xtal(data, unicode_to_int(basedColumns[3].data),
                                           unicode_to_int(basedColumns[4].data), format_instance.hrm), 1000000)
         additional.append(energy)
         legendNames.append(basedColumns[1].id)
-    elif bools[2].data:
+    elif energyType == 'Energy xtal w/T':
         energy = numpy.divide(energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
                                                unicode_to_int(basedColumns[4].data), unicode_to_int(basedColumns[5].data),
                                                unicode_to_int(basedColumns[6].data), format_instance.hrm), 1000000)
         additional.append(energy)
         legendNames.append(basedColumns[2].id)
+    elif energyType == 'Energy Fitted':
+        cat = "DO THIS"
     else:
         used.append(unicode_to_int(basedColumns[0].data))
         legendNames.append(basedColumns[0].id)
-    if bools[9].data:
+    if signalType == 'Signal Normalized':
         signal = signal_normalized(data, unicode_to_int(basedColumns[8].data),
                                    unicode_to_int(basedColumns[10].data))
         additional.append(signal)
