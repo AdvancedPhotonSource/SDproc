@@ -48,7 +48,7 @@ $(document).ready(function(){
     var rows = $('tr.item');
     rows.removeClass("highlight");
     rows.removeClass("lightlight");
-
+    sortTable($('#sesPicker'));
     setupClick();
 
     if(localStorage.getItem("usingDAT") == 1){
@@ -73,14 +73,12 @@ $(document).ready(function(){
         rows = table.find('tbody tr');
         rows.removeClass('highlight');
         rows.removeClass('lightlight');
-        /* Dirtiest filter function ever ;) */
         var filteredRows = rows.filter(function(){
             var value = $(this).find('td').text().toLowerCase();
             return value.indexOf(inputContent) === -1;
         });
         /* Clean previous no-result if exist */
         table.find('tbody .no-result').remove();
-        /* Show all rows, hide filtered ones (never do that outside of a demo ! xD) */
         rows.show();
         filteredRows.hide();
         /* Prepend no-result row if all rows are filtered */
@@ -105,14 +103,12 @@ $(document).ready(function(){
         rows = table.find('tbody tr');
         rows.removeClass('highlight');
         rows.removeClass('lightlight');
-        /* Dirtiest filter function ever ;) */
         var filteredRows = rows.filter(function(){
             var value = $(this).find('td').text().toLowerCase();
             return value.indexOf(inputContent) === -1;
         });
         /* Clean previous no-result if exist */
         table.find('tbody .no-result').remove();
-        /* Show all rows, hide filtered ones (never do that outside of a demo ! xD) */
         rows.show();
         filteredRows.hide();
         /* Prepend no-result row if all rows are filtered */
@@ -177,32 +173,6 @@ $(function()
         return false;
     })
 })
-
-function moveFile()
-{
-    var found = 0;
-    $("tr.item").each(function(){
-        var row = $(this);
-        if ($(row).hasClass( "highlight" ))
-        {
-            found = 1;
-            $.post( "/SDproc/make_name" , {id : $('td:first', $(row)).attr('id')},
-            function(data){
-                var temp = data;
-                $('#sel1')
-                    .append($('<option></option>')
-                    .text(data)
-                    .attr('value', $('td:first', $(row)).attr('id')))
-            })
-        }
-    })
-    if (found == 0)
-    {
-        alert('No File Selected');
-    }
-}
-
-
 
 function newSession()
 {
@@ -433,4 +403,11 @@ function logout(){
         }
         $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: format});
     }
+}
+
+function sortTable(table){
+    tbody = table.find('tbody')
+    tbody.find('tr').sort(function(a, b){
+        return $('td:first', a).text().localeCompare($('td:first', b).text());
+    }).appendTo(tbody);
 }

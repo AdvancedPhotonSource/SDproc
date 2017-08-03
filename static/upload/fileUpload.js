@@ -51,6 +51,7 @@ $(document).ready(function(){
     resetForm();
     setupRows();
     setupClick();
+    sortTable($('#filePicker'));
 
     if(localStorage.getItem("usingDAT") == 1){
         $("#navData").addClass('disabled');
@@ -399,4 +400,11 @@ function logout(){
             window.location.href = ("logout")
         });
     }
+}
+
+function sortTable(table){
+    tbody = table.find('tbody')
+    tbody.find('tr').sort(function(a, b){
+        return $('td:first', a).text().localeCompare($('td:first', b).text());
+    }).appendTo(tbody);
 }

@@ -51,6 +51,9 @@ $(document).ready( function() {
 
     setupRows();
     setupClick();
+    sortTable($('#fileTable'));
+    sortTable($('#nameTable'));
+    sortTable($('#sessionTable'));
 
     if(localStorage.getItem("usingDAT") == 1){
         $("#navData").addClass('disabled');
@@ -803,6 +806,9 @@ function decline(task){
     })
 }
 
-function viewHRM(){
-
+function sortTable(table){
+    tbody = table.find('tbody')
+    tbody.find('tr').sort(function(a, b){
+        return $('td:first', a).text().localeCompare($('td:first', b).text());
+    }).appendTo(tbody);
 }

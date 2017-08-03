@@ -272,6 +272,12 @@ $(function()
     })
 })
 
+function populateName(){
+    if ($('#sesName').text() != 'None'){
+        $('#ssName').val($('#sesName').text());
+    }
+}
+
 function saveSes(){
     if (localStorage.getItem('previous2') === null)
     {

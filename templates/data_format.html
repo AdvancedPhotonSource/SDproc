@@ -236,7 +236,7 @@ with context %}
                         <b class="sessionText" id="sesName">{{ ses }}</b>
                     </div>
                     <div class="btn-group-vertical stretcher">
-                        <button class="btn btn-primary btn-sm sesBtn" data-toggle="modal" data-target="#ssModal" title="Save this session so that it can be accessed later">
+                        <button class="btn btn-primary btn-sm sesBtn" data-toggle="modal" data-target="#ssModal" onclick="populateName()" title="Save this session so that it can be accessed later">
                             Save Session
                         </button>
                         <button onclick="advance()" class="btn btn-primary btn-sm sesBtn" title="Proceed with files to generate a DAT">
