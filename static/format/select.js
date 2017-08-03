@@ -42,7 +42,7 @@
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 */
-function sel1Clicker(){
+$(function (){
     $('#sel1').on('click', 'tr.file', function(e){
         var rows = $('tr.file');
         rows.removeClass('highlight');
@@ -81,7 +81,7 @@ function sel1Clicker(){
             })
         }
     })
-}
+})
 
 
 /*
@@ -138,7 +138,10 @@ $(function (){
 $(document).ready( function() {
     $('#unit').val('meV');
     setPlotAgainst();
-    asynchOnLoad();
+    asynchOnLoad()
+    $('#pane').hide();
+    if (!localStorage.getItem('previous2') === null)
+        localStorage.removeItem("previous2");
     $('#fitType').text('Fit around max');
     $('#fitType').append("<span class='caret'></span>");
     $('#peakLocation').attr('placeholder', 'Peak found automatically');
@@ -150,6 +153,7 @@ $(document).ready( function() {
     $('#commentGroup').addClass('commentGroup');
     $('#fitBtn').removeClass('fitBtnShifted');
     $('#fitBtn').addClass('fitBtn');
+    sortTable($('#filePicker'));
     localStorage.setItem('justPeakFit', 0);
 });
 
@@ -165,35 +169,26 @@ $(document).keypress( function(event) {
 function asynchOnLoad(){
     var deferred = new $.Deferred(), completed = deferred.then(function(){
         //$('#sel1 tr.file:first').addClass('highlight');
-        sel1Clicker();
-        if ($('#sel1 tbody').children().length == 0){
-            $('#pane').hide();
-            $('#sel1Label').text('Add files');
-        }
-        else{
-            $('#pane').show();
-            $('#sel1Label').text('Select = View | Check = Add to sum');
-        }
+        sortTable($('#sel1'));
         $('#sel1 tr.file:first').trigger('click');
         return 1;
     });
     var saved_files = JSON.parse(localStorage.getItem('use_files'));
-    if (saved_files == null){
-        deferred.resolve();
-    }
-    $.each(saved_files, function(index, value){
-        var temp = index
-        $.post("/SDproc/make_name", {id: index}, function(data){
-            if (value == 'checked'){
+    $(saved_files).each(function(){
+        var temp = this
+        $.post("/SDproc/make_name", {id: this}, function(data){
+            data = JSON.parse(data)
+            if (data[1] == true){
                 $('#sel1 > tbody:last-child')
-                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data + '<td><input onclick="modifySum(this)" checked type="checkbox"></td></tr>')
+                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" checked type="checkbox"></td></tr>')
             }
             else{
                 $('#sel1 > tbody:last-child')
-                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data + '<td><input onclick="modifySum(this)" type="checkbox"></td></tr>')
+                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" type="checkbox"></td></tr>')
             }
+            $('#pane').show()
             saved_files = removeID(temp.valueOf(), saved_files);
-            if (Object.keys(saved_files).length == 0){
+            if (saved_files.length == 0){
                 deferred.resolve();
             }
         })
@@ -201,26 +196,11 @@ function asynchOnLoad(){
     return deferred.promise()
 }
 
-function modifySum(checkbox){
-    files = JSON.parse(localStorage.getItem('use_files'));
-    if ($(checkbox).is(':checked')){
-        files[String($(checkbox).parent().parent().data('value'))] = 'checked';
-        localStorage.setItem('use_files', JSON.stringify(files))
-    }
-    else{
-        files[String($(checkbox).parent().parent().data('value'))] = 'unchecked';
-        localStorage.setItem('use_files', JSON.stringify(files))
-    }
-
-}
-
 function removeID(id, idArray){
-    //var result = $.grep(idArray, function(n, i){
-    //    return (n !== id);
-    //})
-    //return result;
-    delete idArray[id];
-    return idArray;
+    var result = $.grep(idArray, function(n, i){
+        return (n !== id);
+    })
+    return result;
 }
 
 
@@ -250,25 +230,25 @@ $(function()
         rows.removeClass('lightlight');
         row.addClass('highlight');
         $('#sel1 > tbody:last-child')
-            .append('<tr style="cursor: pointer;" data-value="'+$('td:first', $(row)).attr('id')+'" class="file"><td class="fileNameCell">' + $('td:first', $(row)).text() + '</td><td><input checked onclick="modifySum(this)" type="checkbox"></td></tr>')
+            .append('<tr style="cursor: pointer;" data-value="'+$('td:first', $(row)).attr('id')+'" class="file"><td class="fileNameCell">' + $('td:first', $(row)).text() + '</td><td><input checked onclick="updateSumCheck(this)" type="checkbox"></td></tr>')
+        $('#pane').show()
         row.removeClass('highlight');
         if (localStorage.getItem('use_files') === null)
         {
-            var files = {};
-            files[$('td:first', $(row)).attr('id')] = 'checked';
+            var files = [];
+            files.push($('td:first', $(row)).attr('id'));
             localStorage.setItem('use_files', JSON.stringify(files));
         }
         else
         {
             var files = JSON.parse(localStorage.getItem('use_files'));
-            files[$('td:first', $(row)).attr('id')] = 'checked';
+            files.push($('td:first', $(row)).attr('id'));
             localStorage.setItem('use_files', JSON.stringify(files));
         }
-        $('#pane').show();
-        $('#sel1Label').text('Select = View | Check = Add to sum');
         $('#fileModal').modal('toggle');
         $('#sel1 tr:last').addClass('highlight');
         $('#sel1 tr:last').trigger('click');
+        sortTable($('#sel1'));
     })
 
     rows.on('mouseenter', function(e)
@@ -343,6 +323,17 @@ function log(){
     })
 }
 
+function updateSumCheck(checkbox){
+    if ($(checkbox).is(':checked')){
+        idnum = $(checkbox).parent().parent().data('value')
+        $.post('/SDproc/updateSumCheck', {id: idnum, check: "True"})
+    }
+    else{
+        idnum = $(checkbox).parent().parent().data('value')
+        $.post('/SDproc/updateSumCheck', {id: idnum, check: "False"})
+    }
+}
+
 function deleteCmeta(){
     if (localStorage.getItem('previous2') === null){
         alert("No file selected")
@@ -386,10 +377,6 @@ function deleteCmeta(){
                     localStorage.setItem('use_files', JSON.stringify(result));
                 }
             })
-            if ($('#sel1 tbody').children().length == 0){
-                $('#pane').hide();
-                $('#sel1Label').text('Add files');
-            }
         })
     }
 }
@@ -716,6 +703,13 @@ function logout(){
             window.location.href = ("logout")
         });
     }
+}
+
+function sortTable(table){
+    tbody = table.find('tbody')
+    tbody.find('tr').sort(function(a, b){
+        return $('td:first', a).text().localeCompare($('td:first', b).text());
+    }).appendTo(tbody);
 }
 
 

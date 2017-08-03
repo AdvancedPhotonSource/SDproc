@@ -841,6 +841,7 @@ def dataFormat():
             format.fit_pos = 0
             format.fit_range = 3
             format.file_id = idthis
+            format.checked = True
             hrmInstance = db.session.query(HRM).filter_by(name='Fe-inline-1meV').first()
             hrm = {'name': hrmInstance.name, 'hrm_e0': hrmInstance.hrm_e0, 'hrm_bragg1': hrmInstance.hrm_bragg1,
                    'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo, 'hrm_alpha1': hrmInstance.hrm_alpha1,
@@ -950,6 +951,7 @@ def saveSession():
         session_instance.file_id = instance.file_id
         session_instance.path = instance.path
         session_instance.comment = instance.comment
+        session_instance.checked = instance.checked
         session_instance.against_E = instance.against_E
         session_instance.fit_type = instance.fit_type
         session_instance.fit_pos = instance.fit_pos
@@ -1434,10 +1436,11 @@ def make_name():
     if request.method == 'POST':
         idthis = request.form.get('id', type=int)
         instance = db.session.query(dataFile).filter_by(id=idthis).first()
-        # lastMod = modified(instance.path)
-        # temp = lastMod.strftime("%Y-%m-%d %H:%M:%S")
-        # modname = str(instance.name) + ' ' + temp
-        return instance.name
+
+        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                    currentMeta.file_id == instance.id,
+                                                                    currentMeta.session == current_user.current_session)).first()
+        return json.dumps([instance.name, format_instance.checked])
     return 'Made'
 
 
@@ -1615,6 +1618,7 @@ def set_ses():
             form.populate_obj(newCurrent)
             newCurrent.path = actualMeta.path
             newCurrent.comment = actualMeta.comment
+            newCurrent.checked = actualMeta.checked
             newCurrent.against_E = actualMeta.against_E
             newCurrent.file_id = actualMeta.file_id
             newCurrent.fit_type = actualMeta.fit_type
@@ -2213,6 +2217,23 @@ def updateHRM():
     format_instance.hrm = hrm
     db.session.commit()
     return hrmInstance.name
+
+
+@app.route('/updateSumCheck', methods=['GET', 'POST'])
+@login_required
+def updateSumCheck():
+    '''
+    Updates the current meta to keep track of the checkbox associated with adding the file to the sum.
+    :return:
+    '''
+    idthis = request.form.get('id', type=int)
+    checkVal = request.form.get('check').lower() == "true"
+    format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                currentMeta.file_id == idthis,
+                                                                currentMeta.session == current_user.current_session)).first()
+    format_instance.checked = checkVal
+    db.session.commit()
+    return 'Updated'
 
 
 @app.route('/shareSes', methods=['GET', 'POST'])

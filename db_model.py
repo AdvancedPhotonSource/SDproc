@@ -123,6 +123,7 @@ class logBook(db.Model):
     plot = db.Column(db.String())
     timestamp = db.Column(db.DateTime())
     session = db.Column(db.String())
+    checked = db.Column(db.Boolean())
 
     against_E = db.Column(db.String())
 
@@ -174,6 +175,7 @@ class currentMeta(db.Model):
     comment = db.Column(db.String())
     file_id = db.Column(db.Integer())
     session = db.Column(db.String())
+    checked = db.Column(db.Boolean())
 
     fit_type = db.Column(db.String())
     fit_pos = db.Column(db.Float())
@@ -228,6 +230,7 @@ class sessionMeta(db.Model):
     comment = db.Column(db.String())
     file_id = db.Column(db.Integer())
     session = db.Column(db.String())
+    checked = db.Column(db.Boolean())
 
     fit_type = db.Column(db.String())
     fit_pos = db.Column(db.Float())
