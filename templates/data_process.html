@@ -171,103 +171,63 @@ with context %}
     </div>
 </div>
 <div class="container data-select" role="main">
-    <br/>
-    <br/>
-    <br/>
-    <div class="row">
-        <div class="sessionName" id="sesName">
-            {{ ses }}
-        </div>
-        <div class="col-xs-6">
-            <label for="sel1">Select files to view:</label>
-            <select multiple class="form-control" id="sel1">
-            </select>
-        </div>
-        <div class="col-xs-6">
-            <label for="comment">Comment:</label>
-            <p id="comment"></p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-6">
-            <div class="row">
-                <div class="col-xs-11">
-                    <span class="centerBlock">
-                        <button type="button" onclick="log()" class="btn btn-primary btn-sm" id="logbtn">
-                            Add to Logbook
-                        </button>
-                    </span>
-                </div>
-                <div class="col-xs-1">
-                    <p id="log_add">
-                    </p>
-                </div>
+    <hr class="separator">
+    <div class="selectGroup">
+        <div class="sesGroup" style="text-align:center;">
+            <div class="sessionName" id="sesName">
+                {{ ses }}
             </div>
-            <div class="row">
-
+            <div class="text-center">
+                <button class="btn btn-primary btn-sm continue" id="continue" title="Move on to modify the DAT you just created" onclick="advance()">
+                    Continue
+                </button>
+            </div>
+        </div>
+        <div class="secondBtns">
+            <button id="outputBtn" onclick="outputFile()" class="btn btn-primary btn-sm output" title="Display or save output file">
+                Output
+            </button>
+            <div>
+                <button id="logbook" type="button" onclick="log()" class="btn btn-primary btn-sm logbook" id="logbtn">
+                    Add to Logbook
+                </button>
+            </div>
+            <div>
+                <p id="log_add">
+                </p>
             </div>
         </div>
     </div>
-    <div class="row">
+    <div>
         <br/>
         <br/>
         <br/>
-        <label for="maxes" class="maxLabel">Maxes:</label>
-        <div class="col-xs-6" id="maxes">
-            <div class="maxdata">
-                {% if data %}
-                    {% for post in data %}
-                        {% for i in range(0, post.filenames|length()) %}
-                            <div class = row">
-                                <div class="col-xs-4">
-                                    <span class="pull-left">
-                                        <p>{{ post.filenames[i] }}:</p>
-                                    </span>
-                                </div>
-                                <div class="col-xs-8" id="maxVal">
-                                    <span class="pull-left">
-                                        <p>{{ post.max[i] }}</p>
-                                    </span>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endfor %}
-                {% endif %}
+        <div class="selectorGroup">
+            <label id="sel1Label" for="sel1">Check = Add to sum</label>
+            <div class="pane" id="pane">
+                <table id="sel1" cellspacing="0" style="text-align: center; margin: auto;">
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="col-xs-6" id="process_plot_spot">
-            <span class="pull-right">
-                <div id="process_plot" class="plot">
-                    {{code|safe}}
-                </div>
-            </span>
-            <div class="row">
-                <div class="text-center settings" id="settingsBtn">
-                    <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#ssModal" title="View the settings used to plot the sum">
-                        Sum Settings
-                    </button>
-                </div>
-                <form id="output-form" method=post action="">
-                    <input type="hidden" name="cordData" id="cordData">
-                    <input type="hidden" name="idnum" id="idnum">
-                    <input type="hidden" name="outType" id="outType">
-                    <input type="hidden" name="datFName" id="datFName">
-                    <input type="hidden" name="DBSave" id="DBSave">
-                </form>
-                <div class="text-center output" id="outputBtn">
-                    <button onclick="outputFile()" class="btn btn-primary btn-md" title="Display or save output file">
-                        Output
-                    </button>
-                </div>
+        <span class="pull-right">
+            <div id="process_plot" class="plot">
+                {{code|safe}}
             </div>
-            <div class="row">
-                <div class="text-center">
-                    <button class="btn btn-primary btn-lg continue" id="continue" title="Move on to modify the DAT you just created" onclick="advance()">
-                        Continue
-                    </button>
-                </div>
-            </div>
+        </span>
+        <div class="text-center settings" id="settingsBtn">
+            <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#ssModal" title="View the settings used to plot the sum">
+                Sum Settings
+            </button>
         </div>
+        <form id="output-form" method=post action="">
+            <input type="hidden" name="cordData" id="cordData">
+            <input type="hidden" name="idnum" id="idnum">
+            <input type="hidden" name="outType" id="outType">
+            <input type="hidden" name="datFName" id="datFName">
+            <input type="hidden" name="DBSave" id="DBSave">
+        </form>
     </div>
 </div>
 <div id="procButton" class="procButton">

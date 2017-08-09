@@ -83,8 +83,9 @@ function startProc(){
     $('#sel1').trigger('change');
     $('#procButton').hide();
     $('#settingsBtn').show();
-    $('#outputBtn').show();
-    $('#continue').show();
+    $('#outputBtn').prop('disabled', false);
+    $('#continue').prop('disabled', false);
+    $('#logbook').prop('disabled', false);
     setcDAT();
 }
 
@@ -93,8 +94,9 @@ $(document).ready( function() {
     asynchOnLoad()
     $('#procButton').show();
     $('#settingsBtn').hide();
-    $('#outputBtn').hide();
-    $('#continue').hide();
+    $('#outputBtn').prop('disabled', true);
+    $('#continue').prop('disabled', true);
+    $('#logbook').prop('disabled', true);
     $('#linearRad').prop("checked", true)
     $('#binWidth').attr('placeholder', 'Input width of bins');
     $('#binWidth').prop('disabled', true);

@@ -399,6 +399,7 @@ $(function(){
                 $('#metaForm_id').html( $(data).find('#metaForm_id').html());
                 $('#plot_spot').html( $(data).find('#plot_spot').html());
                 $('#currentAE').html( $(data).find('#currentAE').html());
+                setPlotAgainst();
                 localStorage.setItem('justPeakFit', 0);
             })
         });
@@ -471,35 +472,17 @@ var waitPeak = $.Deferred();
 function fitPeak(sendOut){
     $('#fitBtn').removeClass('fitBtn');
     $('#fitBtn').addClass('fitBtnShifted');
+    temp = $('#peakSignalType').text();
     previous = localStorage.getItem('previous2');
-    $('#a1bool').removeProp('checked');
-    $('#a2bool').removeProp('checked');
-    $('#t1bool').removeProp('checked');
-    $('#t2bool').removeProp('checked');
-    $('#tcbool').removeProp('checked');
-    $('#nbool').removeProp('checked');
-    $('#nfbool').removeProp('checked');
-    $('#xbool').removeProp('checked');
-    if (!$('#ebool').prop('checked') && !$('#ecbool').prop('checked') && !$('#etcbool').prop('checked')){
-        $('#ebool').prop('checked', true);
-    }
-    if (!$('#sbool').prop('checked') && !$('#sncbool').prop('checked')){
-        $('#sbool').prop('checked', true);
-    }
-    var checked = [];
-    $('#metaForm_id input:checked').each(function(){
-        checked.push($(this).attr('name'));
+    $('#metaForm_id input').each(function(){
+        $(this).removeProp('checked');
     })
-    if (checked.length > 2){
-        alert('Please only select 1 energy and 1 signal')
-        return;
-    }
     var unit = $('#unit').val();
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
         if ($.isNumeric(range)){
             $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range, sendOut: sendOut, unit: unit,
-            signalType: $('#peakSignalType').text(), energyType: $('#peakEnergyType').text()}, function(data){
+            signal: $('#peakSignalType').text(), energy: $('#peakEnergyType').text()}, function(data){
                 if (sendOut == 1){
                     localStorage.setItem('peakData', data);
                     waitPeak.resolve();
@@ -696,7 +679,11 @@ function setPlotAgainst(){
 }
 
 function headerFile(){
-
+    previous = localStorage.getItem('previous2');
+    $.post("/SDproc/headerFile", {id: previous}, function(data){
+        $('#headerText').text(data);
+        $('#headerModal').model('show');
+    });
 }
 
 function logout(){

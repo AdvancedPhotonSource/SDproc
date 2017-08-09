@@ -76,6 +76,78 @@ select[multiple].scan-list{
     margin: 0 auto;
 }
 
+/*---------Session Header Section----------*/
+
+.selectGroup{
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    margin-top: 100px;
+}
+
+.sesGroup{
+    float: left;
+    width: 40%;
+    margin-right: -100px;
+    margin-left: 180px;
+}
+
+.sessionName{
+    position: relative;
+    display: inline-block;
+    font-weight:bold;
+    border:1px dotted;
+    padding:10px;
+    width: 80%;
+}
+
+.continue{
+    position: relative;
+    display: inline-block;
+    margin-top: 10px;
+    width: 40%;
+}
+
+.secondBtns{
+    float: left;
+    position: relative;
+    width: 40%;
+}
+
+.output{
+    position: relative;
+    display: inline-block;
+    width: 40%;
+    margin-top: 5px;
+}
+
+.logbook{
+    position: relative;
+    display: inline-block;
+    width: 40%;
+    margin-top: 17px;
+}
+
+.separator{
+    position: absolute;
+    top: 225px;
+    width: 100%;
+    margin-left: -2px;
+    margin-right: auto;
+    border-top-style: dashed;
+    border-width: 1px;
+}
+
+/*---------Session Data Section----------*/
+
+.selectorGroup{
+    float: left;
+    position: relative;
+    left: 10%;
+    width: 40%;
+}
+
+
 .bootbtn{
     position: absolute;
     left: 550px;
@@ -111,8 +183,6 @@ select[multiple].scan-list{
     border-radius: 10px;
     border: 1px;
 }
-
-.sessionName{ position:absolute; top: 105px; left:150px; font-weight:bold; border:1px dotted; padding:10px;}
 
 .content-height .ui-dialog-content{
     height: 80px;
@@ -196,10 +266,4 @@ body{
 html{
     position: relative;
     min-height: 100%;
-}
-
-.continue{
-    position: relative;
-    margin-top: 30px;
-    margin-right: 250px;
 }

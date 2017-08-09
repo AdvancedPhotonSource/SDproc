@@ -53,13 +53,15 @@ For debugging server use:
 from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash, \
     send_from_directory, request
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import mpld3
 import os
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from app import app
-from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta, notification, currentDAT, userFiles, HRM
+from db_model import db, User, logBook, dataFile, currentMeta, sessionMeta, sessionFiles, sessionFilesMeta, \
+    notification, currentDAT, userFiles, HRM
 from forms import InputForm, CommentForm
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -69,8 +71,10 @@ import numpy
 import uuid
 from sqlalchemy import desc, or_, and_
 import mda
+import mdaAscii
 import copy
 from scipy import stats
+from globus_sdk import TransferClient
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -187,8 +191,8 @@ def profile():
                            'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
                            'commentChar': current_user.commentChar})
 
-    #notifications = notification.query.order_by('id')
-    #for instance in notifications:
+    # notifications = notification.query.order_by('id')
+    # for instance in notifications:
     #    userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
     #    if userInfo != None:
     #        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
@@ -269,9 +273,9 @@ def admin():
     hrms = HRM.query.order_by('id')
     for instance in hrms:
         hrmData.insert(0, {'name': instance.name, 'hrm_e0': instance.hrm_e0, 'hrm_bragg1': instance.hrm_bragg1,
-                             'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
-                             'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
-                             'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
+                           'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
+                           'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
+                           'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
 
     return render_template('admin.html', user=current_user, fileData=fileData, sesData=sesData,
                            names=names, notifications=notifData, hrms=hrms)
@@ -338,6 +342,7 @@ def hrmInfo():
                'hrm_theta1_sign': hrmInfo.hrm_theta1_sign, 'hrm_theta2_sign': hrmInfo.hrm_theta2_sign}
     return render_template('admin.html', user=current_user, hrmData=hrmData)
 
+
 @app.route('/addHRM', methods=['GET', 'POST'])
 @login_required
 def addHRM():
@@ -380,6 +385,7 @@ def addHRM():
         return 'Updated'
     return 'Added'
 
+
 @app.route('/solveNotif', methods=['GET', 'POST'])
 @login_required
 def solveNotif():
@@ -420,7 +426,8 @@ def solveNotif():
             file = db.session.query(dataFile).filter(dataFile.id == id.file_id).first()
             auths = file.authed.split(',')
             auths.remove(str(user.id))
-            userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == file.id)).first()
+            userFile = db.session.query(userFiles).filter(
+                and_(userFiles.user_id == user.id, userFiles.file_id == file.id)).first()
             db.session.delete(userFile)
             if len(auths) == 0:
                 db.session.delete(file)
@@ -569,7 +576,8 @@ def removeThing():
                 instance = db.session.query(dataFile).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
                 auths.remove(str(user.id))
-                userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
+                userFile = db.session.query(userFiles).filter(
+                    and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
                 db.session.delete(userFile)
                 db.session.commit()
                 if len(auths) == 0:
@@ -601,7 +609,8 @@ def removeThing():
                 file_instance = db.session.query(dataFile).filter_by(id=location).first()
                 auths = file_instance.authed.split(',')
                 auths.remove(str(user.id))
-                userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == file_instance.id)).first()
+                userFile = db.session.query(userFiles).filter(
+                    and_(userFiles.user_id == user.id, userFiles.file_id == file_instance.id)).first()
                 db.session.delete(userFile)
                 db.session.commit()
                 if len(auths) == 0:
@@ -650,8 +659,9 @@ def index():
     for Dinstance in DATsessions:
         lastMod = modified(Dinstance.path)
         data.insert(0,
-                    {'name': Dinstance.name + '.dat', 'id': Dinstance.id, 'comment': Dinstance.comment, 'authed': Dinstance.authed,
-                    'modified': lastMod, 'type': 'dat'})
+                    {'name': Dinstance.name + '.dat', 'id': Dinstance.id, 'comment': Dinstance.comment,
+                     'authed': Dinstance.authed,
+                     'modified': lastMod, 'type': 'dat'})
     if request.method == 'POST':
         return redirect(url_for('dataFormat'))
     return render_template('view_output.html', data=data, user=user, names=names)
@@ -719,15 +729,16 @@ def dataFormat():
         temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
         modname = [instance.name + temp]
         if instance.type != 'dat':
-            fdata.insert(0, {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
-                            'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+            fdata.insert(0,
+                         {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
+                          'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
     hrms = HRM.query.order_by('id')
     for instance in hrms:
         hrmData.insert(0, {'name': instance.name, 'hrm_e0': instance.hrm_e0, 'hrm_bragg1': instance.hrm_bragg1,
-                             'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
-                             'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
-                             'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
+                           'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
+                           'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
+                           'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
 
     if findPlot != 1:
         form = InputForm(request.form)
@@ -844,7 +855,8 @@ def dataFormat():
             format.checked = True
             hrmInstance = db.session.query(HRM).filter_by(name='Fe-inline-1meV').first()
             hrm = {'name': hrmInstance.name, 'hrm_e0': hrmInstance.hrm_e0, 'hrm_bragg1': hrmInstance.hrm_bragg1,
-                   'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo, 'hrm_alpha1': hrmInstance.hrm_alpha1,
+                   'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo,
+                   'hrm_alpha1': hrmInstance.hrm_alpha1,
                    'hrm_alpha2': hrmInstance.hrm_alpha2, 'hrm_theta1_sign': hrmInstance.hrm_theta1_sign,
                    'hrm_theta2_sign': hrmInstance.hrm_theta2_sign}
             hrm = json.dumps(hrm)
@@ -928,7 +940,8 @@ def saveSession():
     checked = request.form.get("checked", type=int)
     namechk = request.form.get("name", type=str)
     if checked == 0:
-        instance = db.session.query(sessionFiles).filter(and_(sessionFiles.user_id == current_user.get_id(), sessionFiles.name == namechk)).first()
+        instance = db.session.query(sessionFiles).filter(
+            and_(sessionFiles.user_id == current_user.get_id(), sessionFiles.name == namechk)).first()
         if instance:
             data = str(instance.id)
             return data
@@ -1176,9 +1189,11 @@ def sendOut(filename, displayName):
     :return:
     '''
     if displayName != 'None' and displayName is not None:
-        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True, attachment_filename=displayName + '.dat')
+        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename,
+                                   as_attachment=True, attachment_filename=displayName + '.dat')
     else:
-        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename, as_attachment=True)
+        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename,
+                                   as_attachment=True)
 
 
 @app.route('/db')
@@ -1276,7 +1291,8 @@ def delete_file():
             auths = instance.authed.split(',')
             auths.remove(str(user.id))
             temp = db.session.query(userFiles).all()
-            userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
+            userFile = db.session.query(userFiles).filter(
+                and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
             db.session.delete(userFile)
             db.session.commit()
             if len(auths) == 0:
@@ -1319,7 +1335,8 @@ def delete_file():
                 file = db.session.query(dataFile).filter(dataFile.id == id.file_id).first()
                 auths = file.authed.split(',')
                 auths.remove(str(user_instance.id))
-                userFile = db.session.query(userFiles).filter(and_(userFiles.user_id == user_instance.id, userFiles.file_id == file.id)).first()
+                userFile = db.session.query(userFiles).filter(
+                    and_(userFiles.user_id == user_instance.id, userFiles.file_id == file.id)).first()
                 db.session.delete(userFile)
                 if len(auths) == 0:
                     db.session.delete(file)
@@ -1407,9 +1424,10 @@ def show_comment():
             else:
                 setBaseComment(idnext)
                 instance = db.session.query(dataFile).filter_by(id=idnext).first()
-                format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                            currentMeta.file_id == instance.id,
-                                                                            currentMeta.session == current_user.current_session)).first()
+                format_instance = db.session.query(currentMeta).filter(
+                    and_(currentMeta.user_id == current_user.get_id(),
+                         currentMeta.file_id == instance.id,
+                         currentMeta.session == current_user.current_session)).first()
                 send_comment = format_instance.comment
         if idnext is not None and formatting == 2:
             instance = db.session.query(sessionFiles).filter_by(id=idnext).first()
@@ -1702,13 +1720,15 @@ def process():
                 legendNames.append(basedColumns[8].id)
             else:
                 if bools[1].data:
-                    energy = energy_xtal(data, unicode_to_int(basedColumns[3].data), unicode_to_int(basedColumns[4].data),
+                    energy = energy_xtal(data, unicode_to_int(basedColumns[3].data),
+                                         unicode_to_int(basedColumns[4].data),
                                          format_instance.hrm)
                     additional.append(energy)
                     legendNames.append(basedColumns[1].id)
                 elif bools[2].data:
                     energy = energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
-                                              unicode_to_int(basedColumns[4].data), unicode_to_int(basedColumns[5].data),
+                                              unicode_to_int(basedColumns[4].data),
+                                              unicode_to_int(basedColumns[5].data),
                                               unicode_to_int(basedColumns[6].data), format_instance.hrm)
                     additional.append(energy)
                     legendNames.append(basedColumns[2].id)
@@ -1768,9 +1788,10 @@ def process():
                 except AttributeError:
                     flash('Unable to find file')
                     return redirect(url_for('waitProc'))
-                format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                            currentMeta.file_id == file_instance.id,
-                                                                            currentMeta.session == current_user.current_session)).first()
+                format_instance = db.session.query(currentMeta).filter(
+                    and_(currentMeta.user_id == current_user.get_id(),
+                         currentMeta.file_id == file_instance.id,
+                         currentMeta.session == current_user.current_session)).first()
                 againstE = format_instance.against_E
                 form = populate_from_instance(format_instance)
                 columns, bools = splitForm(form)
@@ -1780,12 +1801,14 @@ def process():
                 else:
                     data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
                 if bools[1].data:
-                    energy = energy_xtal(data, unicode_to_int(basedColumns[3].data), unicode_to_int(basedColumns[4].data),
+                    energy = energy_xtal(data, unicode_to_int(basedColumns[3].data),
+                                         unicode_to_int(basedColumns[4].data),
                                          format_instance.hrm)
                     used.append(energy)
                 elif bools[2].data:
                     energy = energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
-                                              unicode_to_int(basedColumns[4].data), unicode_to_int(basedColumns[5].data),
+                                              unicode_to_int(basedColumns[4].data),
+                                              unicode_to_int(basedColumns[5].data),
                                               unicode_to_int(basedColumns[6].data), format_instance.hrm)
                     used.append(energy)
                 else:
@@ -1828,14 +1851,15 @@ def process():
                 allagainstE.append(againstE)
                 allFileNames.append(file_instance.name)
             if binWidth == None:
-                code, sumxmax, sumymax, sumX, sumY = mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames,
-                                                    allFileNames, pltLeg)
+                code, sumxmax, sumymax, sumX, sumY = mergePlots(allycords, allxmax, allagainstE, alldata,
+                                                                allLegendNames,
+                                                                allFileNames, pltLeg)
                 sumX = sumX.tolist()
                 sumY = sumY.tolist()
             else:
                 code, sumxmax, sumymax, sumX, sumY = mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames,
-                                                  allFileNames,
-                                                  pltLeg, binWidth)
+                                                              allFileNames,
+                                                              pltLeg, binWidth)
             if output == 1:
                 outputs = []
                 outputs.append(sumX)
@@ -1876,8 +1900,8 @@ def peak_at_max():
     fitRange = request.form.get('inputRange', type=float)
     localRange = request.form.get('localRange', type=float)
     sendOut = request.form.get('sendOut', type=int)
-    signalType = request.form.get('signal', type=str)
-    energyType = request.form.get('energy', type=str)
+    signalType = ' '.join(request.form.get('signal', type=str).split())
+    energyType = ' '.join(request.form.get('energy', type=str).split())
     unit = request.form.get('unit', type=str)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
@@ -1900,7 +1924,8 @@ def peak_at_max():
         legendNames.append(basedColumns[1].id)
     elif energyType == 'Energy xtal w/T':
         energy = numpy.divide(energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
-                                               unicode_to_int(basedColumns[4].data), unicode_to_int(basedColumns[5].data),
+                                               unicode_to_int(basedColumns[4].data),
+                                               unicode_to_int(basedColumns[5].data),
                                                unicode_to_int(basedColumns[6].data), format_instance.hrm), 1000000)
         additional.append(energy)
         legendNames.append(basedColumns[2].id)
@@ -1992,7 +2017,8 @@ def peak_at_max():
     if sendOut == 1:
         ycords[0] = ycords[0].tolist()
         return json.dumps(ycords)
-    return render_template("data_format.html", user=current_user, ses=current_user.current_session, code=code, form=form,
+    return render_template("data_format.html", user=current_user, ses=current_user.current_session, code=code,
+                           form=form,
                            shiftVal=str(abs(ycords[0][0])))
 
 
@@ -2149,9 +2175,12 @@ def remBackDAT():
     if leftIn != None:
         if show == 0:
             cords = calcAverageBack(leftIn, rightIn)
-            leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[4]]), numpy.array([cords[1], cords[5]]), 1)
-            middleSlope, middleIntercept = numpy.polyfit(numpy.array([cords[4], cords[2]]), numpy.array([cords[5], cords[3]]), 1)
-            rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[2], cords[6]]), numpy.array([cords[3], cords[7]]), 1)
+            leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[4]]),
+                                                     numpy.array([cords[1], cords[5]]), 1)
+            middleSlope, middleIntercept = numpy.polyfit(numpy.array([cords[4], cords[2]]),
+                                                         numpy.array([cords[5], cords[3]]), 1)
+            rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[2], cords[6]]),
+                                                       numpy.array([cords[3], cords[7]]), 1)
             DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             tempX = []
@@ -2165,7 +2194,7 @@ def remBackDAT():
             for i in range(len(data[1])):
                 if data[0][i] <= cords[4]:
                     data[1][i] = data[1][i] - abs((leftSlope * data[0][i]) + leftIntercept)
-                elif data[0][i] <=cords[2]:
+                elif data[0][i] <= cords[2]:
                     data[1][i] = data[1][i] - abs((middleSlope * data[0][i] + middleIntercept))
                 else:
                     data[1][i] = data[1][i] - abs((rightSlope * data[0][i] + rightIntercept))
@@ -2302,6 +2331,71 @@ def shareFile():
         db.session.add(userFile)
         db.session.commit()
     return 'Shared'
+
+
+@app.route('/headerFile', methods=['GET', 'POST'])
+@login_required
+def headerFile():
+    idthis = request.form.get('id', type=int)
+    file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+    header = getHeader(file_instance.name, file_instance.path)
+    return header
+
+
+def getHeader(fileName, filePath):
+    d = mda.readMDA(filePath, 4, 0, 0)
+    if not d:
+        return 0
+
+    rank = d[0]['rank']
+    (phead_fmt, dhead_fmt, pdata_fmt, ddata_fmt, columns) = mdaAscii.getFormat(d, 1)
+    output = "### " + fileName + " is a " + str(d[0]['rank']) + "dimensional file.\n"
+    if (rank > len(d) - 1):
+        output += "file doesn't contain the data that it claims to contain\n"
+        output += "rank=%d, dimensions found=%d" % (rank, len(d) - 1)
+        return output
+    output += "### Number of data points = ["
+    for i in range(d[0]['rank'], 1, -1):
+        output += "%-d," % str(d[i].curr_pt)
+    output += str(d[1].curr_pt) + "]\n"
+
+    output += "### Number of detector signals = ["
+    for i in range(d[0]['rank'], 1, -1): output += "%-d," % d[i].nd
+    output += str(d[1].nd) + "]\n"
+    output += "#\n# Scan-environment PV values:\n"
+    ourKeys = d[0]['ourKeys']
+    maxKeyLen = 0
+    for i in d[0].keys():
+        if (i not in ourKeys):
+            if len(i) > maxKeyLen: maxKeyLen = len(i)
+    for i in d[0].keys():
+        if (i not in ourKeys):
+            output += "#" + str(i) + str((maxKeyLen - len(i)) * ' ') + str(d[0][i]) + "\n"
+    output += "#\n# " + str(d[1]) + "\n"
+    output += "#  scan date, time: " + str(d[1].time) + "\n"
+    output += "#\n"
+    for j in range(d[1].np):
+        output += phead_fmt[j] % (d[1].p[j].fieldName) + "\n"
+    for j in range(d[1].nd):
+        output += dhead_fmt[j] % (d[1].d[j].fieldName) + "\n"
+
+    output += "#\n"
+    for j in range(d[1].np):
+        output += phead_fmt[j] % (d[1].p[j].name) + "\n"
+    for j in range(d[1].nd):
+        output += dhead_fmt[j] % (d[1].d[j].name) + "\n"
+
+    output += "#\n"
+    for j in range(d[1].np):
+        output += phead_fmt[j] % (d[1].p[j].desc) + "\n"
+    for j in range(d[1].nd):
+        output += dhead_fmt[j] % (d[1].d[j].desc) + "\n"
+    return output
+
+
+def globusTest():
+    tc = TransferClient()
+    return
 
 
 def writeOutput(output, colNames, name, lname):
@@ -2577,11 +2671,12 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/T':
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[
+                count1] == 'Energy xtal w/T':
                 xs = alldata[count1][1]
                 xs = numpy.multiply(xs, 1000000)
             plt.plot(xs, ys)
-            #plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
+            # plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
             count2 += 1
     else:
         fig, ax = plt.subplots()
@@ -2590,9 +2685,9 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
             ys = oneDat[1]
             line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1])
             lines.append(line[0])
-            #point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
+            # point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
             labels.append(allFileNames[count1])
-            #lines.append(point[0])
+            # lines.append(point[0])
             count1 += 1
         sumNumpy = []
         YVals = []
@@ -2722,9 +2817,9 @@ def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFile
         line = ax.plot(largePadx, ySummed, color='k', alpha=0, label='Sum of selected')
         lines.append(line[0])
 
-        #point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
+        # point = ax.plot(sum2D[0][sum2Dxmax - largePadx.size], sum2Dymax, '-bD')
         labels.append('Sum of selected')
-        #lines.append(point[0])
+        # lines.append(point[0])
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
@@ -2750,10 +2845,11 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         for plot in alldata:
             xs = range(1, len(plot) + 1)
             ys = plot
-            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[count1] == 'Energy xtal w/T':
+            if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[
+                count1] == 'Energy xtal w/T':
                 xs = alldata[count1][1]
             plt.plot(xs, ys)
-            #plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
+            # plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
             count2 += 1
     else:
         fig, ax = plt.subplots()
@@ -2762,9 +2858,9 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
             ys = oneDat[1]
             line = ax.plot(xs, ys, alpha=0, label=allFileNames[count1])
             lines.append(line[0])
-            #point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
+            # point = ax.plot(xs[allxmax[count1][1]], ys[allxmax[count1][1]], '-bD')
             labels.append(allFileNames[count1])
-            #lines.append(point[0])
+            # lines.append(point[0])
             count1 += 1
         minValue = 0
         maxValue = 0
@@ -2825,9 +2921,9 @@ def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNa
         sum2Dymax = numpy.amax(sum2D)
         sum2Dxmax = numpy.ndarray.argmax(sum2D)
 
-        #point = ax.plot(sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, '-bD')
+        # point = ax.plot(sum2D[0][sum2Dxmax - len(sumXvals)], sum2Dymax, '-bD')
         labels.append('Sum of selected')
-        #lines.append(point[0])
+        # lines.append(point[0])
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
     mpld3.plugins.connect(fig, HideLegend(nameID))
     code = mpld3.fig_to_html(fig)
@@ -3069,6 +3165,7 @@ def calcAverageBack(leftIn, rightIn):
     sending = averaged
     return sending
 
+
 def addLines(line1, line2):
     fig = plt.figure(figsize=(10, 7))
     css = """
@@ -3089,7 +3186,7 @@ def addLines(line1, line2):
     ys = []
     try:
         for i in range(len(line2)):
-            if i < len(line2)/2:
+            if i < len(line2) / 2:
                 xs.append(line2[i])
             else:
                 ys.append(line2[i])
