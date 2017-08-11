@@ -408,3 +408,9 @@ function sortTable(table){
         return $('td:first', a).text().localeCompare($('td:first', b).text());
     }).appendTo(tbody);
 }
+
+function linkGlobus(){
+    $.post("/SDproc/linkGlobus", function(data){
+        alert('Done');
+    });
+}

@@ -114,15 +114,25 @@ td {
 
 .uploadGroup{
     display: inline-block;
+    width: 60%;
     margin-top: 20px;
 }
 
 .upBtn{
     float: left;
+    width: 20%;
 }
 
 .browseBtn{
     float: left;
+}
+
+.globusBtn{
+    float: left;
+    position: relative;
+    margin-left: -200px;
+    margin-right: 200px;
+    width: 20%;
 }
 
 .fileManageGroup{

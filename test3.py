@@ -74,11 +74,12 @@ import mda
 import mdaAscii
 import copy
 from scipy import stats
-from globus_sdk import TransferClient
+import globus_sdk
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 ALLOWED_EXTENSIONS = {'txt', 'mda', 'dat'}
+CLIENT_ID = '0c5f2ef9-7898-4d24-bdbf-57c3f1a2b4ea'
 usedArgs = []
 
 
@@ -2342,6 +2343,35 @@ def headerFile():
     return header
 
 
+@app.route('/linkGlobus', methods=['GET', 'POST'])
+@login_required
+def linkGlobus():
+    client = globus_sdk.NativeAppAuthClient(CLIENT_ID)
+    #client.oauth2_start_flow(refresh_tokens=True)
+    client.oauth2_start_flow()
+    authorize_url = client.oauth2_get_authorize_url()
+    print('Please go to this URL and login: {0}'.format(authorize_url))
+    get_input = getattr(__builtins__, 'raw_input', input)
+    auth_code = get_input('Please enter the code you get after login here: ').strip()
+    token_response = client.oauth2_exchange_code_for_tokens(auth_code)
+    globus_auth_data = token_response.by_resource_server['auth.globus.org']
+    globus_transfer_data = token_response.by_resource_server['transfer.api.globus.org']
+    AUTH_TOKEN = globus_auth_data['access_token']
+    TRANSFER_TOKEN = globus_transfer_data['access_token']
+    TRANSFER_REFRESH = globus_transfer_data['refresh_token']
+    TRANSFER_EXP = globus_transfer_data['expires_at_seconds']
+    #authorizer = globus_sdk.RefreshTokenAuthorizer(TRANSFER_REFRESH, client, access_token=TRANSFER_TOKEN, expires_at=TRANSFER_EXP)
+    authorizer = globus_sdk.AccessTokenAuthorizer(access_token=TRANSFER_TOKEN)
+    tc = globus_sdk.TransferClient(authorizer=authorizer)
+    petrel = 'e890db9e-8182-11e5-993f-22000b96db58'
+    ep = tc.get_endpoint(petrel)
+    epResult = tc.endpoint_autoactivate(petrel)
+    r = tc.operation_ls(petrel, path='/')
+    for item in r:
+        print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
+    return 'Linked'
+
+
 def getHeader(fileName, filePath):
     d = mda.readMDA(filePath, 4, 0, 0)
     if not d:
@@ -2391,11 +2421,6 @@ def getHeader(fileName, filePath):
     for j in range(d[1].nd):
         output += dhead_fmt[j] % (d[1].d[j].desc) + "\n"
     return output
-
-
-def globusTest():
-    tc = TransferClient()
-    return
 
 
 def writeOutput(output, colNames, name, lname):
