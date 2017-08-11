@@ -183,6 +183,7 @@ function sendfileForm()
                 setupRows();
                 setupClick();
                 resetForm();
+                sortTable($('#filePicker'));
                 return;
             })
         },

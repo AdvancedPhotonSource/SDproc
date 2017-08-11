@@ -83,6 +83,7 @@ select[multiple].scan-list{
     text-align: center;
     width: 100%;
     margin-top: 100px;
+    left: -100px;
 }
 
 .sesGroup{
@@ -136,6 +137,7 @@ select[multiple].scan-list{
     margin-right: auto;
     border-top-style: dashed;
     border-width: 1px;
+    left: 0px;
 }
 
 /*---------Session Data Section----------*/
@@ -143,10 +145,23 @@ select[multiple].scan-list{
 .selectorGroup{
     float: left;
     position: relative;
-    left: 10%;
+    text-align: center;
     width: 40%;
 }
 
+.pane{
+    display: inline-block;
+    overflow-y: scroll;
+    max-height: 500px;
+}
+
+.sel1{
+    width: 100%;
+}
+
+.fileNameCell{
+    width:300px;
+}
 
 .bootbtn{
     position: absolute;
@@ -212,6 +227,11 @@ select[multiple].scan-list{
 .plot{
     position: relative;
     bottom: 80px;
+    float: left;
+    width: 50%;
+    margin-left: 100px;
+    margin-top: 100px;
+    left: -250px;
 }
 
 .input-group{

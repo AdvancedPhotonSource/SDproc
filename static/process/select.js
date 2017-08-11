@@ -44,7 +44,7 @@
 */
 $(function (){
     $('#sel1').on('change', function(event){
-        if ($('#sel1').val().length == 1){
+        if ($('#sel1 > tbody > tr').length == 1){
             var ses = localStorage.getItem('usingSes');
             localStorage.setItem('previous3', this.value);
             $.post('/SDproc/process', { idnext: this.value },
@@ -62,8 +62,8 @@ $(function (){
         else{
             var ses = localStorage.getItem('usingSes');
             var ids = []
-            $('#sel1 > option:selected').each(function(){
-                ids.push(this.value);
+            $('#sel1 > tbody > tr').each(function(){
+                ids.push($(this).data('value'));
             })
             var jIds = JSON.stringify(ids);
             localStorage.setItem('previous3', jIds);
@@ -71,6 +71,7 @@ $(function (){
             $.post('/SDproc/process', { idList: jIds },
             function(data){
                 $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
+                temp = $(data).find('#maxes').html()
                 $('#maxes').html( $(data).find('#maxes').html());
                 $('#maxVal').html( $(data).find('#maxVal').html());
                 $('#comment').text('');
@@ -109,7 +110,9 @@ $(document).ready( function() {
 
 function asynchOnLoad(){
     var deferred = new $.Deferred(), completed = deferred.then(function(){
-        $('#sel1 option').prop('selected', true);
+        $('#sel1 > tbody > tr > td > input').each(function(){
+            updateSumCheck(this);
+        });
         /*$('#sel1').trigger('change');*/
         return 1;
     });
@@ -118,11 +121,15 @@ function asynchOnLoad(){
         var temp = this
         $.post("/SDproc/make_name", {id: this},
         function(data){
-        $('#sel1')
-            .append($('<option></option')
-            .text(data)
-            .attr('value', temp))
-
+            data = JSON.parse(data)
+            if (data[1] == true){
+                $('#sel1 > tbody:last-child')
+                .append('<tr style="cursor: pointer;" class="sel1Row" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" checked type="checkbox"></td></tr>')
+            }
+            else{
+                $('#sel1 > tbody:last-child')
+                .append('<tr style="cursor: pointer;" class="sel1Row" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" type="checkbox"></td></tr>')
+            }
         saved_files = removeID(temp.valueOf(), saved_files);
         if (saved_files.length == 0){
             deferred.resolve();
@@ -130,6 +137,19 @@ function asynchOnLoad(){
         })
     })
     return deferred.promise()
+}
+
+function updateSumCheck(checkbox){
+    if ($(checkbox).is(':checked')){
+        idnum = $(checkbox).parent().parent().data('value');
+        $(checkbox).parent().parent().addClass('highlight');
+        $.post('/SDproc/updateSumCheck', {id: idnum, check: "True"});
+    }
+    else{
+        idnum = $(checkbox).parent().parent().data('value');
+        $(checkbox).parent().parent().removeClass('highlight');
+        $.post('/SDproc/updateSumCheck', {id: idnum, check: "False"});
+    }
 }
 
 function removeID(id, idArray){
