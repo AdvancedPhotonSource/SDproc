@@ -44,14 +44,22 @@
 */
 $(function (){
     $('#sel1').on('change', function(event){
+        temp1 = $('#cordData').val()
+        var binWidth = $('#binWidth').val();
         if ($('#sel1 > tbody > tr').length == 1){
             var ses = localStorage.getItem('usingSes');
             localStorage.setItem('previous3', this.value);
-            $.post('/SDproc/process', { idnext: this.value },
+            $.post('/SDproc/process', { idnext: this.value, output: 1, binWidth: binWidth},
             function(data){
-                $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
-                $('#maxes').html( $(data).find('#maxes').html());
-                $('#maxVal').html( $(data).find('#maxVal').html());
+                $('#process_plot').html( $(data).find('#process_plot').html());
+                $('#cordData').val( $(data).find('#cordHolder').html());
+                $('#idnum').val(localStorage.getItem('previous3'));
+                $('#outType').val(4);
+                $('#DBSave').val(0);
+                $('#output-form').attr('action', '/SDproc/generateOutput')
+                $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
+                    $.post('/SDproc/setDAT', {DAT: data})
+                })
             })
 
             $.post('/SDproc/show_comment', { idnext: this.value, format: 1, ses: ses},
@@ -68,13 +76,17 @@ $(function (){
             var jIds = JSON.stringify(ids);
             localStorage.setItem('previous3', jIds);
 
-            $.post('/SDproc/process', { idList: jIds },
+            $.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth},
             function(data){
-                $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
-                temp = $(data).find('#maxes').html()
-                $('#maxes').html( $(data).find('#maxes').html());
-                $('#maxVal').html( $(data).find('#maxVal').html());
-                $('#comment').text('');
+                $('#process_plot').html( $(data).find('#process_plot').html());
+                $('#cordData').val( $(data).find('#cordHolder').html());
+                $('#idnum').val(localStorage.getItem('previous3'));
+                $('#outType').val(5);
+                $('#DBSave').val(0);
+                $('#output-form').attr('action', '/SDproc/generateOutput')
+                $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
+                    $.post('/SDproc/setDAT', {DAT: data})
+                })
             });
         }
     });
@@ -87,7 +99,7 @@ function startProc(){
     $('#outputBtn').prop('disabled', false);
     $('#continue').prop('disabled', false);
     $('#logbook').prop('disabled', false);
-    setcDAT();
+    //setcDAT();
 }
 
 
@@ -113,7 +125,7 @@ function asynchOnLoad(){
         $('#sel1 > tbody > tr > td > input').each(function(){
             updateSumCheck(this);
         });
-        /*$('#sel1').trigger('change');*/
+        sortTable($('#sel1'));
         return 1;
     });
     var saved_files = JSON.parse(localStorage.getItem('use_files'));
@@ -190,7 +202,7 @@ function saveSettings(){
                 var id = JSON.stringify(id);
                 $.post('/SDproc/process', { idList: id , binWidth: binWidth},
                     function(data){
-                        $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
+                        $('#process_plot').html( $(data).find('#process_plot').html());
                         $('#maxes').html( $(data).find('#maxes').html());
                         $('#maxVal').html( $(data).find('#maxVal').html());
                     })
@@ -199,7 +211,7 @@ function saveSettings(){
             else{
                 $.post('/SDproc/process', { idnext: id , binWidth: binWidth},
                     function(data){
-                        $('#process_plot_spot').html( $(data).find('#process_plot_spot').html());
+                        $('#process_plot').html( $(data).find('#process_plot').html());
                         $('#maxes').html( $(data).find('#maxes').html());
                         $('#maxVal').html( $(data).find('#maxVal').html());
                     })
@@ -234,9 +246,11 @@ $(function (){
 function setcDAT(){
     id = localStorage.getItem('previous3');
     var binWidth = $('#binWidth').val();
+    temp1 = $('#cordData').val()
     if ($('#sel1').val().length == 1){
         $.post('/SDproc/process', {idnext: id , output: 1, binWidth: binWidth}, function(data){
             $('#idnum').val(id);
+            temp = $('#cordData').val()
             $('#cordData').val(data);
             $('#outType').val(4);
             $('#DBSave').val(0);
@@ -259,6 +273,14 @@ function setcDAT(){
         })
     }
 }
+
+function sortTable(table){
+    tbody = table.find('tbody')
+    tbody.find('tr').sort(function(a, b){
+        return $('td:first', a).text().localeCompare($('td:first', b).text());
+    }).appendTo(tbody);
+}
+
 
 function advance(){
     window.location.href = ("modifyDAT");

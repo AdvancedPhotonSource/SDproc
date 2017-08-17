@@ -1689,6 +1689,7 @@ def process():
     endmax = 'No File Selected'
     senddata = []
     allFileNames = []
+    outputs = ''
     if idthis is not None or idlist is not None:
         if idlist is None:
             file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
@@ -1769,7 +1770,7 @@ def process():
                 outputData = []
                 outputData.append(ycords[0].tolist())
                 outputData.append(ycords[1])
-                return json.dumps(outputData)
+                outputs = json.dumps(outputData)
             code = simplePlot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
         if idthis is None:
             jidlist = json.loads(idlist)
@@ -1865,7 +1866,7 @@ def process():
                 outputs = []
                 outputs.append(sumX)
                 outputs.append(sumY)
-                return json.dumps(outputs)
+                outputs = json.dumps(outputs)
             endmax.append([format(sumxmax, '.6f'), format(sumymax, '.6f')])
             allFileNames.append('Summed Files')
     else:
@@ -1883,7 +1884,7 @@ def process():
         db.session.add(processEntry)
         db.session.commit()
     senddata.append({'max': endmax, 'filenames': allFileNames})
-    return render_template("data_process.html", user=user, ses=current_user.current_session, code=code, data=senddata)
+    return render_template("data_process.html", user=user, ses=current_user.current_session, code=code, data=senddata, outputs=outputs)
 
 
 @app.route('/peakFit', methods=['GET', 'POST'])

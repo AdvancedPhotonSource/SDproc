@@ -147,6 +147,7 @@ select[multiple].scan-list{
     position: relative;
     text-align: center;
     width: 40%;
+    left: -100px;
 }
 
 .pane{
