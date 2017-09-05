@@ -682,7 +682,7 @@ function headerFile(){
     previous = localStorage.getItem('previous2');
     $.post("/SDproc/headerFile", {id: previous}, function(data){
         $('#headerText').text(data);
-        $('#headerModal').model('show');
+        $('#headerModal').modal('show');
     });
 }
 

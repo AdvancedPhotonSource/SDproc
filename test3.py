@@ -2674,6 +2674,7 @@ def simplePlot(data, xmax, filename, linenames, legend, sized):
 
         mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, sized, nameID, css))
         mpld3.plugins.connect(fig, HideLegend(nameID))
+    plt.xlabel('meV')
     code = mpld3.fig_to_html(fig)
     plt.close('all')
     return code
@@ -3247,13 +3248,16 @@ class HideLegend(mpld3.plugins.PluginBase):
             sticky: false,
             onActivate: function(){
                 var legend = $('[name=' + tempName + ']');
+                var holder = $('[name=legendHolder]');
                 var pltStat = localStorage.getItem('pltStat');
                 if (pltStat == 0){
                     legend[0].style.visibility = "visible";
+                    holder[0].style.visibility = "visible";
                     localStorage.setItem('pltStat', 1);
                 }
                 else{
                     legend[0].style.visibility = "hidden";
+                    holder[0].style.visibility = "hidden";
                     localStorage.setItem('pltStat', 0);
                 }
             },
@@ -3321,10 +3325,30 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                labels.push(obj);
             }
             var ax = this.fig.axes[0];
-            var legend = this.fig.canvas.append("svg")
-                                    .attr("name", this.props.nameID)
-                                    .attr("id", "legendSVG")
-                                    .attr("overflow", "scroll")
+            if (this.props.sized == 1){
+                var foreign = this.fig.canvas.append('foreignObject')
+                                        .attr("name", "legendHolder")
+                                        .attr("x", 200)
+                                        .attr("y", 30)
+                                        .attr("width", 400)
+                                        .attr("height", 200)
+                                        .append("xhtml:div")
+                                        .style("max-height", "180px")
+                                        .style("overflow-y", "scroll")
+
+                var legend = foreign.append("svg")
+                                        .attr("name", this.props.nameID)
+                                        .attr("id", "legendSVG")
+                                        .attr("width", 387)
+                                        .attr("height", labels.length * 25)
+                                        .attr("x", 0)
+                                        .attr("y", 0)
+            }
+            else{
+                var legend = this.fig.canvas.append("svg")
+                                        .attr("name", this.props.nameID)
+                                        .attr("id", "legendSVG")
+            }
 
 
             legend.selectAll("rect")
@@ -3351,6 +3375,20 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
                             return ax.position[1] + i * 25
                             })
                         .text(function(d){return d.label})
+
+            if (this.props.sized == 1){
+                legend.selectAll("rect")
+                            .attr("x", ax.width+10+ax.position[0] - 400)
+                            .attr("y", function(d, i){
+                                return ax.position[1] + (i * 25) - 40
+                                })
+
+                legend.selectAll("text")
+                            .attr("x", ax.width+10+ax.position[0] - 350)
+                            .attr("y", function(d, i){
+                                return ax.position[1] + (i * 25) - 30
+                            })
+            }
 
             if (this.props.sized == 1){
                 var boxes = legend.selectAll("rect");
