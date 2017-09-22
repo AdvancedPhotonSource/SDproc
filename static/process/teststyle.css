@@ -267,10 +267,10 @@ select[multiple].scan-list{
 }
 
 .procButton{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
+    float: right;
+    margin-top: 20px;
+    right: 100px;
 }
 
 footer {

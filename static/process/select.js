@@ -42,59 +42,56 @@
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 */
-$(function (){
-    $('#sel1').on('change', function(event){
-        temp1 = $('#cordData').val()
-        var binWidth = $('#binWidth').val();
-        if ($('#sel1 > tbody > tr').length == 1){
-            var ses = localStorage.getItem('usingSes');
-            localStorage.setItem('previous3', this.value);
-            $.post('/SDproc/process', { idnext: this.value, output: 1, binWidth: binWidth},
-            function(data){
-                $('#process_plot').html( $(data).find('#process_plot').html());
-                $('#cordData').val( $(data).find('#cordHolder').html());
-                $('#idnum').val(localStorage.getItem('previous3'));
-                $('#outType').val(4);
-                $('#DBSave').val(0);
-                $('#output-form').attr('action', '/SDproc/generateOutput')
-                $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
-                    $.post('/SDproc/setDAT', {DAT: data})
-                })
+function processor(){
+    temp1 = $('#cordData').val()
+    var binWidth = $('#binWidth').val();
+    if ($('#sel1 > tbody > tr').length == 1){
+        var ses = localStorage.getItem('usingSes');
+        localStorage.setItem('previous3', this.value);
+        $.post('/SDproc/process', { idnext: this.value, output: 1, binWidth: binWidth},
+        function(data){
+            $('#process_plot').html( $(data).find('#process_plot').html());
+            $('#cordData').val( $(data).find('#cordHolder').html());
+            $('#idnum').val(localStorage.getItem('previous3'));
+            $('#outType').val(4);
+            $('#DBSave').val(0);
+            $('#output-form').attr('action', '/SDproc/generateOutput')
+            $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
+                $.post('/SDproc/setDAT', {DAT: data})
             })
+        })
 
-            $.post('/SDproc/show_comment', { idnext: this.value, format: 1, ses: ses},
-            function(data){
-                $('#comment').text(data);
-            })
-        }
-        else{
-            var ses = localStorage.getItem('usingSes');
-            var ids = []
-            $('#sel1 > tbody > tr').each(function(){
-                ids.push($(this).data('value'));
-            })
-            var jIds = JSON.stringify(ids);
-            localStorage.setItem('previous3', jIds);
+        $.post('/SDproc/show_comment', { idnext: this.value, format: 1, ses: ses},
+        function(data){
+            $('#comment').text(data);
+        })
+    }
+    else{
+        var ses = localStorage.getItem('usingSes');
+        var ids = []
+        $('#sel1 > tbody > tr.highlight').each(function(){
+            ids.push($(this).data('value'));
+        })
+        var jIds = JSON.stringify(ids);
+        localStorage.setItem('previous3', jIds);
 
-            $.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth},
-            function(data){
-                $('#process_plot').html( $(data).find('#process_plot').html());
-                $('#cordData').val( $(data).find('#cordHolder').html());
-                $('#idnum').val(localStorage.getItem('previous3'));
-                $('#outType').val(5);
-                $('#DBSave').val(0);
-                $('#output-form').attr('action', '/SDproc/generateOutput')
-                $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
-                    $.post('/SDproc/setDAT', {DAT: data})
-                })
-            });
-        }
-    });
-})
+        $.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth},
+        function(data){
+            $('#process_plot').html( $(data).find('#process_plot').html());
+            $('#cordData').val( $(data).find('#cordHolder').html());
+            $('#idnum').val(localStorage.getItem('previous3'));
+            $('#outType').val(5);
+            $('#DBSave').val(0);
+            $('#output-form').attr('action', '/SDproc/generateOutput')
+            $.post('/SDproc/generateOutput', $('#output-form').serialize(), function(data){
+                $.post('/SDproc/setDAT', {DAT: data})
+            })
+        });
+    }
+}
 
 function startProc(){
-    $('#sel1').trigger('change');
-    $('#procButton').hide();
+    processor();
     $('#settingsBtn').show();
     $('#outputBtn').prop('disabled', false);
     $('#continue').prop('disabled', false);
@@ -105,7 +102,6 @@ function startProc(){
 
 $(document).ready( function() {
     asynchOnLoad()
-    $('#procButton').show();
     $('#settingsBtn').hide();
     $('#outputBtn').prop('disabled', true);
     $('#continue').prop('disabled', true);
@@ -123,31 +119,31 @@ $(document).ready( function() {
 function asynchOnLoad(){
     var deferred = new $.Deferred(), completed = deferred.then(function(){
         $('#sel1 > tbody > tr > td > input').each(function(){
-            updateSumCheck(this);
+            if ($(this).is(':checked')){
+                $(this).parent().parent().addClass('highlight');
+            }
         });
         sortTable($('#sel1'));
         return 1;
     });
-    var saved_files = JSON.parse(localStorage.getItem('use_files'));
-    $(saved_files).each(function(){
-        var temp = this
-        $.post("/SDproc/make_name", {id: this},
+    if (localStorage.getItem('use_files')){
+        $.post("/SDproc/make_name", {ids: localStorage.getItem('use_files')},
         function(data){
             data = JSON.parse(data)
-            if (data[1] == true){
-                $('#sel1 > tbody:last-child')
-                .append('<tr style="cursor: pointer;" class="sel1Row" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" checked type="checkbox"></td></tr>')
+            for(i = 0; i < data.length; i++){
+                if (data[i][1] == true){
+                    $('#sel1 > tbody:last-child')
+                    .append('<tr style="cursor: pointer;" data-value="'+data[i][2]+'" class="file"><td class="fileNameCell">' + data[i][0] + '<td><input onclick="updateSumCheck(this)" checked type="checkbox"></td></tr>')
+                }
+                else{
+                    $('#sel1 > tbody:last-child')
+                    .append('<tr style="cursor: pointer;" data-value="'+data[i][2]+'" class="file"><td class="fileNameCell">' + data[i][0] + '<td><input onclick="updateSumCheck(this)" type="checkbox"></td></tr>')
+                }
             }
-            else{
-                $('#sel1 > tbody:last-child')
-                .append('<tr style="cursor: pointer;" class="sel1Row" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" type="checkbox"></td></tr>')
-            }
-        saved_files = removeID(temp.valueOf(), saved_files);
-        if (saved_files.length == 0){
+            $('#pane').show();
             deferred.resolve();
-        }
         })
-    })
+    }
     return deferred.promise()
 }
 
@@ -226,9 +222,8 @@ function saveSettings(){
     }
     else
     {
-        $('#sel1').trigger('change');
+        processor();
     }
-    $('#procButton').hide();
 }
 
 
@@ -306,7 +301,7 @@ function outputFile(){
                             id = localStorage.getItem('previous3');
                             $.post('/SDproc/process', {idnext: id , output: 1, binWidth: binWidth}, function(data){
                                 $('#idnum').val(id);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(4);
                                 $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
@@ -326,13 +321,13 @@ function outputFile(){
                         }
                         else{
                             var ids = []
-                            $('#sel1 > option:selected').each(function(){
-                                ids.push(this.value);
-                            });
+                            $('#sel1 > tbody > tr.highlight').each(function(){
+                                ids.push($(this).data('value'));
+                            })
                             var jIds = JSON.stringify(ids);
                             $.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth}, function(data){
                                 $('#idnum').val(jIds);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(5);
                                 $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
@@ -356,7 +351,7 @@ function outputFile(){
                             id = localStorage.getItem('previous3');
                             $.post('/SDproc/process', {idnext: id , output: 1}, function(data){
                                 $('#idnum').val(id);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(4);
                                 $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
@@ -376,13 +371,13 @@ function outputFile(){
                         }
                         else{
                             var ids = []
-                            $('#sel1 > option:selected').each(function(){
-                                ids.push(this.value);
-                            });
+                            $('#sel1 > tbody > tr.highlight').each(function(){
+                                ids.push($(this).data('value'));
+                            })
                             var jIds = JSON.stringify(ids);
                             $.post('/SDproc/process', {idList: jIds, output: 1}, function(data){
                                 $('#idnum').val(jIds);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(5);
                                 $('#DBSave').val(1);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
@@ -411,7 +406,7 @@ function outputFile(){
                             id = localStorage.getItem('previous3');
                             $.post('/SDproc/process', {idnext: id , output: 1, binWidth: binWidth}, function(data){
                                 $('#idnum').val(id);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(2);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())
@@ -426,13 +421,13 @@ function outputFile(){
                         }
                         else{
                             var ids = []
-                            $('#sel1 > option:selected').each(function(){
-                                ids.push(this.value);
-                            });
+                            $('#sel1 > tbody > tr.highlight').each(function(){
+                                ids.push($(this).data('value'));
+                            })
                             var jIds = JSON.stringify(ids);
                             $.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth}, function(data){
                                 $('#idnum').val(jIds);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(3);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())
@@ -451,7 +446,7 @@ function outputFile(){
                             id = localStorage.getItem('previous3');
                             $.post('/SDproc/process', {idnext: id , output: 1}, function(data){
                                 $('#idnum').val(id);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(2);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())
@@ -466,13 +461,13 @@ function outputFile(){
                         }
                         else{
                             var ids = []
-                            $('#sel1 > option:selected').each(function(){
-                                ids.push(this.value);
-                            });
+                            $('#sel1 > tbody > tr.highlight').each(function(){
+                                ids.push($(this).data('value'));
+                            })
                             var jIds = JSON.stringify(ids);
                             $.post('/SDproc/process', {idList: jIds, output: 1}, function(data){
                                 $('#idnum').val(jIds);
-                                $('#cordData').val(data);
+                                $('#cordData').val($(data).find('#cordHolder').html());
                                 $('#outType').val(3);
                                 $('#output-form').attr('action', '/SDproc/generateOutput')
                                 $('#datFName').val($('#DATname').val())

@@ -168,31 +168,28 @@ $(document).keypress( function(event) {
 
 function asynchOnLoad(){
     var deferred = new $.Deferred(), completed = deferred.then(function(){
-        //$('#sel1 tr.file:first').addClass('highlight');
         sortTable($('#sel1'));
         $('#sel1 tr.file:first').trigger('click');
         return 1;
     });
-    var saved_files = JSON.parse(localStorage.getItem('use_files'));
-    $(saved_files).each(function(){
-        var temp = this
-        $.post("/SDproc/make_name", {id: this}, function(data){
+    if (localStorage.getItem('use_files')){
+        $.post("/SDproc/make_name", {ids: localStorage.getItem('use_files')},
+        function(data){
             data = JSON.parse(data)
-            if (data[1] == true){
-                $('#sel1 > tbody:last-child')
-                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" checked type="checkbox"></td></tr>')
+            for(i = 0; i < data.length; i++){
+                if (data[i][1] == true){
+                    $('#sel1 > tbody:last-child')
+                    .append('<tr style="cursor: pointer;" data-value="'+data[i][2]+'" class="file"><td class="fileNameCell">' + data[i][0] + '<td><input onclick="updateSumCheck(this)" checked type="checkbox"></td></tr>')
+                }
+                else{
+                    $('#sel1 > tbody:last-child')
+                    .append('<tr style="cursor: pointer;" data-value="'+data[i][2]+'" class="file"><td class="fileNameCell">' + data[i][0] + '<td><input onclick="updateSumCheck(this)" type="checkbox"></td></tr>')
+                }
             }
-            else{
-                $('#sel1 > tbody:last-child')
-                .append('<tr style="cursor: pointer;" data-value="'+temp+'" class="file"><td class="fileNameCell">' + data[0] + '<td><input onclick="updateSumCheck(this)" type="checkbox"></td></tr>')
-            }
-            $('#pane').show()
-            saved_files = removeID(temp.valueOf(), saved_files);
-            if (saved_files.length == 0){
-                deferred.resolve();
-            }
+            $('#pane').show();
+            deferred.resolve();
         })
-    })
+    }
     return deferred.promise()
 }
 
@@ -481,7 +478,7 @@ function fitPeak(sendOut){
     if ($('#fitType').text() == 'Fit around max'){
         var range = $('#pWInput').val()
         if ($.isNumeric(range)){
-            $.post('/SDproc/peakFit', {idnum: previous, fitType: 0, inputRange: range, sendOut: sendOut, unit: unit,
+            $.post('/SDproc/peakFit', {idnum: previous, fitType: 'AtMax', inputRange: range, sendOut: sendOut, unit: unit,
             signal: $('#peakSignalType').text(), energy: $('#peakEnergyType').text()}, function(data){
                 if (sendOut == 1){
                     localStorage.setItem('peakData', data);
@@ -502,7 +499,7 @@ function fitPeak(sendOut){
         var range = $('#pWInput').val()
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
-                $.post('/SDproc/peakFit', {idnum: previous, fitType: 1, inputCord: cord, inputRange: range,
+                $.post('/SDproc/peakFit', {idnum: previous, fitType: 'AtPoint', inputCord: cord, inputRange: range,
                 sendOut: sendOut, unit: unit, signalType: $('#peakSignalType').text(),
                 energyType: $('#peakEnergyType').text()}, function(data){
                 if (sendOut == 1){
@@ -531,7 +528,7 @@ function fitPeak(sendOut){
         if ($.isNumeric(cord)){
             if ($.isNumeric(range)){
                 if ($.isNumeric(localRange)){
-                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 2, inputCord: cord, inputRange: range,
+                    $.post('/SDproc/peakFit', {idnum: previous, fitType: 'AroundPoint', inputCord: cord, inputRange: range,
                     localRange: localRange, sendOut: sendOut, unit: unit, signalType: $('#peakSignalType').text(),
                     energyType: $('#peakEnergyType').text()}, function(data){
                         if (sendOut == 1){
@@ -619,6 +616,11 @@ function setAE(event){
         $('#againstE').append("<span class='caret'></span>");
         $('#agaE').val('Energy xtal w/T');
     }
+    else if (event.target.text == 'Energy Fitted'){
+        $('#againstE').text('Energy Fitted');
+        $('#againstE').append("<span class='caret'></span>");
+        $('#agaE').val('Energy Fitted');
+    }
     else {
         $('#againstE').text('Point #');
         $('#againstE').append("<span class='caret'></span>");
@@ -681,7 +683,8 @@ function setPlotAgainst(){
 function headerFile(){
     previous = localStorage.getItem('previous2');
     $.post("/SDproc/headerFile", {id: previous}, function(data){
-        $('#headerText').text(data);
+        var header = $('<div>').text(JSON.parse(data)).text();
+        $('#headerText').html(header.replace(/\n/g, '<br />'));
         $('#headerModal').modal('show');
     });
 }

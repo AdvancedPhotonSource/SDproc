@@ -119,6 +119,14 @@ select[multiple].scan-list{
     width:auto;
 }
 
+.ssHeaderBody{
+    position: relative;
+    height: 300px;
+    width: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
 .ssName{
     position: relative;
     bottom: 20px !important;

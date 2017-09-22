@@ -820,6 +820,11 @@ def dataFormat():
                                                       unicode_to_int(basedColumns[5].data),
                                                       unicode_to_int(basedColumns[6].data), format_instance.hrm),
                                      1000000)
+            elif againstE == 'Energy Fitted':
+                code, ycords, form = peakFit(idthis, format_instance.fit_energy, format_instance.fit_signal, unit,
+                                             format_instance.fit_type, format_instance.fit_range,
+                                             format_instance.fit_pos, format_instance.fit_localRange)
+                etype = ycords[0]
             else:
                 etype = 0
             labels.append(normLabels)
@@ -852,6 +857,9 @@ def dataFormat():
             format.fit_type = 'Unfit'
             format.fit_pos = 0
             format.fit_range = 3
+            format.fit_energy = 'Energy'
+            format.fit_signal = 'Signal'
+            format.fit_localRange = None
             format.file_id = idthis
             format.checked = True
             hrmInstance = db.session.query(HRM).filter_by(name='Fe-inline-1meV').first()
@@ -1454,12 +1462,23 @@ def make_name():
     '''
     if request.method == 'POST':
         idthis = request.form.get('id', type=int)
-        instance = db.session.query(dataFile).filter_by(id=idthis).first()
+        idlist = json.loads(request.form.get('ids', type=str))
+        if idthis:
+            instance = db.session.query(dataFile).filter_by(id=idthis).first()
 
-        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                    currentMeta.file_id == instance.id,
-                                                                    currentMeta.session == current_user.current_session)).first()
-        return json.dumps([instance.name, format_instance.checked])
+            format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                        currentMeta.file_id == instance.id,
+                                                                        currentMeta.session == current_user.current_session)).first()
+            return json.dumps([instance.name, format_instance.checked])
+        else:
+            names = []
+            for id in idlist:
+                instance = db.session.query(dataFile).filter_by(id=id).first()
+                format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                            currentMeta.file_id == instance.id,
+                                                                            currentMeta.session == current_user.current_session)).first()
+                names.append([instance.name, format_instance.checked, id])
+            return json.dumps(names)
     return 'Made'
 
 
@@ -1897,7 +1916,7 @@ def peak_at_max():
     :return:
     '''
     idthis = request.form.get('idnum', type=int)
-    fitType = request.form.get('fitType', type=int)
+    fitType = request.form.get('fitType', type=str)
     inputCord = request.form.get('inputCord', type=float)
     fitRange = request.form.get('inputRange', type=float)
     localRange = request.form.get('localRange', type=float)
@@ -1905,117 +1924,7 @@ def peak_at_max():
     signalType = ' '.join(request.form.get('signal', type=str).split())
     energyType = ' '.join(request.form.get('energy', type=str).split())
     unit = request.form.get('unit', type=str)
-    file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-    format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                currentMeta.file_id == file_instance.id,
-                                                                currentMeta.session == current_user.current_session)).first()
-    if str(file_instance.type) == 'mda':
-        data, name, unusedpath = readMda(file_instance.path)
-    else:
-        data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
-    form = populate_from_instance(format_instance)
-    columns, bools = splitForm(form)
-    basedColumns = zeroBaseColumns(columns)
-    used = []
-    additional = []
-    legendNames = []
-    if energyType == 'Energy xtal':
-        energy = numpy.divide(energy_xtal(data, unicode_to_int(basedColumns[3].data),
-                                          unicode_to_int(basedColumns[4].data), format_instance.hrm), 1000000)
-        additional.append(energy)
-        legendNames.append(basedColumns[1].id)
-    elif energyType == 'Energy xtal w/T':
-        energy = numpy.divide(energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
-                                               unicode_to_int(basedColumns[4].data),
-                                               unicode_to_int(basedColumns[5].data),
-                                               unicode_to_int(basedColumns[6].data), format_instance.hrm), 1000000)
-        additional.append(energy)
-        legendNames.append(basedColumns[2].id)
-    elif energyType == 'Energy Fitted':
-        cat = "DO THIS"
-    else:
-        used.append(unicode_to_int(basedColumns[0].data))
-        legendNames.append(basedColumns[0].id)
-    if signalType == 'Signal Normalized':
-        signal = signal_normalized(data, unicode_to_int(basedColumns[8].data),
-                                   unicode_to_int(basedColumns[10].data))
-        additional.append(signal)
-        legendNames.append(basedColumns[9].id)
-    else:
-        used.append(unicode_to_int(basedColumns[8].data))
-        legendNames.append(basedColumns[8].id)
-    max, xmax, ycords = convert_Numpy(used, data, additional)
-    npXcords = numpy.array(ycords[0])
-    if unit == 'keV':
-        npYcords = numpy.array(ycords[1])
-    else:
-        npXcords = numpy.multiply(npXcords, 1000000)
-        npYcords = numpy.array(ycords[1])
-    if fitType == 0:
-        leftBound = (find_nearest(npXcords, npXcords[xmax[1]] - (fitRange / 2)))
-        rightBound = (find_nearest(npXcords, npXcords[xmax[1]] + (fitRange / 2)))
-        targetRange = [x for x in npXcords if x >= leftBound]
-        targetRange = [x for x in targetRange if x <= rightBound]
-        npData = []
-        for xcord in targetRange:
-            oneCord = numpy.where(npXcords == xcord)[0][0]
-            npData.append(ycords[1][oneCord])
-        targetX = numpy.array(targetRange)
-        targetY = numpy.array(npData)
-        center = centroid(targetX, targetY)
-        ycords[0] = npXcords
-        moveXcords(ycords, center)
-        format_instance.fit_type = 'AtMax'
-        format_instance.fit_pos = center
-        format_instance.fit_range = fitRange
-    elif fitType == 1:
-        leftBound = (find_nearest(npXcords, inputCord + npXcords[0] - (fitRange / 2)))
-        rightBound = (find_nearest(npXcords, inputCord + npXcords[0] + (fitRange / 2)))
-        targetRange = [x for x in npXcords if x >= leftBound]
-        targetRange = [x for x in targetRange if x <= rightBound]
-        npData = []
-        for xcord in targetRange:
-            oneCord = numpy.where(npXcords == xcord)[0][0]
-            npData.append(ycords[1][oneCord])
-        targetX = numpy.array(targetRange)
-        targetY = numpy.array(npData)
-        center = centroid(targetX, targetY)
-        ycords[0] = npXcords
-        moveXcords(ycords, center)
-        format_instance.fit_type = 'AtPoint'
-        format_instance.fit_pos = center
-        format_instance.fit_range = fitRange
-    else:
-        leftBound = (find_nearest(npXcords, inputCord + npXcords[0] - (localRange / 2)))
-        rightBound = (find_nearest(npXcords, inputCord + npXcords[0] + (localRange / 2)))
-        targetRange = [x for x in npXcords if x >= leftBound]
-        targetRange = [x for x in targetRange if x <= rightBound]
-        npData = []
-        for xcord in targetRange:
-            oneCord = numpy.where(npXcords == xcord)[0][0]
-            npData.append(ycords[1][oneCord])
-        npData = numpy.array(npData)
-        max = numpy.argmax(npData)
-        maxIndex = oneCord - len(targetRange) + max + 1
-
-        leftBound = (find_nearest(npXcords, npXcords[maxIndex] - (fitRange / 2)))
-        rightBound = (find_nearest(npXcords, npXcords[maxIndex] + (fitRange / 2)))
-        targetRange = [x for x in npXcords if x >= leftBound]
-        targetRange = [x for x in targetRange if x <= rightBound]
-        npData = []
-        for xcord in targetRange:
-            oneCord = numpy.where(npXcords == xcord)[0][0]
-            npData.append(ycords[1][oneCord])
-        targetX = numpy.array(targetRange)
-        targetY = numpy.array(npData)
-        center = centroid(targetX, targetY)
-        ycords[0] = npXcords
-        moveXcords(ycords, center)
-        format_instance.fit_type = 'AtPoint'
-        format_instance.fit_pos = center
-        format_instance.fit_range = fitRange
-    db.session.commit()
-    code = simplePlot(ycords, xmax, file_instance.name, legendNames, 0, 0)
+    code, ycords, form = peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord, localRange)
     if sendOut == 1:
         ycords[0] = ycords[0].tolist()
         return json.dumps(ycords)
@@ -2341,7 +2250,7 @@ def headerFile():
     idthis = request.form.get('id', type=int)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     header = getHeader(file_instance.name, file_instance.path)
-    return header
+    return json.dumps(header)
 
 
 @app.route('/linkGlobus', methods=['GET', 'POST'])
@@ -2371,6 +2280,121 @@ def linkGlobus():
     for item in r:
         print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
     return 'Linked'
+
+
+def peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord, localRange):
+    if fitType == 'Unfit':
+        fitType = 'AtMax'
+    file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+    format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                currentMeta.file_id == file_instance.id,
+                                                                currentMeta.session == current_user.current_session)).first()
+    if str(file_instance.type) == 'mda':
+        data, name, unusedpath = readMda(file_instance.path)
+    else:
+        data, name, unusedpath = readAscii(file_instance.path, file_instance.comChar)
+    form = populate_from_instance(format_instance)
+    columns, bools = splitForm(form)
+    basedColumns = zeroBaseColumns(columns)
+    used = []
+    additional = []
+    legendNames = []
+    if energyType == 'Energy xtal':
+        energy = numpy.divide(energy_xtal(data, unicode_to_int(basedColumns[3].data),
+                                          unicode_to_int(basedColumns[4].data), format_instance.hrm), 1000000)
+        additional.append(energy)
+        legendNames.append(basedColumns[1].id)
+    elif energyType == 'Energy xtal w/T':
+        energy = numpy.divide(energy_xtal_temp(data, unicode_to_int(basedColumns[3].data),
+                                               unicode_to_int(basedColumns[4].data),
+                                               unicode_to_int(basedColumns[5].data),
+                                               unicode_to_int(basedColumns[6].data), format_instance.hrm), 1000000)
+        additional.append(energy)
+        legendNames.append(basedColumns[2].id)
+    else:
+        used.append(unicode_to_int(basedColumns[0].data))
+        legendNames.append(basedColumns[0].id)
+    if signalType == 'Signal Normalized':
+        signal = signal_normalized(data, unicode_to_int(basedColumns[8].data),
+                                   unicode_to_int(basedColumns[10].data))
+        additional.append(signal)
+        legendNames.append(basedColumns[9].id)
+    else:
+        used.append(unicode_to_int(basedColumns[8].data))
+        legendNames.append(basedColumns[8].id)
+    max, xmax, ycords = convert_Numpy(used, data, additional)
+    npXcords = numpy.array(ycords[0])
+    if unit == 'keV':
+        npYcords = numpy.array(ycords[1])
+    else:
+        npXcords = numpy.multiply(npXcords, 1000000)
+        npYcords = numpy.array(ycords[1])
+    if fitType == 'AtMax':
+        leftBound = (find_nearest(npXcords, npXcords[xmax[1]] - (fitRange / 2)))
+        rightBound = (find_nearest(npXcords, npXcords[xmax[1]] + (fitRange / 2)))
+        targetRange = [x for x in npXcords if x >= leftBound]
+        targetRange = [x for x in targetRange if x <= rightBound]
+        npData = []
+        for xcord in targetRange:
+            oneCord = numpy.where(npXcords == xcord)[0][0]
+            npData.append(ycords[1][oneCord])
+        targetX = numpy.array(targetRange)
+        targetY = numpy.array(npData)
+        center = centroid(targetX, targetY)
+        ycords[0] = npXcords
+        moveXcords(ycords, center)
+        format_instance.fit_type = 'AtMax'
+        format_instance.fit_pos = center
+        format_instance.fit_range = fitRange
+    elif fitType == 'AtPoint':
+        leftBound = (find_nearest(npXcords, inputCord + npXcords[0] - (fitRange / 2)))
+        rightBound = (find_nearest(npXcords, inputCord + npXcords[0] + (fitRange / 2)))
+        targetRange = [x for x in npXcords if x >= leftBound]
+        targetRange = [x for x in targetRange if x <= rightBound]
+        npData = []
+        for xcord in targetRange:
+            oneCord = numpy.where(npXcords == xcord)[0][0]
+            npData.append(ycords[1][oneCord])
+        targetX = numpy.array(targetRange)
+        targetY = numpy.array(npData)
+        center = centroid(targetX, targetY)
+        ycords[0] = npXcords
+        moveXcords(ycords, center)
+        format_instance.fit_type = 'AtPoint'
+        format_instance.fit_pos = center
+        format_instance.fit_range = fitRange
+    else:
+        leftBound = (find_nearest(npXcords, inputCord + npXcords[0] - (localRange / 2)))
+        rightBound = (find_nearest(npXcords, inputCord + npXcords[0] + (localRange / 2)))
+        targetRange = [x for x in npXcords if x >= leftBound]
+        targetRange = [x for x in targetRange if x <= rightBound]
+        npData = []
+        for xcord in targetRange:
+            oneCord = numpy.where(npXcords == xcord)[0][0]
+            npData.append(ycords[1][oneCord])
+        npData = numpy.array(npData)
+        max = numpy.argmax(npData)
+        maxIndex = oneCord - len(targetRange) + max + 1
+
+        leftBound = (find_nearest(npXcords, npXcords[maxIndex] - (fitRange / 2)))
+        rightBound = (find_nearest(npXcords, npXcords[maxIndex] + (fitRange / 2)))
+        targetRange = [x for x in npXcords if x >= leftBound]
+        targetRange = [x for x in targetRange if x <= rightBound]
+        npData = []
+        for xcord in targetRange:
+            oneCord = numpy.where(npXcords == xcord)[0][0]
+            npData.append(ycords[1][oneCord])
+        targetX = numpy.array(targetRange)
+        targetY = numpy.array(npData)
+        center = centroid(targetX, targetY)
+        ycords[0] = npXcords
+        moveXcords(ycords, center)
+        format_instance.fit_type = 'AtPoint'
+        format_instance.fit_pos = center
+        format_instance.fit_range = fitRange
+    db.session.commit()
+    code = simplePlot(ycords, xmax, file_instance.name, legendNames, 0, 0)
+    return code, ycords, form
 
 
 def getHeader(fileName, filePath):
@@ -2986,6 +3010,9 @@ def plotData(data, used, againstE, additional, lineNames, eType, unit):
                 xs = numpy.multiply(xs, 1000000)
                 xs = numpy.subtract(xs, xs[0])
                 plt.xlabel('meV')
+        elif againstE == 'Energy Fitted':
+            xs = [float(x) for x in eType]
+            plt.xlabel('meV')
         line = ax.plot(xs, ys, alpha=0, label=lineNames[0][count])
         lines.append(line[0])
         labels.append(lineNames[0][count])
@@ -3005,6 +3032,9 @@ def plotData(data, used, againstE, additional, lineNames, eType, unit):
                     xs = numpy.multiply(xs, 1000000)
                     xs = numpy.subtract(xs, xs[0])
                     plt.xlabel('meV')
+            elif againstE == 'Energy Fitted':
+                xs = [float(x) for x in eType]
+                plt.xlabel('meV')
             line = ax.plot(xs, ys, alpha=0, label=lineNames[1][i])
             lines.append(line[0])
             labels.append(lineNames[1][i])

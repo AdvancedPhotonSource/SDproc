@@ -179,7 +179,10 @@ class currentMeta(db.Model):
 
     fit_type = db.Column(db.String())
     fit_pos = db.Column(db.Float())
-    fit_range = db.Column(db.Float)
+    fit_range = db.Column(db.Float())
+    fit_localRange = db.Column(db.Float())
+    fit_energy = db.Column(db.String())
+    fit_signal = db.Column(db.String())
 
     hrm = db.Column(db.String())
 
@@ -234,7 +237,10 @@ class sessionMeta(db.Model):
 
     fit_type = db.Column(db.String())
     fit_pos = db.Column(db.Float())
-    fit_range = db.Column(db.Float)
+    fit_range = db.Column(db.Float())
+    fit_localRange = db.Column(db.Float())
+    fit_energy = db.Column(db.String())
+    fit_signal = db.Column(db.String())
 
     against_E = db.Column(db.String())
 
