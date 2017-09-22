@@ -74,7 +74,7 @@ import mda
 import mdaAscii
 import copy
 from scipy import stats
-import globus_sdk
+#import globus_sdk
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -2252,7 +2252,7 @@ def headerFile():
     header = getHeader(file_instance.name, file_instance.path)
     return json.dumps(header)
 
-
+'''
 @app.route('/linkGlobus', methods=['GET', 'POST'])
 @login_required
 def linkGlobus():
@@ -2280,6 +2280,7 @@ def linkGlobus():
     for item in r:
         print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
     return 'Linked'
+'''
 
 
 def peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord, localRange):
