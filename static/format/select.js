@@ -344,31 +344,33 @@ function deleteCmeta(){
     else{
         selected = localStorage.getItem('previous2')
         $.post('/SDproc/clearPart_cmeta', {id: selected}, function(){
-            $('#sel1 > tr').each(function(){
-                if (!this.hasClass('highlight')){
-                    return;
+            $('#sel1 > tbody > tr').each(function(){
+                if (!$(this).hasClass('highlight')){
+                    return true;
                 }
                 localStorage.removeItem('previous2');
                 var sel = parseInt(selected);
                 if (this.previousElementSibling !== null){
-                    $(this.previousSibling).addClass('highlight');
+                    var newSelected = this.previousSibling;
+                    $(newSelected).addClass('highlight');
                     $(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
                     var result = $.grep(saved_files, function(n,i){
                         return (n !== String(sel));
                     })
                     localStorage.setItem('use_files', JSON.stringify(result));
-                    $(this).trigger('click');
+                    $(newSelected).trigger('click');
                 }
                 else if (this.nextElementSibling !== null){
-                    $(this.nextSibling).addClass('highlight');
+                    var newSelected = this.nextSibling;
+                    $(newSelected).addClass('highlight');
                     $(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
                     var result = $.grep(saved_files, function(n,i){
                         return (n !== String(sel));
                     })
                     localStorage.setItem('use_files', JSON.stringify(result));
-                    $(this).trigger("click");
+                    $(newSelected).trigger("click");
                 }
                 else{
                     $('#comment').val('');

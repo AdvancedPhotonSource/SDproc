@@ -74,7 +74,11 @@ import mda
 import mdaAscii
 import copy
 from scipy import stats
+import time
 #import globus_sdk
+from globusonline.transfer.api_client.goauth import get_access_token
+from globusonline.transfer.api_client import Transfer
+from globusonline.transfer.api_client import TransferAPIClient
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -1474,6 +1478,7 @@ def make_name():
             names = []
             for id in idlist:
                 instance = db.session.query(dataFile).filter_by(id=id).first()
+                temp = db.session.query(currentMeta).all()
                 format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
                                                                             currentMeta.file_id == instance.id,
                                                                             currentMeta.session == current_user.current_session)).first()
@@ -1600,6 +1605,7 @@ def clearPart_cmeta():
                                                          currentMeta.session == current_user.current_session)).first()
     db.session.delete(deleting)
     db.session.commit()
+    temp = db.session.query(currentMeta).all()
     return 'Cleared'
 
 
@@ -2252,10 +2258,11 @@ def headerFile():
     header = getHeader(file_instance.name, file_instance.path)
     return json.dumps(header)
 
-'''
+
 @app.route('/linkGlobus', methods=['GET', 'POST'])
 @login_required
 def linkGlobus():
+    '''
     client = globus_sdk.NativeAppAuthClient(CLIENT_ID)
     #client.oauth2_start_flow(refresh_tokens=True)
     client.oauth2_start_flow()
@@ -2280,7 +2287,30 @@ def linkGlobus():
     for item in r:
         print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
     return 'Linked'
-'''
+    '''
+    api = getApi('caschmitz', 'password')
+    print api.endpoint_ls('petrel#sdm')
+    code, reason, result = api.endpoint_autoactivate('petrel#sdm', if_expires_in=600)
+    print code, reason, result
+    code, message, data = api.transfer_submission_id()
+    print code, message, data
+    submission_id = data['value']
+    t = Transfer(submission_id, "petrel#sdm", "petrel#sdm")
+    t.add_item("/test/testfile.txt", "/test/col/dir1/testfile01")
+    code, reason, data = api.transfer(t)
+    task_id = data['task_id']
+    print "TASK_ID: ", task_id
+    for i in range(0, 10):
+        code, reason, data = api.task(task_id, fields="status")
+        status = data["status"]
+        print "STATUS: ", status
+        time.sleep(10)
+    return 'Linked'
+
+def getApi(username, password):
+    goAuthTuple = get_access_token(username=username, password=password)
+    api = TransferAPIClient(goAuthTuple.usernmae, goauth=goAuthTuple.token)
+    return api
 
 
 def peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord, localRange):
