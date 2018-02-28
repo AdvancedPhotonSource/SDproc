@@ -50,6 +50,13 @@ For debugging server use:
     except Exception,e:
         print(str(e))
 '''
+
+#TODO: Ask Nicholas for information on xtrepid UUID and giving permissions to Michael
+#TODO: Subdirectories to file structure and make them searchable within the program
+#TODO: Split comments from fileComments and sessionComments on Scans Tab
+#TODO: Have fileComments searchable on manageFiles and sessionComments searchable on selectSession
+#TODO: Make script to restart server
+
 from flask import Flask, render_template, request, session, redirect, url_for, escape, redirect, make_response, flash, \
     send_from_directory, request
 import matplotlib
@@ -75,7 +82,7 @@ import mdaAscii
 import copy
 from scipy import stats
 import time
-#import globus_sdk
+import globus_sdk
 from globusonline.transfer.api_client.goauth import get_access_token
 from globusonline.transfer.api_client import Transfer
 from globusonline.transfer.api_client import TransferAPIClient
@@ -84,6 +91,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 ALLOWED_EXTENSIONS = {'txt', 'mda', 'dat'}
 CLIENT_ID = '0c5f2ef9-7898-4d24-bdbf-57c3f1a2b4ea'
+globusClient = None
 usedArgs = []
 
 
@@ -2288,6 +2296,7 @@ def linkGlobus():
         print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
     return 'Linked'
     '''
+    '''
     api = getApi('caschmitz', 'password')
     print api.endpoint_ls('petrel#sdm')
     code, reason, result = api.endpoint_autoactivate('petrel#sdm', if_expires_in=600)
@@ -2305,7 +2314,44 @@ def linkGlobus():
         status = data["status"]
         print "STATUS: ", status
         time.sleep(10)
-    return 'Linked'
+    '''
+    global globusClient
+    globusClient = globus_sdk.NativeAppAuthClient(CLIENT_ID)
+    globusClient.oauth2_start_flow()
+    authorize_url = globusClient.oauth2_get_authorize_url()
+    return format(authorize_url)
+
+@app.route('/connectGlobus', methods=['GET', 'POST'])
+@login_required
+def connectGlobus():
+    authID = request.form.get('authURL')
+    token_response = globusClient.oauth2_exchange_code_for_tokens(authID)
+    globus_transfer_data = token_response.by_resource_server['transfer.api.globus.org']
+    authorizer = globus_sdk.AccessTokenAuthorizer(access_token=globus_transfer_data['access_token'])
+    tc = globus_sdk.TransferClient(authorizer=authorizer)
+    extrepid = '9c9cb97e-de86-11e6-9d15-22000a1e3b52'
+    ep = tc.get_endpoint(extrepid)
+    r = tc.operation_ls(extrepid, path='/gdata/dm')
+    for item in r:
+        print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
+
+    # Setup for actually transferring files
+    '''
+    local_ep = globus_sdk.LocalGlobusConnectPersonal()
+    local_ep_id = local_ep.endpoint_id
+    tdata = globus_sdk.TransferData(tc, ep.endpoint_id, local_ep_id)
+    searchPath = "/test"
+    for file in searchPath:
+        tdata.add_item(file, app.config['UPLOAD_DIR'] + '/rawData')
+    tc.submit_transfer(tdata)
+
+
+    r = tc.operation_ls(petrel, path='/test')
+    for item in r:
+        print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
+    '''
+
+    return 'Connected'
 
 def getApi(username, password):
     goAuthTuple = get_access_token(username=username, password=password)

@@ -194,6 +194,27 @@ with context %}
         </div>
     </div>
 </div>
+<div id="globusModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Input Globus Authorization Code:</h4>
+            </div>
+            <div class="formatModalBody text-center">
+                <div class="input-group formatG">
+                    <input type="text" id="globusAuth" class="form-control" aria-label="..." placeholder="Gotten from globus autodirect">
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="formatModalFooter">
+                    <button type="button" onclick="connectGlobus()" class="btn btn-primary btn-default ssShareBtn" data-dismiss="modal">Connect</button>
+                    <button type="button" class="btn btn-default formatCloseBtn" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container data-select" role="main">
     <div class="jumbotron">
         <h1>
@@ -204,11 +225,14 @@ with context %}
         </p>
         <div class="text-center">
             <div class="uploadGroup">
-                    <button class="btn btn-primary btn-sm globusBtn" onclick="linkGlobus()">Link with Globus</button>
+                <button class="btn btn-primary btn-sm globusBtn" id="globusConnect" data-target="#globusModal" onclick="linkGlobus()">Link with Globus</button>
                 <form id="fileForm" enctype="multipart/form-data">
                     <input type="file" name="file" class="browseBtn" multiple>
                     <input id="uploadBtn" data-toggle="modal" data-target="#formatModal" value="Upload File" class="btn btn-primary btn-xs upBtn" title="Upload selected file to database"/>
                 </form>
+            </div>
+            <div class="popupWarning">
+                Enable popups for Globus.
             </div>
         </div>
     </div>

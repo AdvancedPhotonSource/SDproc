@@ -411,7 +411,18 @@ function sortTable(table){
 }
 
 function linkGlobus(){
+    $('#globusModal').modal('show');
     $.post("/SDproc/linkGlobus", function(data){
-        alert('Done');
+        window.open(data);
+    });
+}
+
+function connectGlobus(){
+    $.post("/SDproc/connectGlobus", {authURL: $('#globusAuth').val()}, function(data){
+        $('#navTable').load("/SDproc/upload #navTable>*", function(){
+            setupRows();
+            setupClick();
+            $('#comment').val('')
+        })
     });
 }

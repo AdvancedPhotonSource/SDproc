@@ -135,6 +135,12 @@ td {
     width: 20%;
 }
 
+.popupWarning{
+    margin-top: 10px;
+    margin-bottom: -10px;
+    text-align:left;
+}
+
 .fileManageGroup{
     display: inline-block;
     margin-top: 20px;
