@@ -43,13 +43,56 @@ __author__ = 'caschmitz'
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
-import os
-from flask import Flask
+'''
+For debugging server use:
+    try:
+        *line you want to test*
+    except Exception,e:
+        print(str(e))
+'''
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-app.config['UPLOAD_DIR'] = app.root_path + '/static/dataFiles'
-app.config['RECAPTCHA_PUBLIC_KEY'] = 'public'
-app.config['RECAPTCHA_PRIVATE_KEY'] = 'secret'
-app.secret_key = os.urandom(24)
+# TODO: Ask Nicholas for information on xtrepid UUID and giving permissions to Michael
+# TODO: Subdirectories to file structure and make them searchable within the program
+# TODO: Split comments from fileComments and sessionComments on Scans Tab
+# TODO: Have fileComments searchable on manageFiles and sessionComments searchable on selectSession
+# TODO: Make script to restart server
 
+from flask import redirect,request
+from flask_login import LoginManager
+from flask_app import app
+from db.api.user_db_api import UserDbApi
+
+from sdproc.user import userApp
+from sdproc.hrm import hrmApp
+from sdproc.sdproc import sdprocApp
+from sdproc.logbook import logbookApp
+from sdproc.comment import commentApp
+from sdproc.file import fileApp
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+userDbApi = UserDbApi()
+
+app.register_blueprint(sdprocApp)
+app.register_blueprint(userApp)
+app.register_blueprint(hrmApp)
+app.register_blueprint(logbookApp)
+app.register_blueprint(fileApp)
+app.register_blueprint(commentApp)
+
+""" REMOVE THIS ON SERVER """
+@app.before_request
+def fixURL():
+	url = request.path
+	if 'SDproc' in url:
+		fixedUrl = url[7:]
+		return redirect(fixedUrl, 307)
+	return
+
+@login_manager.user_loader
+def load_user(user_id):
+	return userDbApi.getUserById(user_id)
+
+if __name__ == '__main__':
+	app.run(host='0.0.0.0', port=5001, debug=True)

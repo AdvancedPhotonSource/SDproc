@@ -1,6 +1,4 @@
-name: sharable
 dependencies:
-- _license=1.1=py27_0
 - abstract-rendering=0.5.1=np110py27_0
 - alabaster=0.7.7=py27_0
 - anaconda=4.0.0=np110py27_0
