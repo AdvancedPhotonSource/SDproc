@@ -6,7 +6,7 @@
 ```
 # Clone the project
 cd toTheProject
-conda env create -f environment.yml
+conda env create -f anaconda/environment.yml
 conda activate SDproc
 
 #Run this command every time you start a new terminal session to run the project
