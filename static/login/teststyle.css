@@ -61,6 +61,7 @@ td {
 }
 
 .loginBtn{
+    background-color: Green;
     float: left;
     /*margin-left: 100px;*/
 }
