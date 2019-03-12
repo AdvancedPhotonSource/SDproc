@@ -61,13 +61,12 @@ td {
 }
 
 .loginBtn{
-    background-color: Green;
-    float: left;
-    /*margin-left: 100px;*/
+    float:right;
 }
 
 .regBtn{
     float: left;
+    margin-right: 100px;
 }
 
 
