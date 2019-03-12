@@ -152,13 +152,14 @@ class logBook(db.Model):
 
 class dataFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     name = db.Column(db.String())
     path = db.Column(db.String())
     comment = db.Column(db.String())
     authed = db.Column(db.String())
     comChar = db.Column(db.String())
     type = db.Column(db.String())
+    parentID = db.Column(db.Integer, nullable=True)
+    treeType = db.Column(db.String(), nullable=True)
 
 
 class currentMeta(db.Model):
