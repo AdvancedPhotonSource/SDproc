@@ -64,56 +64,23 @@ with context %}
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button class="navbar-toggle collapsed" aria-controls="navbar" aria-expanded="false" data-target="#navbar"
-                    data-toggle="collapse" type="button">
-                <span class="sr-only">
-                    Toggle navigation
-                </span>
+            <button class="navbar-toggle collapsed" aria-controls="navbar" aria-expanded="false" data-target="#navbar" data-toggle="collapse" type="button">
+                <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="login">
-                Scandataproc
-            </a>
+            <a class="navbar-brand" href="login">Scandataproc</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li>
-                    <a href="upload">
-                        Manage Files
-                    </a>
-                </li>
-                <li class="active">
-                    <a href="select">
-                        Select Session
-                    </a>
-                </li>
-                <li id="navData">
-                    <a href="data">
-                        Scans
-                    </a>
-                </li>
-                <li id="navProcess">
-                    <a href="process">
-                        Sum
-                    </a>
-                </li>
-                <li>
-                    <a href="modifyDAT">
-                        Modify DAT
-                    </a>
-                </li>
-                <li>
-                    <a href="profile">
-                        Profile
-                    </a>
-                </li>
+                <li><a href="upload">Manage Files</a></li>
+                <li class="active"><a href="select">Select Session</a></li>
+                <li id="navData"><a href="data">Scans</a></li>
+                <li id="navProcess"><a href="process">Sum</a></li>
+                <li><a href="modifyDAT">Modify DAT</a></li>
+                <li><a href="profile">Profile</a></li>
                 {% if user.isAdmin == 1 %}
-                <li>
-                    <a href="admin">
-                        Admin
-                    </a>
-                </li>
+                <li><a href="admin">Admin</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -172,15 +139,9 @@ with context %}
 </div>
 <div class="container data-select" role="main">
     <div class="jumbotron">
-        <h1>
-            Select How to Proceed
-        </h1>
-        <p>
-            Choose to start a new session or continue a previous session.
-        </p>
-        <p class="smallText">
-            Use browser zoom if everything does not fit on your screen (Ctrl and +/- or Cmd and +/-)
-        </p>
+        <h3>Select How to Proceed</h3>
+        <p>Choose to start a new session or continue a previous session.</p>
+        <p class="smallText">Use browser zoom if everything does not fit on your screen (Ctrl and +/- or Cmd and +/-)</p>
     </div>
 </div>
 <div class="text-center">
