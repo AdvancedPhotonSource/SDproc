@@ -277,6 +277,21 @@ function sortTable(table){
 }
 
 
+function logout(){
+    if (localStorage.getItem('previous3') === null){
+        window.location.href = ("logout");
+    }
+    else{
+        previous = localStorage.getItem('previous3');
+        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1}, function(){
+            window.location.href = ("logout")
+        });
+    }
+}
+
+
+
+
 function advance(){
     window.location.href = ("modifyDAT");
 }

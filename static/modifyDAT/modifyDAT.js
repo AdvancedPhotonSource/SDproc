@@ -189,6 +189,20 @@ function outputFile(){
     })
 }
 
+// check this function again, might not be correct format
+function logout(){
+    if (localStorage.getItem('usingDAT') === null){
+        window.location.href = ("logout");
+    }
+    else{
+        previous = localStorage.getItem('usingDAT');
+        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1}, function(){
+            window.location.href = ("logout")
+        });
+    }
+}
+
+
 $(window).on('unload', function(){
     if (jQuery.trim($('#process_plot').text()) == "No DAT selected"){
         return;
