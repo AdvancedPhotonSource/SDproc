@@ -68,7 +68,7 @@ class LoginForm(Form):
         if not user.check_password(self.password.data):
             self.password.errors.append('Login Failed')
             #self.password.errors.append('Invalid password')
-            return True
+            return False
 
         return True
 
