@@ -812,3 +812,15 @@ function sortTable(table){
         return $('td:first', a).text().localeCompare($('td:first', b).text());
     }).appendTo(tbody);
 }
+
+function logout(){
+    if (localStorage.getItem('usingDAT') === null){
+        window.location.href = ("logout");
+    }
+    else{
+        previous = localStorage.getItem('usingDAT');
+        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1}, function(){
+            window.location.href = ("logout")
+        });
+    }
+}

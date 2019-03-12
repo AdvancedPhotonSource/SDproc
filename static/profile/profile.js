@@ -61,6 +61,19 @@ function updateProf(){
     });
 }
 
+function logout(){
+    if (localStorage.getItem('usingDAT') === null){
+        window.location.href = ("logout");
+    }
+    else{
+        previous = localStorage.getItem('usingDAT');
+        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1}, function(){
+            window.location.href = ("logout")
+        });
+    }
+}
+
+
 $(document).ready(function(){
     if(localStorage.getItem("usingDAT") == 1){
         $("#navData").addClass('disabled');
