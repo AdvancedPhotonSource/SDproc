@@ -46,13 +46,11 @@
 from operator import and_
 
 import matplotlib
-
-from sdproc.forms.input_form import InputForm
-from utilities.file_utility import FileUtility
-
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import mpld3
+from sdproc.forms.input_form import InputForm
+from utilities.file_utility import FileUtility
 from flask_login import current_user
 from db.db_model import db, currentDAT, dataFile, currentMeta
 import json
@@ -62,8 +60,8 @@ import uuid
 import copy
 from scipy import stats
 
-from utilities.mpld3.hide_legend import HideLegend
-from utilities.mpld3.interactive_legend import InteractiveLegend
+from utilities.sdproc_mpld3.hide_legend import HideLegend
+from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
 
 class GraphingUtility():
 

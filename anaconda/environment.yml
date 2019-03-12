@@ -44,7 +44,7 @@ dependencies:
   - mkl=2019.0=118
   - mkl_fft=1.0.6=py27h7dd41cf_0
   - mkl_random=1.0.1=py27h4414c95_1
-  - mpld3=0.3=py27_0
+  - sdproc_mpld3=0.3=py27_0
   - ncurses=6.1=hf484d3e_0
   - numpy=1.15.2=py27h1d66e8a_1
   - numpy-base=1.15.2=py27h81de0dd_1

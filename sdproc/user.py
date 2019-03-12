@@ -44,7 +44,7 @@
 '''
 import json
 from datetime import datetime
-from operator import and_
+from sqlalchemy import and_
 
 from flask import Blueprint, render_template, url_for, request, flash, session
 from flask_login import login_required, login_user, current_user
@@ -466,7 +466,6 @@ def set_ses():
 			newCurrent.session = allSes.name
 			db.session.add(newCurrent)
 			db.session.commit()
-
 			files.append(newCurrent.file_id)
 		current_user.current_session = allSes.name
 		db.session.commit()
@@ -554,6 +553,10 @@ def solveNotif():
 	if action == 1:
 		user = db.session.query(User).filter_by(username=notif.originUser).first()
 		user.approved = 1
+		username = user.username
+		id = user.id
+		rootnode = dataFile(name="/" + username + "/", path="", comment="This is the root node", authed=str(id), comChar="", type="", parentID=0, treeType="Root")
+		db.session.add(rootnode)
 		db.session.delete(notif)
 	else:
 		db.session.delete(notif)

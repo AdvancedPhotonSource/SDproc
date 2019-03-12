@@ -43,7 +43,7 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
 
-from flask import render_template, request, Blueprint, url_for, redirect, flash
+from flask import render_template, request, Blueprint, url_for, redirect, flash, send_from_directory
 from flask_login import current_user, login_required
 from flask_app import app
 
@@ -53,13 +53,13 @@ import mpld3
 
 from forms.input_form import InputForm
 from utilities.graphing_utility import GraphingUtility
-from utilities.mpld3.hide_legend import HideLegend
+from utilities.sdproc_mpld3.hide_legend import HideLegend
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from utilities.file_utility import FileUtility
-from utilities.mpld3.interactive_legend import InteractiveLegend
+from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
 
 from db.db_model import db, User, logBook, currentMeta, currentDAT, userFiles, HRM, dataFile
 
@@ -198,7 +198,7 @@ def dataFormat():
 			normLabels = []
 			labels = []
 			if str(file_instance.type) == 'mda':
-				data, name, unusedpath = GraphingUtility.readMda(file_instance.path)
+				data, name, unusedpath = FileUtility.readMda(file_instance.path)
 			else:
 				data, name, unusedpath = FileUtility.readAscii(file_instance.path, file_instance.comChar)
 			for i in range(len(bools)):
@@ -256,7 +256,7 @@ def dataFormat():
 				etype = 0
 			labels.append(normLabels)
 			labels.append(addLabels)
-			code = FileUtility.plotData(data, used, againstE, additional, labels, etype, unit)
+			code = GraphingUtility.plotData(data, used, againstE, additional, labels, etype, unit)
 			format_instance.plot = code
 			db.session.commit()
 		else:
@@ -421,6 +421,10 @@ def generateOutput():
 			user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
 			dfile.comChar = user_instance.commentChar
 			dfile.type = 'dat'
+			currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
+			parentNode = db.session.query(dataFile).filter(and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+			dfile.parentID = parentNode.id
+			dfile.treeType = "File"
 			db.session.add(dfile)
 			userFile = userFiles()
 			userFile.file_id = dfile.id
@@ -449,6 +453,10 @@ def generateOutput():
 			user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
 			dfile.comChar = user_instance.commentChar
 			dfile.type = 'dat'
+			currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
+			parentNode = db.session.query(dataFile).filter(and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+			dfile.parentID = parentNode.id
+			dfile.treeType = "File"
 			db.session.add(dfile)
 			userFile = userFiles()
 			userFile.file_id = dfile.id
@@ -486,6 +494,10 @@ def generateOutput():
 		user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
 		dfile.comChar = user_instance.commentChar
 		dfile.type = 'dat'
+		currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
+		parentNode = db.session.query(dataFile).filter(and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+		dfile.parentID = parentNode.id
+		dfile.treeType = "File"
 		db.session.add(dfile)
 		userFile = userFiles()
 		userFile.file_id = dfile.id
@@ -494,9 +506,32 @@ def generateOutput():
 		db.session.commit()
 		return datFName
 	if datFName is not None:
-		return redirect(url_for('sendOut', filename=filename, displayName=datFName))
+		return redirect(url_for('file.sendOut', filename=filename, displayName=datFName))
+		#sendOut(filename, datFName)
 	else:
-		return redirect(url_for('sendOut', filename=filename, displayName='None'))
+		return redirect(url_for('file.sendOut', filename=filename, displayName='None'))
+		#sendOut(filename, 'None')
+
+	return "Done"
+
+
+# @hrmApp.route('/outData/<path:filename>/<displayName>', methods=['GET', 'POST'])
+# @login_required
+# def sendOut(filename, displayName):
+#     '''
+#     Sends the file to the user for doanloading using flask's send_from_directory
+#     :param filename:
+#     The absolute name of the file that is saved in the database.
+#     :param displayName:
+#     The simplistic name of the file that the user chose.
+#     :return:
+#     '''
+#     if displayName != 'None' and displayName is not None:
+#         return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename,
+#                                    as_attachment=True, attachment_filename=displayName + '.dat')
+#     else:
+#         return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename,
+#                                    as_attachment=True)
 
 
 @hrmApp.route('/process', methods=['GET', 'POST'])
@@ -627,7 +662,7 @@ def process():
 				columns, bools = GraphingUtility.splitForm(form)
 				basedColumns = GraphingUtility.zeroBaseColumns(columns)
 				if str(file_instance.type) == 'mda':
-					data, name, unusedpath = GraphingUtility.readMda(file_instance.path)
+					data, name, unusedpath = FileUtility.readMda(file_instance.path)
 				else:
 					data, name, unusedpath = GraphingUtility.readAscii(file_instance.path, file_instance.comChar)
 				if bools[1].data:
