@@ -75,6 +75,9 @@ function logout(){
 
 
 $(document).ready(function(){
+    $('nav li').removeClass('active');
+    $('#navProfile').addClass('active');
+
     if(localStorage.getItem("usingDAT") == 1){
         $("#navData").addClass('disabled');
         $('#navProcess').addClass('disabled');
