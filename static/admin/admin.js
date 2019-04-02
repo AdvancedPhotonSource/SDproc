@@ -45,6 +45,9 @@
 $(document).ready( function() {
     Users();
 
+    $('nav li').removeClass('active');
+    $('#navAdmin').addClass('active');
+
     var rows = $('tr.item');
     rows.removeClass("highlight")
     rows.removeClass("lightlight")

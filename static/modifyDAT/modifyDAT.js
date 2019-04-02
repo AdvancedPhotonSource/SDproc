@@ -1,4 +1,7 @@
 $(document).ready( function() {
+    $('nav li').removeClass('active');
+    $('#navModifyDAT').addClass('active');
+
     if (jQuery.trim($('#process_plot').text()) == "No DAT selected"){
         alert('Please select or generate a DAT file');
     }
