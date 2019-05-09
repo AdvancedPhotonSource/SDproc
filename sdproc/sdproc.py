@@ -63,6 +63,7 @@ def index():
     This is done with a database query and authenticated in view_output.html.
     :return:
     '''
+	print "index"
 	user = current_user
 	data = []
 	sessions = sessionFiles.query.all()

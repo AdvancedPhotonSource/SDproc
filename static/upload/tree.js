@@ -42,7 +42,7 @@ $(document).ready(function(){
         'plugins' : [ "dnd", "contextmenu", "wholerow", "unique", "types" ]
     })
     .on('rename_node.jstree', function (e, data) {
-        $.post("/renameN", { node: data.node.id, newName: data.text })
+        $.post("/SDproc/rename", { node: data.node.id, newName: data.text })
         .done(function (d) {
             $('#tree').jstree(true).refresh();
         })
