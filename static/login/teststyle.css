@@ -42,52 +42,53 @@
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 */
-.loginInputs{
+/*.loginInputs{
     display: inline-block;
-}
+}*/
 
-td {
+/*td {
     padding: 10px;
-}
+}*/
 
-.loginBtns{
+/*.loginBtns{
     display: inline-block;
     text-align: center;
     padding-top: 10px;
-}
+}*/
 
-.floatClear {
+/*.floatClear {
     clear: both;
-}
+}*/
 
-.loginBtn{
+/*.loginBtn{
     float:right;
-}
+}*/
 
-.regBtn{
+/*.regBtn{
     float: left;
     margin-right: 100px;
-}
+}*/
 
 
-footer {
+/*footer {
     position: absolute;
     left: 0;
     bottom: 0;
     height: 30px;
     width: 100%;
-}
+}*/
 
-body{
+/*body{
     margin: 0 0 30px;
-}
+}*/
 
-html{
+/*html{
     position: relative;
     min-height: 100%;
-}
+}*/
 
+/*
 .disabled{
     pointer-events: none;
     opacity: 1;
-}
+}*/

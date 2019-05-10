@@ -74,7 +74,7 @@ from sdproc.users.routes import users
 
 
 login_manager = LoginManager()
-login_manager.login_view = 'user.login'
+login_manager.login_view = 'users.login2'
 login_manager.login_message_category = 'info'
 login_manager.init_app(app)
 
