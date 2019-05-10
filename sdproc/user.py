@@ -63,10 +63,10 @@ userApp = Blueprint('user', __name__)
 fileApi = FileDbApi()
 
 
-@userApp.route('/', methods=['GET', 'POST'])
-def toLogin():
-    '''Ensures users will be redirected to login page even without /login'''
-    return redirect(url_for('user.login'))
+# @userApp.route('/', methods=['GET', 'POST'])
+# def toLogin():
+#     '''Ensures users will be redirected to login page even without /login'''
+#     return redirect(url_for('user.login'))
 
 
 @userApp.route('/reg', methods=['GET', 'POST'])
@@ -120,7 +120,6 @@ def login():
         return redirect(url_for('sdproc.index'))
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
-        print "hi"
         user = form.get_user()
         # user.approved = 1
         # user.isAdmin = 1

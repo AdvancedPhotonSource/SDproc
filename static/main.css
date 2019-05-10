@@ -3,6 +3,7 @@
     border: 1px solid #dddddd;
     border-radius: 3px;
     margin-bottom: 20px;
+    position: relative;
 }
 
 body {
@@ -31,4 +32,11 @@ body {
 
 .red {
     background-color:red;
+}
+#footer {
+  margin-bottom: 0;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 2.5rem;            /* Footer height */
 }

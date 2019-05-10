@@ -9,6 +9,9 @@
 
     <!-- JSTree links -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+        var $y = jQuery.noConflict();
+    </script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.5/themes/default/style.min.css" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.5/jstree.min.js"></script>
     <script type="text/javascript" src="/static/upload/tree.js"></script>
@@ -119,6 +122,7 @@
     </div>
     <script type="text/javascript" src="/static/upload/fileUpload.js"></script>
     <br/>
+
     <div class="row">
         <div class="col-sm-2"></div>
         <div class="col-sm-4">
@@ -132,4 +136,5 @@
         </div>
     </div>
     <br/><br/><br/><br/><br/><br/>
+
 {% endblock content %}
