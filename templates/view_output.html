@@ -10,45 +10,45 @@
 
 {% block content %}
     <div id="ssModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Share Session With:</h4>
-            </div>
-            <div class="ssModalBody">
-                <input type="text" class="form-control filtInput" placeholder="Username" id="ssName">
-                <div class="nameTable">
-                    <table id="nameTable">
-                        <tbody>
-                            {% if names %}
-                                {% for name in names %}
-                                    <tr>
-                                        <td>{{ name.username }}</td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
-                                No Users Detected
-                            {% endif %}
-                        </tbody>
-                    </table>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Share Session With:</h4>
                 </div>
-            </div>
-            <div class="ssModalFooter">
-                <div class="col-xs-6">
-                    <span class="centerBlock">
-                        <button type="button" onclick="shareSes()" class="btn btn-primary btn-default" data-dismiss="modal">Share</button>
-                    </span>
+                <div class="ssModalBody">
+                    <input type="text" class="form-control filtInput" placeholder="Username" id="ssName">
+                    <div class="nameTable">
+                        <table id="nameTable">
+                            <tbody>
+                                {% if names %}
+                                    {% for name in names %}
+                                        <tr>
+                                            <td>{{ name.username }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    No Users Detected
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="col-xs-6">
-                    <span class="centerBlock">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </span>
+                <div class="ssModalFooter">
+                    <div class="col-xs-6">
+                        <span class="centerBlock">
+                            <button type="button" onclick="shareSes()" class="btn btn-primary btn-default" data-dismiss="modal">Share</button>
+                        </span>
+                    </div>
+                    <div class="col-xs-6">
+                        <span class="centerBlock">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
     <div class="container data-select" role="main">
         <div class="jumbotron">
             <h3>Select How to Proceed</h3>
@@ -61,15 +61,15 @@
     </div>
     <br/>
     <br/>
-    <div class="text-center">
-        <div class="allCols">
-            <div class="text-center floatL navBlock">
-                <div class="searchLabel">Search:</div>
-                <input type="text" class="form-control navFiltInput" placeholder="Session Name" id="navName">
-                <div class="navTable" id="navTable">
-                    <br/>
-                    {% block header %}{% endblock %}
-                    {% block table %}
+    <div class="row">
+        <div class="col-md-6 ">
+            <div class="searchLabel">Search:</div>
+            <input type="text" class="form-control navFiltInput" placeholder="Session Name" id="navName">
+
+            <div class="navTable" id="navTable">
+                <br/>
+                {% block header %}{% endblock %}
+                {% block table %}
                     <table id="sesPicker">
                         <thead class="fixedHead">
                             {{ thead() }}
@@ -80,24 +80,24 @@
                                     {% set auths = post.authed.split(',') %}
                                     {% for aID in auths %}
                                         {% if aID|int() == user.get_id()|int() %}
-                                          <tr class="item fixedHead">
-                                            <td class="name" colspan="2" id="{{ post.id }}" data-type="{{ post.type }}">
-                                              {%- if post.name == ".." -%}
-                                                Parent folder
-                                              {%- else -%}
-                                                {{ post.name }}
-                                              {%- endif -%}
-                                            </a></td>
-                                            <td class="modified">
-                                              <time datetime="{{ post.modified }}">{{ post.modified }}</time>
-                                            </td>
-                                            <td class="size">
-                                              {% if post.size %}
-                                                {{ post.size }}
-                                              {% else %}
-                                                -
-                                              {% endif %}
-                                            </td>
+                                            <tr class="item fixedHead">
+                                                <td class="name text-center" colspan="2" id="{{ post.id }}" data-type="{{ post.type }}">
+                                                    {%- if post.name == ".." -%}
+                                                    Parent folder
+                                                    {%- else -%}
+                                                    {{ post.name }}
+                                                    {%- endif -%}
+                                                </td>
+                                                <td class="modified text-center">
+                                                    <time datetime="{{ post.modified }}">{{ post.modified }}</time>
+                                                </td>
+                                                <td class="size">
+                                                    {% if post.size %}
+                                                        {{ post.size }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
                                           </tr>
                                         {% endif %}
                                     {% endfor %}
@@ -105,30 +105,27 @@
                             {% endif %}
                         </tbody>
                     </table>
-                    {% endblock %}
-                    <br/>
-                </div>
-                <div class="text-center">
-                    <div class="manageButtons">
-                        <button onclick="delFile()" class="btn btn-primary btn-xs delBtn" title="Remove all selected sessions from database">
-                            Delete Session
-                        </button>
-                        <button class="btn btn-primary btn-xs shareBtn" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
-                            Share Session
-                        </button>
-                    </div>
-                </div>
+                {% endblock table %}
+                <br/>
             </div>
-            <div class="text-center floatL">
-                <div class="comGroup">
-                    <label for="comment">Comment:</label>
-                    <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
-                    <button id="finito" disabled type="submit" class="btn btn-primary btn-lg" onclick="proceed()" title="Advance with all files to be used">
-                        Confirm
+
+            <div class="text-center">
+                <div class="manageButtons">
+                    <button onclick="delFile()" class="btn btn-primary btn-xs delBtn" title="Remove all selected sessions from database">
+                        Delete Session
+                    </button>
+                    <button class="btn btn-primary btn-xs shareBtn" data-toggle="modal" data-target="#ssModal" title="Share this session with another user">
+                        Share Session
                     </button>
                 </div>
             </div>
-            <br/>
+        </div>
+        <div class="col-md-6">
+            <label for="comment">Comment:</label>
+            <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
+            <button id="finito" disabled type="submit" class="btn btn-primary btn-lg" onclick="proceed()" title="Advance with all files to be used">
+                Confirm
+            </button>
         </div>
     </div>
 {% endblock content %}

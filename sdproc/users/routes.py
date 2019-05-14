@@ -3,8 +3,8 @@ from datetime import datetime
 from flask import Blueprint, url_for, flash, render_template, redirect, session, request
 from flask_login import current_user, logout_user, login_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from sdproc.user import clear_cmeta, clear_rowa_wrapper
-
+from sdproc.user import clear_rowa_wrapper
+from sdproc.sessions.routes import clear_cmeta
 from db.db_model import db, User, notification
 from sdproc.users.forms import RegistrationForm, LoginForm, UpdateProfileForm
 
@@ -24,7 +24,7 @@ def register2():
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
         user = User(username=form.username.data, email=form.email.data,
-                    pwhash=hashed_password, fullname=form.full_name.data,
+                    pwhash=hashed_password, fullName=form.full_name.data,
                     institution=form.institution.data, reason=form.reason_for_account.data)
         user.approved = 0
         user.isAdmin = 0
@@ -88,3 +88,10 @@ def profile2():
         form.comment_char.data = current_user.commentChar
         # form.password.data = current_user.pwhash.decode('utf-8')
     return render_template('new_profile.html', title='Profile', form=form)
+
+
+@users.route("/logout2")
+def logout2():
+    session.clear()
+    logout_user()
+    return redirect(url_for('users.login2'))
