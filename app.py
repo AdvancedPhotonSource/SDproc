@@ -70,6 +70,7 @@ from sdproc.logbook import logbookApp
 from sdproc.comment import commentApp
 from sdproc.file import fileApp
 from sdproc.users.routes import users
+from sdproc.sessions.routes import sessions
 
 
 
@@ -87,6 +88,7 @@ app.register_blueprint(logbookApp)
 app.register_blueprint(fileApp)
 app.register_blueprint(commentApp)
 app.register_blueprint(users)
+app.register_blueprint(sessions)
 
 
 

@@ -42,7 +42,7 @@
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 */
-$x(document).ready(function(){
+$(document).ready(function(){
     $('nav li').removeClass('active');
     $('#navUpload').addClass('active');
 

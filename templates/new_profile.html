@@ -7,42 +7,43 @@
 
 {% block content %}
     <div id="notifModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title" id="notifTitle">Profile:</h4>
-            </div>
-            <div class="notifModalBody" id="notifID">
-                <div class="notifTable text-center">
-                    <table id="notifTable">
-                        <tbody class="notifBod">
-                            {% if userProf %}
-                                <tr>
-                                    <td><b class="pull-left">Username:</b>{{ userProf.username }}</td>
-                                    <td><b class="pull-left">Institution:</b>{{ userProf.institution }}</td>
-                                </tr>
-                                <tr>
-                                    <td><b class="pull-left">Full Name:</b>{{ userProf.fullName }}</td>
-                                    <td><b class="pull-left">Reason:</b>{{ userProf.reason }}</td>
-                                </tr>
-                                <tr>
-                                    <td><b class="pull-left">Email:</b>{{ userProf.email }}</td>
-                                    <td></td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="notifTitle">Profile:</h4>
                 </div>
-            </div>
-            <div class="text-center">
-                <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+                <div class="notifModalBody" id="notifID">
+                    <div class="notifTable text-center">
+                        <table id="notifTable">
+                            <tbody class="notifBod">
+                                {% if userProf %}
+                                    <tr>
+                                        <td><b class="pull-left">Username:</b>{{ userProf.username }}</td>
+                                        <td><b class="pull-left">Institution:</b>{{ userProf.institution }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b class="pull-left">Full Name:</b>{{ userProf.fullName }}</td>
+                                        <td><b class="pull-left">Reason:</b>{{ userProf.reason }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b class="pull-left">Email:</b>{{ userProf.email }}</td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-    <div class="content-section">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="content-section">
         <form method="POST" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
@@ -124,43 +125,41 @@
             </div>
         </form>
     </div>
-
-
-
-
-
-<div class="notifications" id="notifications">
-            <h3>Notifications:</h3>
-            <table>
-                <tbody>
-                    {% if notifications %}
-                        {% for task in notifications %}
-                            <tr class="item notifTR">
-                                <td class="name" colspan="2" id="{{ task.id }}">
-                                    {{ task.type }}
-                                </td>
-                                <td>
-                                    {{ task.name }}
-                                </td>
-                                <td>
-                                    <button class="btn btn-default" onclick="showInfo({{ task.id }})">Info</button>
-                                </td>
-                                <td>
-                                    {{ task.time }}
-                                </td>
-                                <td>
-                                    <button class="btn btn-success" onclick="approve({{ task.id }})">Approve</button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-danger" onclick="decline({{ task.id }})">Decline</button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    {% else %}
-                        No Notifications
-                    {% endif %}
-                </tbody>
-            </table>
         </div>
-
+        <div class="col-md-6">
+            <div class="notifications text-center" id="notifications">
+                <h3>Notifications:</h3>
+                <table>
+                    <tbody>
+                        {% if notifications %}
+                            {% for task in notifications %}
+                                <tr class="item notifTR">
+                                    <td class="name" colspan="2" id="{{ task.id }}">
+                                        {{ task.type }}
+                                    </td>
+                                    <td>
+                                        {{ task.name }}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-default" onclick="showInfo({{ task.id }})">Info</button>
+                                    </td>
+                                    <td>
+                                        {{ task.time }}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success" onclick="approve({{ task.id }})">Approve</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" onclick="decline({{ task.id }})">Decline</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            No Notifications
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock content %}
