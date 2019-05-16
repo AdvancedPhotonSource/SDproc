@@ -12,7 +12,7 @@ $y(document).ready(function(){
         },
         'contextmenu' : {
             'items' : function(node) {
-                var tmp = $.jstree.defaults.contextmenu.items();
+                var tmp = $y.jstree.defaults.contextmenu.items();
                 delete tmp.ccp;
 
                 if(this.is_disabled(node)) {
@@ -42,26 +42,25 @@ $y(document).ready(function(){
         'plugins' : [ "dnd", "contextmenu", "wholerow", "unique", "types" ]
     })
     .on('rename_node.jstree', function (e, data) {
-        $.post("/SDproc/rename", { node: data.node.id, newName: data.text })
+        $y.post("/SDproc/rename", { node: data.node.id, newName: data.text })
         .done(function (d) {
-            $('#tree').jstree(true).refresh();
+            $y('#tree').jstree(true).refresh();
         })
     })
     .on('create_node.jstree', function (e, data) {
-        $.post("/createNode", { parent: data.node.parent, title: data.node.text })
-        //$('#tree').jstree(true).refresh();
+        $y.post("/SDproc/createNode", { parent: data.node.parent, title: data.node.text })
     })
     .on('move_node.jstree', function (e, data) {
-        $.post("/moveNode", { parent: data.parent, node: data.node.id });
+        $y.post("/SDproc/moveNode", { parent: data.parent, node: data.node.id });
     })
     .on('delete_node.jstree', function (e, data) {
-        $.post("/deleteNode", { node: data.node.id });
+        $y.post("/SDproc/deleteNode", { node: data.node.id });
     })
     .on("select_node.jstree", function (e, data) {
         //alert(data.node.id);
-        $.post('/show_NewComment', { id: data.node.id },
+        $y.post('/SDproc/show_NewComment', { id: data.node.id },
                 function(data){
-                    $('#comment').val(data);
+                    $y('#comment').val(data);
                 });
     });
 
@@ -69,11 +68,11 @@ $y(document).ready(function(){
 });
 
 function saveNewComment() {
-    if ($("#tree").jstree("get_selected") == false) {
+    if ($y("#tree").jstree("get_selected") == false) {
         alert("Please select a file or folder to view comment(s) or save new comment(s).")
     } else {
-        var nodeID = $("#tree").jstree("get_selected")[0];
+        var nodeID = $y("#tree").jstree("get_selected")[0];
         var x = document.getElementById("comment").value;
-        $.post("/saveNC", { id : nodeID, comment : x });
+        $y.post("/SDproc/saveNC", { id : nodeID, comment : x });
     }
 }
