@@ -21,6 +21,28 @@ $x(document).ready(function(){
           });
         });
 
+function continue_session() {
+    var table = document.getElementById('sessionTable');
+    var selected = false;
+    var id = null;
+    var type = null;
+
+    for (var i = 0, row; row = table.rows[i]; i++) {
+        if (row.classList.contains('active')) {
+            selected = true;
+            id = $x(row).attr('id');
+            type = $x(row)[0].getAttribute("type");
+        }
+    }
+
+    if (!selected) {
+        alert('Please select a session or data file.');
+    } else {
+        $x.post("/continue_session", { type: type, id: id });
+        document.location.href="/SDproc/modifyDAT";
+    }
+}
+
 function new_session() {
 document.location.href="/SDproc/data";
     $x.post('/new_session2');
