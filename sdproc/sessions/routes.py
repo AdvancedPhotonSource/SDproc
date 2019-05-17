@@ -167,6 +167,38 @@ def new_session2():
     return ""
 
 
+@sessions.route("/continue_session", methods=['GET', 'POST'])
+def continue_session():
+    type = request.form.get("type")
+    id = request.form.get("id")
+    user = current_user
+
+    if type == "session":
+        session = sessionFiles.query.filter_by(id=4).first()
+        return ""
+    elif type == "dat":
+        try:
+            data_file = dataFile.query.filter_by(id=id).first()
+            path = data_file.path
+            x_values = []
+            y_values = []
+            with open(path, 'r') as current_file:
+                current_file = current_file.readlines()
+                for line in current_file:
+                    if not line.startswith("#"):
+                        line = line.split()
+                        x_values.append(float(line[0]))
+                        y_values.append(float(line[1]))
+            data = [x_values, y_values]
+            data = json.dumps(data)
+            current_data = currentDAT(user_id=user.id, file_id=data_file.id, user=user, DATname=data_file.name, DAT=data, originDAT=data)
+            db.session.add(current_data)
+            db.session.commit()
+        except Exception, e:
+            print(str(e))
+        return ""
+
+
 @sessions.route('/set_ses', methods=['GET', 'POST'])
 @login_required
 def set_ses():
