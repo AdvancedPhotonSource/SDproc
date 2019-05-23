@@ -53,7 +53,6 @@ from werkzeug.utils import redirect
 from db.db_model import User, sessionFiles, notification, db, currentMeta, dataFile, HRM, currentDAT, userFiles, \
     sessionFilesMeta, sessionMeta
 from forms.login_form import LoginForm
-# from sdproc.sessions.routes import clear_cmeta
 
 from forms.register_form import RegisterForm
 from utilities.file_utility import FileUtility
@@ -107,39 +106,39 @@ def register():
     return render_template('register.html', form=form)
 
 
-# @userApp.route('/login', methods=['GET', 'POST'])
-# def login():
-#     '''
-#     Template generator method for the login page
-#
-#     Accepts login form and ensure that the user has permission to login.
-#
-#     This is done by using Flask's builtin login_user after checking that the user is approved in the database
-#     :return:
-#     '''
-#     if current_user.is_authenticated:
-#         return redirect(url_for('sdproc.index'))
-#     form = LoginForm(request.form)
-#     if request.method == 'POST' and form.validate():
-#         user = form.get_user()
-#         # user.approved = 1
-#         # user.isAdmin = 1
-#         if user.approved == 1:
-#             login_user(user)
-#             clear_cmeta()
-#             clear_rowa_wrapper()
-#             current_user.current_session = "None"
-#             db.session.commit()
-#             return redirect(url_for('sdproc.index'))
-#         elif user.approved == 2:
-#             refusePrompt = "Your account has been frozen"
-#             return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
-#         elif user.approved == 0:
-#             refusePrompt = "Wait for an admin to approve your account"
-#             return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
-#         else:
-#             flash('Login sucks', 'danger')
-#     return render_template('login_form.html', form=form, session=session)
+@userApp.route('/login', methods=['GET', 'POST'])
+def login():
+    '''
+    Template generator method for the login page
+
+    Accepts login form and ensure that the user has permission to login.
+
+    This is done by using Flask's builtin login_user after checking that the user is approved in the database
+    :return:
+    '''
+    if current_user.is_authenticated:
+        return redirect(url_for('sdproc.index'))
+    form = LoginForm(request.form)
+    if request.method == 'POST' and form.validate():
+        user = form.get_user()
+        # user.approved = 1
+        # user.isAdmin = 1
+        if user.approved == 1:
+            login_user(user)
+            clear_cmeta()
+            clear_rowa_wrapper()
+            current_user.current_session = "None"
+            db.session.commit()
+            return redirect(url_for('sdproc.index'))
+        elif user.approved == 2:
+            refusePrompt = "Your account has been frozen"
+            return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
+        elif user.approved == 0:
+            refusePrompt = "Wait for an admin to approve your account"
+            return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
+        else:
+            flash('Login sucks', 'danger')
+    return render_template('login_form.html', form=form, session=session)
 
 
 @userApp.route('/logout')
@@ -280,24 +279,24 @@ def freeze():
     return 'Updated'
 
 
-# @userApp.route('/clear_cmeta', methods=['GET', 'POST'])
-# @login_required
-# def clear_cmeta():
-#     '''
-#     Function that clears the current user's currentMeta Table.
-#
-#     This is usually called when starting a new session or resuming an old one so that prexisting data does not cause conflicts.
-#     :return:
-#     '''
-#     current_user.current_session = 'None'
-#     deleting = db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all()
-#     for i in deleting:
-#         db.session.delete(i)
-#     deleting = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).all()
-#     for i in deleting:
-#         db.session.delete(i)
-#     db.session.commit()
-#     return 'Cleared'
+@userApp.route('/clear_cmeta', methods=['GET', 'POST'])
+@login_required
+def clear_cmeta():
+    '''
+    Function that clears the current user's currentMeta Table.
+
+    This is usually called when starting a new session or resuming an old one so that prexisting data does not cause conflicts.
+    :return:
+    '''
+    current_user.current_session = 'None'
+    deleting = db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all()
+    for i in deleting:
+        db.session.delete(i)
+    deleting = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).all()
+    for i in deleting:
+        db.session.delete(i)
+    db.session.commit()
+    return 'Cleared'
 
 
 @userApp.route('/clearPart_cmeta', methods=['GET', 'POST'])
@@ -347,43 +346,43 @@ def notifInfo():
     return render_template('admin.html', user=current_user, userProf=userData)
 
 
-# @userApp.route('/shareSes', methods=['GET', 'POST'])
-# @login_required
-# def shareSes():
-#     '''
-#     Shares a session with another user.
-#
-#     Similar to the admin sharing feature, but for users.
-#
-#     *Should probably be implemented with other sharing features*
-#     :return:
-#     '''
-#     idthis = request.form.get('id', type=int)
-#     shareUser = request.form.get('toUser', type=str)
-#     type = request.form.get('type', type=str)
-#     thisUser = db.session.query(User).filter_by(username=shareUser).first()
-#     toAuth = thisUser.id
-#     if type == 'dat':
-#         dat_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-#         auths = dat_instance.authed.split(',')
-#         if toAuth in auths:
-#             return 'Already Shared'
-#         else:
-#             dat_instance.authed = dat_instance.authed + ',' + str(toAuth)
-#             userFile = userFiles()
-#             userFile.file_id = idthis
-#             userFile.user_id = thisUser.id
-#             db.session.add(userFile)
-#             db.session.commit()
-#     else:
-#         session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
-#         auths = session_instance.authed.split(',')
-#         if toAuth in auths:
-#             return 'Already Shared'
-#         else:
-#             session_instance.authed = session_instance.authed + ',' + str(toAuth)
-#             db.session.commit()
-#     return 'Shared'
+@userApp.route('/shareSes', methods=['GET', 'POST'])
+@login_required
+def shareSes():
+    '''
+    Shares a session with another user.
+
+    Similar to the admin sharing feature, but for users.
+
+    *Should probably be implemented with other sharing features*
+    :return:
+    '''
+    idthis = request.form.get('id', type=int)
+    shareUser = request.form.get('toUser', type=str)
+    type = request.form.get('type', type=str)
+    thisUser = db.session.query(User).filter_by(username=shareUser).first()
+    toAuth = thisUser.id
+    if type == 'dat':
+        dat_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+        auths = dat_instance.authed.split(',')
+        if toAuth in auths:
+            return 'Already Shared'
+        else:
+            dat_instance.authed = dat_instance.authed + ',' + str(toAuth)
+            userFile = userFiles()
+            userFile.file_id = idthis
+            userFile.user_id = thisUser.id
+            db.session.add(userFile)
+            db.session.commit()
+    else:
+        session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
+        auths = session_instance.authed.split(',')
+        if toAuth in auths:
+            return 'Already Shared'
+        else:
+            session_instance.authed = session_instance.authed + ',' + str(toAuth)
+            db.session.commit()
+    return 'Shared'
 
 
 @userApp.route('/shareFile', methods=['GET', 'POST'])
@@ -415,140 +414,140 @@ def shareFile():
     return 'Shared'
 
 
-# @userApp.route('/set_ses', methods=['GET', 'POST'])
-# @login_required
-# def set_ses():
-#     '''
-#     Function that updates currentMeta/currentDAT based on which type of session is selected by the user.
-#
-#     By setting these tables the user is then able to view/alter the information on the corresponding tabs.
-#     :return:
-#     '''
-#     if request.method == 'POST':
-#         files = []
-#         sesID = request.form.get('id', type=int)
-#         type = request.form.get('type', type=str)
-#         if type == 'dat':
-#             dat = db.session.query(dataFile).filter_by(id=sesID).first()
-#             with open(dat.path, 'r') as DATfile:
-#                 data = DATfile.read()
-#                 cDAT = currentDAT()
-#                 cDAT.user = current_user
-#                 cDAT.file_id = dat.id
-#                 xs = []
-#                 ys = []
-#                 user = db.session.query(User).filter_by(username=current_user.username).first()
-#                 data = data.split("\n")
-#                 try:
-#                     data = [x for x in data if not x.startswith(user.commentChar)]
-#                 except TypeError:
-#                     data = [x for x in data if not x.startswith('#')]
-#                     flash('No comment preference set, defaulting to #')
-#                 for i in data:
-#                     if not i:
-#                         continue
-#                     line = i.split()
-#                     xs.append(float(line[0]))
-#                     ys.append(float(line[1]))
-#                 DAT = [xs, ys]
-#                 DAT = json.dumps(DAT)
-#                 cDAT.DAT = DAT
-#                 cDAT.originDAT = DAT
-#                 if dat.name is not None:
-#                     cDAT.DATname = dat.name
-#                 db.session.add(cDAT)
-#                 db.session.commit()
-#             return 'Saved'
-#         allSes = db.session.query(sessionFiles).filter_by(id=sesID).first()
-#         metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
-#         for meta in metas:
-#             actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
-#             form = GraphingUtility.populate_from_instance(actualMeta)
-#             newCurrent = currentMeta()
-#             form.populate_obj(newCurrent)
-#             newCurrent.path = actualMeta.path
-#             newCurrent.comment = actualMeta.comment
-#             newCurrent.checked = actualMeta.checked
-#             newCurrent.against_E = actualMeta.against_E
-#             newCurrent.file_id = actualMeta.file_id
-#             newCurrent.fit_type = actualMeta.fit_type
-#             newCurrent.fit_pos = actualMeta.fit_pos
-#             newCurrent.fit_range = actualMeta.fit_range
-#             newCurrent.hrm = actualMeta.hrm
-#             newCurrent.user = current_user
-#             newCurrent.session = allSes.name
-#             db.session.add(newCurrent)
-#             db.session.commit()
-#             files.append(newCurrent.file_id)
-#         current_user.current_session = allSes.name
-#         db.session.commit()
-#         data = json.dumps(files)
-#         return data
-#     return 'Set'
+@userApp.route('/set_ses', methods=['GET', 'POST'])
+@login_required
+def set_ses():
+    '''
+    Function that updates currentMeta/currentDAT based on which type of session is selected by the user.
+
+    By setting these tables the user is then able to view/alter the information on the corresponding tabs.
+    :return:
+    '''
+    if request.method == 'POST':
+        files = []
+        sesID = request.form.get('id', type=int)
+        type = request.form.get('type', type=str)
+        if type == 'dat':
+            dat = db.session.query(dataFile).filter_by(id=sesID).first()
+            with open(dat.path, 'r') as DATfile:
+                data = DATfile.read()
+                cDAT = currentDAT()
+                cDAT.user = current_user
+                cDAT.file_id = dat.id
+                xs = []
+                ys = []
+                user = db.session.query(User).filter_by(username=current_user.username).first()
+                data = data.split("\n")
+                try:
+                    data = [x for x in data if not x.startswith(user.commentChar)]
+                except TypeError:
+                    data = [x for x in data if not x.startswith('#')]
+                    flash('No comment preference set, defaulting to #')
+                for i in data:
+                    if not i:
+                        continue
+                    line = i.split()
+                    xs.append(float(line[0]))
+                    ys.append(float(line[1]))
+                DAT = [xs, ys]
+                DAT = json.dumps(DAT)
+                cDAT.DAT = DAT
+                cDAT.originDAT = DAT
+                if dat.name is not None:
+                    cDAT.DATname = dat.name
+                db.session.add(cDAT)
+                db.session.commit()
+            return 'Saved'
+        allSes = db.session.query(sessionFiles).filter_by(id=sesID).first()
+        metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
+        for meta in metas:
+            actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
+            form = GraphingUtility.populate_from_instance(actualMeta)
+            newCurrent = currentMeta()
+            form.populate_obj(newCurrent)
+            newCurrent.path = actualMeta.path
+            newCurrent.comment = actualMeta.comment
+            newCurrent.checked = actualMeta.checked
+            newCurrent.against_E = actualMeta.against_E
+            newCurrent.file_id = actualMeta.file_id
+            newCurrent.fit_type = actualMeta.fit_type
+            newCurrent.fit_pos = actualMeta.fit_pos
+            newCurrent.fit_range = actualMeta.fit_range
+            newCurrent.hrm = actualMeta.hrm
+            newCurrent.user = current_user
+            newCurrent.session = allSes.name
+            db.session.add(newCurrent)
+            db.session.commit()
+            files.append(newCurrent.file_id)
+        current_user.current_session = allSes.name
+        db.session.commit()
+        data = json.dumps(files)
+        return data
+    return 'Set'
 
 
-# @userApp.route('/save_ses', methods=['GET', 'POST'])
-# @login_required
-# def saveSession():
-#     '''
-#     This saves the current session so that the user may resume from the select page whenever they want.
-#
-#     The currentMeta table is parsed and saved into the sessionFiles and sessionFilesMeta tables for more permanence.
-#     A check is done to ensure that the user cannot save the session under a name that has already been created.
-#     :return:
-#     '''
-#     checked = request.form.get("checked", type=int)
-#     namechk = request.form.get("name", type=str)
-#     if checked == 0:
-#         instance = db.session.query(sessionFiles).filter(
-#             and_(sessionFiles.user_id == current_user.get_id(), sessionFiles.name == namechk)).first()
-#         if instance:
-#             data = str(instance.id)
-#             return data
-#
-#     session_file = sessionFiles()
-#     session_file.user = current_user
-#     session_file.user_id == current_user.get_id()
-#     session_file.authed = current_user.get_id()
-#     session_file.name = request.form.get("name", type=str)
-#     session_file.comment = request.form.get("comment", type=str)
-#     session_file.last_used = FileUtility.getTime()
-#     db.session.add(session_file)
-#     db.session.commit()
-#
-#     for instance in db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all():
-#         form = GraphingUtility.populate_from_instance(instance)
-#         session_instance = sessionMeta()
-#         form.populate_obj(session_instance)
-#
-#         session_instance.file_id = instance.file_id
-#         session_instance.path = instance.path
-#         session_instance.comment = instance.comment
-#         session_instance.checked = instance.checked
-#         session_instance.against_E = instance.against_E
-#         session_instance.fit_type = instance.fit_type
-#         session_instance.fit_pos = instance.fit_pos
-#         session_instance.fit_range = instance.fit_range
-#         session_instance.hrm = instance.hrm
-#         session_instance.session = session_file.name
-#         db.session.add(session_instance)
-#         db.session.commit()
-#
-#         session_file_instance = sessionFilesMeta()
-#         session_file_instance.sessionFiles_id = session_file.id
-#         session_file_instance.sessionMeta_id = session_instance.id
-#
-#         instance.session = session_file.name
-#
-#         db.session.add(session_file_instance)
-#         db.session.commit()
-#     current_user.current_session = session_file.name
-#     db.session.commit()
-#     if checked == 1:
-#         return current_user.current_session
-#     data = ({'status': 'Saved', 'name': current_user.current_session})
-#     sending = json.dumps(data)
-#     return sending
+@userApp.route('/save_ses', methods=['GET', 'POST'])
+@login_required
+def saveSession():
+    '''
+    This saves the current session so that the user may resume from the select page whenever they want.
+
+    The currentMeta table is parsed and saved into the sessionFiles and sessionFilesMeta tables for more permanence.
+    A check is done to ensure that the user cannot save the session under a name that has already been created.
+    :return:
+    '''
+    checked = request.form.get("checked", type=int)
+    namechk = request.form.get("name", type=str)
+    if checked == 0:
+        instance = db.session.query(sessionFiles).filter(
+            and_(sessionFiles.user_id == current_user.get_id(), sessionFiles.name == namechk)).first()
+        if instance:
+            data = str(instance.id)
+            return data
+
+    session_file = sessionFiles()
+    session_file.user = current_user
+    session_file.user_id == current_user.get_id()
+    session_file.authed = current_user.get_id()
+    session_file.name = request.form.get("name", type=str)
+    session_file.comment = request.form.get("comment", type=str)
+    session_file.last_used = FileUtility.getTime()
+    db.session.add(session_file)
+    db.session.commit()
+
+    for instance in db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all():
+        form = GraphingUtility.populate_from_instance(instance)
+        session_instance = sessionMeta()
+        form.populate_obj(session_instance)
+
+        session_instance.file_id = instance.file_id
+        session_instance.path = instance.path
+        session_instance.comment = instance.comment
+        session_instance.checked = instance.checked
+        session_instance.against_E = instance.against_E
+        session_instance.fit_type = instance.fit_type
+        session_instance.fit_pos = instance.fit_pos
+        session_instance.fit_range = instance.fit_range
+        session_instance.hrm = instance.hrm
+        session_instance.session = session_file.name
+        db.session.add(session_instance)
+        db.session.commit()
+
+        session_file_instance = sessionFilesMeta()
+        session_file_instance.sessionFiles_id = session_file.id
+        session_file_instance.sessionMeta_id = session_instance.id
+
+        instance.session = session_file.name
+
+        db.session.add(session_file_instance)
+        db.session.commit()
+    current_user.current_session = session_file.name
+    db.session.commit()
+    if checked == 1:
+        return current_user.current_session
+    data = ({'status': 'Saved', 'name': current_user.current_session})
+    sending = json.dumps(data)
+    return sending
 
 
 @userApp.route('/solveNotif', methods=['GET', 'POST'])
