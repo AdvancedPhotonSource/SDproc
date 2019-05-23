@@ -45,14 +45,13 @@
 
 import json
 import os
-from os import abort
 from datetime import datetime
 from operator import and_
 
-#import globus_sdk
-from flask import Blueprint, render_template, url_for, request, send_from_directory, flash
+import globus_sdk
+from flask import Blueprint, render_template, url_for, request, send_from_directory
 from flask_login import login_required, current_user
-#from globusonline.transfer.api_client import get_access_token, TransferAPIClient
+from globusonline.transfer.api_client import get_access_token, TransferAPIClient
 from werkzeug.utils import redirect, secure_filename
 
 from db.db_model import User, sessionFiles, db, currentMeta, dataFile, userFiles, \
@@ -67,7 +66,6 @@ ALLOWED_EXTENSIONS = {'txt', 'mda', 'dat'}
 
 CLIENT_ID = '0c5f2ef9-7898-4d24-bdbf-57c3f1a2b4ea'
 globusClient = None
-
 
 @fileApp.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -268,7 +266,7 @@ def linkGlobus():
         time.sleep(10)
     '''
     global globusClient
-    #globusClient = globus_sdk.NativeAppAuthClient(CLIENT_ID)
+    globusClient = globus_sdk.NativeAppAuthClient(CLIENT_ID)
     globusClient.oauth2_start_flow()
     authorize_url = globusClient.oauth2_get_authorize_url()
     return format(authorize_url)
@@ -280,13 +278,14 @@ def connectGlobus():
     authID = request.form.get('authURL')
     token_response = globusClient.oauth2_exchange_code_for_tokens(authID)
     globus_transfer_data = token_response.by_resource_server['transfer.api.globus.org']
-    #authorizer = globus_sdk.AccessTokenAuthorizer(access_token=globus_transfer_data['access_token'])
-    #tc = globus_sdk.TransferClient(authorizer=authorizer)
+    authorizer = globus_sdk.AccessTokenAuthorizer(access_token=globus_transfer_data['access_token'])
+    tc = globus_sdk.TransferClient(authorizer=authorizer)
     extrepid = '9c9cb97e-de86-11e6-9d15-22000a1e3b52'
-    #ep = tc.get_endpoint(extrepid)
-    #r = tc.operation_ls(extrepid, path='/gdata/dm')
-    #for item in r:
-     #   print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
+    ep = tc.get_endpoint(extrepid)
+    r = tc.operation_ls(extrepid, path='/gdata/dm')
+    for item in r:
+        print("{}: {} [{}]".format(item["type"], item["name"], item["size"]))
+
     # Setup for actually transferring files
     '''
     local_ep = globus_sdk.LocalGlobusConnectPersonal()
@@ -306,10 +305,10 @@ def connectGlobus():
     return 'Connected'
 
 
-#def getApi(username, password):
-    #goAuthTuple = get_access_token(username=username, password=password)
-    #api = TransferAPIClient(goAuthTuple.usernmae, goauth=goAuthTuple.token)
-    #return api
+def getApi(username, password):
+    goAuthTuple = get_access_token(username=username, password=password)
+    api = TransferAPIClient(goAuthTuple.usernmae, goauth=goAuthTuple.token)
+    return api
 
 @fileApp.route('/updateSumCheck', methods=['GET', 'POST'])
 @login_required
