@@ -19,7 +19,7 @@ def toLogin2():
 @users.route("/register2", methods=['GET', 'POST'])
 def register2():
     if current_user.is_authenticated:
-        return redirect(url_for('sessions.index2'))
+        return redirect(url_for('sdproc.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
@@ -43,7 +43,7 @@ def register2():
 @users.route("/login2", methods=['GET', 'POST'])
 def login2():
     if current_user.is_authenticated:
-        return redirect(url_for('sessions.index2'))
+        return redirect(url_for('sdproc.index'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -54,7 +54,7 @@ def login2():
                 clear_rowa_wrapper()
                 current_user.current_session = 'None'
                 db.session.commit()
-                return redirect(url_for('sessions.index2'))
+                return redirect(url_for('sdproc.index'))
             elif user.approved == 2:
                 flash("Your account has been frozen", 'danger')
                 return render_template('new_login.html', form=form, session=session)

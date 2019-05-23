@@ -4,8 +4,8 @@ from db.db_model import db, currentDAT, currentMeta, User, dataFile, userFiles, 
     sessionMeta
 from utilities.graphing_utility import GraphingUtility
 from utilities.file_utility import FileUtility
-from sqlalchemy import and_, desc
-from sdproc.user import clear_rowa_wrapper
+from sqlalchemy import and_
+
 sessions = Blueprint('sessions', __name__)
 
 
@@ -16,16 +16,9 @@ def delete_session():
 
     if type == 'session':
         session = sessionFiles.query.filter_by(id=id).first()
-        session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
-
-        for file in session_files:
-            db.session.delete(file)
-
         db.session.delete(session)
     elif type == 'dat':
         data_file = dataFile.query.filter_by(id=id).first()
-        user_file = userFiles.query.filter_by(file_id=data_file.id).first()
-        db.session.delete(user_file)
         db.session.delete(data_file)
 
     db.session.commit()
@@ -33,7 +26,7 @@ def delete_session():
     return ""
 
 
-@sessions.route('/get_session_comment', methods=['GET', 'POST'])
+@sessions.route('/session_comment', methods=['GET', 'POST'])
 def session_comment():
     type = request.form.get("type")
     id = request.form.get("id")
@@ -78,14 +71,13 @@ def index2():
     This is done with a database query and authenticated in view_output.html.
     :return:
     """
-    users = User.query.filter(id != current_user.id).all()
     if current_user.id == 1:
         user_sessions = sessionFiles.query.all()
         user_data_files = dataFile.query.filter_by(type='dat')
     else:
         user_sessions = sessionFiles.query.filter_by(user_id= current_user.id)
         user_data_files = dataFile.query.filter_by(and_(type='dat', authed=str(current_user.id)))
-    return render_template('new_session.html', title='Select Session', sessions=user_sessions, data_files = user_data_files, users = users)
+    return render_template('new_session.html', title='Select Session', sessions=user_sessions, data_files = user_data_files)
 
 
 @sessions.route('/clear_cmeta', methods=['GET', 'POST'])
@@ -108,63 +100,43 @@ def clear_cmeta():
     return 'Cleared'
 
 
-@sessions.route("/share_session", methods=['GET', 'POST'])
+@sessions.route('/shareSes', methods=['GET', 'POST'])
 @login_required
-def share_session():
-    user_id = request.form.get("user_id")
-    user = User.query.filter_by(id=user_id).first()
-    type = request.form.get("type")
-    file_id = request.form.get("session_id")
+def shareSes():
+    '''
+    Shares a session with another user.
 
-    root_folder = dataFile.query.filter(and_(dataFile.name == "/" + user.username + "/", dataFile.treeType == "Root")).first()
+    Similar to the admin sharing feature, but for users.
 
-    if type == 'session':
-        shared_session = sessionFiles.query.filter_by(id=file_id).first()
-        new_session = sessionFiles(name=shared_session.name, user_id=user.id, user=user, comment=shared_session.comment,
-                                authed=str(user.id), last_used=shared_session.last_used)
-        db.session.add(new_session)
-        session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=shared_session.id).all()
-        db.session.commit()
-        add_session_files(session_files)
-        flash("You have shared your file.", "success")
-        return ""
-    elif type == 'dat':
-        shared_file = dataFile.query.filter_by(id=file_id).first()
-        new_file = dataFile(name=shared_file.name, path=shared_file.path, comment=shared_file.comment,
-                            authed=str(user.id), comChar=shared_file.comChar, type=shared_file.type,
-                            parentID=root_folder.id, treeType=shared_file.treeType)
-        db.session.add(new_file)
-        db.session.commit()
-        add_user_file(user)
-        flash("You have shared your file.", "success")
-        return ""
-
-
-def add_user_file(user):
-    user = user
-    new_file = dataFile.query.order_by(desc('id')).first()
-
-    new_user_file = userFiles(user_id=user.id,file_id=new_file.id)
-    db.session.add(new_user_file)
-    db.session.commit()
-
-
-def add_session_files(session_files):
-    session_files = session_files
-    new_session = sessionFiles.query.order_by(desc('id')).first()
-
-    for file in session_files:
-        new_session_file = sessionFilesMeta(sessionFiles_id=new_session.id, sessionMeta_id=file.sessionMeta_id)
-        db.session.add(new_session_file)
-
-    db.session.commit()
-
-
-@sessions.route('/new_session2', methods=['POST'])
-def new_session2():
-    clear_cmeta()
-    clear_rowa_wrapper()
-    return ""
+    *Should probably be implemented with other sharing features*
+    :return:
+    '''
+    idthis = request.form.get('id', type=int)
+    shareUser = request.form.get('toUser', type=str)
+    type = request.form.get('type', type=str)
+    thisUser = db.session.query(User).filter_by(username=shareUser).first()
+    toAuth = thisUser.id
+    if type == 'dat':
+        dat_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+        auths = dat_instance.authed.split(',')
+        if toAuth in auths:
+            return 'Already Shared'
+        else:
+            dat_instance.authed = dat_instance.authed + ',' + str(toAuth)
+            userFile = userFiles()
+            userFile.file_id = idthis
+            userFile.user_id = thisUser.id
+            db.session.add(userFile)
+            db.session.commit()
+    else:
+        session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
+        auths = session_instance.authed.split(',')
+        if toAuth in auths:
+            return 'Already Shared'
+        else:
+            session_instance.authed = session_instance.authed + ',' + str(toAuth)
+            db.session.commit()
+    return 'Shared'
 
 
 @sessions.route('/set_ses', methods=['GET', 'POST'])
