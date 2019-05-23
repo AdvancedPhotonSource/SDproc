@@ -124,6 +124,37 @@ def data():
     return json.dumps(data)
 
 
+@fileApp.route("/scans_data", methods=["GET","POST"])
+def scans_data():
+    data = []
+    currentUser = current_user.get_id()
+
+    if currentUser == 1:
+        nodes = dataFile.query.all()
+    else:
+        nodes = dataFile.query.filter_by(authed=currentUser)
+
+    for node in nodes:
+        id = node.id
+        title = node.name
+        parent = node.parentID
+        type = node.treeType
+        file_type = node.type
+
+        if file_type == "mda" or file_type == "txt" or file_type == "":
+            if parent == 0:
+                data.append({"text": title, "id": id, "parent": "#", "type": type, "state": {"opened": "true", "disabled": "true"}})
+            elif type == "Folder":
+                data.append({"text": title, "id": id, "parent": parent, "type": type, "state": {"disabled": "true"}})
+            else:
+                data.append({"text": title, "id": id, "parent": parent, "type" : type})
+
+    with open('static/scans_data.json', 'w') as outfile:
+        json.dump(data, outfile)
+
+    return json.dumps(data)
+
+
 @fileApp.route("/createNode", methods=["GET","POST"])
 def create():
     parent = request.form.get("parent")
