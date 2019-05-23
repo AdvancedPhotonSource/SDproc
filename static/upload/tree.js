@@ -1,6 +1,6 @@
-$y(document).ready(function(){
+$(document).ready(function(){
 
-     $y("#tree").jstree({
+     $("#tree").jstree({
         'core' : {
             "check_callback" : function(o, n, p, i, m) {
                 if (m && m.dnd && m.pos !== 'i') { return false; }
