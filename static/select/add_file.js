@@ -43,9 +43,6 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 */
 $(document).ready(function(){
-    $('nav li').removeClass('active');
-    $('#navSelect').addClass('active');
-
     $('#finito').prop('disabled', true);
     localStorage.removeItem('previous');
     var rows = $('tr.item');

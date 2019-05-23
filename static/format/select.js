@@ -136,10 +136,6 @@ $(function (){
 
 
 $(document).ready( function() {
-
-    $('nav li').removeClass('active');
-    $('#navData').addClass('active');
-
     $('#unit').val('meV');
     setPlotAgainst();
     asynchOnLoad()

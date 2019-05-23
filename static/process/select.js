@@ -101,9 +101,6 @@ function startProc(){
 
 
 $(document).ready( function() {
-    $('nav li').removeClass('active');
-    $('#navProcess').addClass('active');
-
     asynchOnLoad()
     $('#settingsBtn').hide();
     $('#outputBtn').prop('disabled', true);

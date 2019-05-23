@@ -43,9 +43,6 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 */
 $(document).ready(function(){
-    $('nav li').removeClass('active');
-    $('#navUpload').addClass('active');
-
     localStorage.removeItem('previous_upload');
     var rows = $('tr.item');
     rows.removeClass("highlight")
