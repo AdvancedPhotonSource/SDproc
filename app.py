@@ -57,9 +57,8 @@ For debugging server use:
 # TODO: Have fileComments searchable on manageFiles and sessionComments searchable on selectSession
 # TODO: Make script to restart server
 
-from flask import redirect, request
+from flask import redirect,request
 from flask_login import LoginManager
-
 from flask_app import app
 from db.api.user_db_api import UserDbApi
 
@@ -69,13 +68,8 @@ from sdproc.sdproc import sdprocApp
 from sdproc.logbook import logbookApp
 from sdproc.comment import commentApp
 from sdproc.file import fileApp
-from sdproc.users.routes import users
-
-
 
 login_manager = LoginManager()
-login_manager.login_view = 'user.login'
-login_manager.login_message_category = 'info'
 login_manager.init_app(app)
 
 userDbApi = UserDbApi()
@@ -86,26 +80,19 @@ app.register_blueprint(hrmApp)
 app.register_blueprint(logbookApp)
 app.register_blueprint(fileApp)
 app.register_blueprint(commentApp)
-app.register_blueprint(users)
-
-
 
 """ REMOVE THIS ON SERVER """
-
-
 @app.before_request
 def fixURL():
-    url = request.path
-    if 'SDproc' in url:
-        fixedUrl = url[7:]
-        return redirect(fixedUrl, 307)
-    return
-
+	url = request.path
+	if 'SDproc' in url:
+		fixedUrl = url[7:]
+		return redirect(fixedUrl, 307)
+	return
 
 @login_manager.user_loader
 def load_user(user_id):
-    return userDbApi.getUserById(user_id)
-
+	return userDbApi.getUserById(user_id)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+	app.run(host='0.0.0.0', port=5001, debug=True)
