@@ -68,6 +68,12 @@ with context %}
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/static/format/select.js"></script>
 
+    <!-- JSTree links -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.5/jstree.min.js"></script>
+    <script type="text/javascript" src="/static/format/tree.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.5/themes/default/style.min.css" />
+
 </head>
 <body role="document">
 <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -147,44 +153,7 @@ with context %}
                 <h4 class="modal-title">Choose a File</h4>
             </div>
             <div class="modal-body scrollable">
-                {% block header %}{% endblock %}
-                {% block table %}
-                <table id="filePicker">
-                    <thead class="fixedHead">
-                        {{ thead() }}
-                    </thead>
-                    <tbody class="scrollable">
-                        {% if data %}
-                            {% for post in data %}
-                                {% set auths = post.authed.split(',') %}
-                                {% for aID in auths %}
-                                    {% if aID|int() == user.get_id()|int() %}
-                                        <tr class="item fixedHead" ondblclick="moveFile()">
-                                            <td class="name" colspan="2" id="{{ post.id }}">
-                                                {%- if post.name == ".." -%}
-                                                Parent folder
-                                                {%- else -%}
-                                                {{ post.name }}
-                                                {%- endif -%}
-                                            </a></td>
-                                            <td class="modified">
-                                                <time datetime="{{ post.modified }}">{{ post.modified }}</time>
-                                            </td>
-                                            <td class="size">
-                                                {% if post.size %}
-                                                {{ post.size }}
-                                                {% else %}
-                                                -
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endfor %}
-                        {% endif %}
-                    </tbody>
-                </table>
-                {% endblock %}
+                <div id="tree"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

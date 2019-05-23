@@ -48,6 +48,8 @@ from flask_login import current_user, login_required
 from flask_app import app
 
 
+from sessions.routes import add_user_file
+
 import matplotlib
 import mpld3
 
@@ -66,7 +68,7 @@ from db.db_model import db, User, logBook, currentMeta, currentDAT, userFiles, H
 import json
 import numpy
 import uuid
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 
 hrmApp = Blueprint('hrm', __name__)
 
@@ -326,6 +328,7 @@ def generateOutput():
 	form = InputForm(request.form)
 	id = request.form.get('idnum', type=str)
 	outType = request.form.get('outType', type=int)
+	print outType
 	cordData = request.form.get('cordData', type=str)
 	sesID = request.form.get('session', type=int)
 	datFName = request.form.get('datFName', type=str)
@@ -460,7 +463,7 @@ def generateOutput():
 			db.session.add(dfile)
 			userFile = userFiles()
 			userFile.file_id = dfile.id
-			userFile.user_id = current_user.get_id()
+			userFile.user_id = current_user.id
 			db.session.add(userFile)
 			db.session.commit()
 		with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
@@ -499,11 +502,8 @@ def generateOutput():
 		dfile.parentID = parentNode.id
 		dfile.treeType = "File"
 		db.session.add(dfile)
-		userFile = userFiles()
-		userFile.file_id = dfile.id
-		userFile.user_id = current_user.get_id()
-		db.session.add(userFile)
 		db.session.commit()
+		add_user_file(current_user)
 		return datFName
 	if datFName is not None:
 		return redirect(url_for('file.sendOut', filename=filename, displayName=datFName))

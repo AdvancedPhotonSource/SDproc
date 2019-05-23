@@ -1,135 +1,141 @@
-<!--
--    Copyright (c) UChicago Argonne, LLC. All rights reserved.
--
--    Copyright UChicago Argonne, LLC. This software was produced
--    under U.S. Government contract DE-AC02-06CH11357 for Argonne National
--    Laboratory (ANL), which is operated by UChicago Argonne, LLC for the
--    U.S. Department of Energy. The U.S. Government has rights to use,
--    reproduce, and distribute this software.  NEITHER THE GOVERNMENT NOR
--    UChicago Argonne, LLC MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR
--    ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  If software is
--    modified to produce derivative works, such modified software should
--    be clearly marked, so as not to confuse it with the version available
--    from ANL.
--
--    Additionally, redistribution and use in source and binary forms, with
--    or without modification, are permitted provided that the following
--    conditions are met:
--
--        * Redistributions of source code must retain the above copyright
--          notice, this list of conditions and the following disclaimer.
--
--        * Redistributions in binary form must reproduce the above copyright
--          notice, this list of conditions and the following disclaimer in
--          the documentation and/or other materials provided with the
--          distribution.
--
--        * Neither the name of UChicago Argonne, LLC, Argonne National
--          Laboratory, ANL, the U.S. Government, nor the names of its
--          contributors may be used to endorse or promote products derived
--          from this software without specific prior written permission.
--
--    THIS SOFTWARE IS PROVIDED BY UChicago Argonne, LLC AND CONTRIBUTORS
--    AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
--    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
--    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UChicago
--    Argonne, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
--    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
--    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
--    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
--    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
--    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
--    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
--    POSSIBILITY OF SUCH DAMAGE.
--->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta content="width=device-width, initialscale=1" name="viewport">
-    <title>Scandataproc</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/logbook/logbook.js"></script>
-    <link href="/static/logbook/session.css" rel="stylesheet">
-</head>
-<body>
-    <h2>Session Data</h2>
-    <div class="inlinel">
-        <button onclick="deleteAll()" class="btn btn-primary btn-xs" title="Clear logbook">
-            Delete All
-        </button>
-    </div>
-    <div class="inliner">
-        <a onclick="parent.history.back();">Back</a>
-    </div>
-    <br class="clearBoth" />
-    </br>
-    {% if data %}
-        {% for post in data %}
-            <hr>
-            <table>
-                <tr>
-                    <td valign="top" width="25%">
-                        <div class="inlinel">
-                            <h3>Inputs</h3>
-                        </div>
-                        <div class="inline-name">
-                            {{ post.name }}
-                        </div>
-                        <br class="clearBoth" />
-                        <table class="bordered" cellpadding="10">
-                            {% for i in range(0, post.columns|length())  %}
+{% extends "layout.html" %}
+
+{% block static %}
+    <link rel="stylesheet" href="/static/session/session.css">
+
+{% endblock static %}
+
+{% block content %}
+    <div class="content">
+        <div class="jumbotron">
+            <h3>Select How to Proceed</h3>
+            <p>Choose to start a new session or continue a previous session.</p>
+            <p class="smallText">Use browser zoom if everything does not fit on your screen (Ctrl and +/- or Cmd and +/-)</p>
+        </div>
+        <div class="row text-center">
+            <div class="col-md-6">
+                <button class="btn btn-primary btn-lg" onclick="continue_session()">Continue Session</button>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-primary btn-lg" onclick="new_session()">Start New Session</button>
+            </div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-12 text center">
+                        <label for="search" class="form-control-label">Search</label>
+                        <input class="form-control" id="search" type="text" placeholder="Search.."><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 scroll">
+                        <table class="table table-bordered text-center">
+                            <thead>
                                 <tr>
-                                    <td class="bordered">{{ post.bools[i].data }}</td>
-                                    {% if post.columns[i].data %}
-                                        <td class="bordered"><label style="width:300px;">{{ post.columns[i].label }}</label></td>
-                                        <td class="bordered">{{ post.columns[i].data }}</td>
-                                    {% else %}
-                                        <td class="bordered" colspan="2"><label style="width:300px;">{{ post.columns[i].label }}</label></td>
-                                    {% endif %}
+                                    <th>Name</th>
+                                    <th>Last Modified</th>
                                 </tr>
-                            {% endfor %}
+                            </thead>
+                            <tbody id="sessionTable">
+                                {% if sessions %}
+                                    {% for session in sessions %}
+                                        <tr class="click-able" id="{{ session.id }}" type="session" name="{{ session.name }}">
+                                            <td>{{ session.name }}</td>
+                                            <td>{{ session.last_used }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if data_files %}
+                                    {% for data_file in data_files %}
+                                        <tr class="click-able" id="{{ data_file.id }}" type="{{ data_file.type }}" name="{{ data_file.name }}">
+                                            <td>{{ data_file.name }}</td>
+                                            <td> - </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
                         </table>
-                    </td>
-                    <td valign="top" width="50%">
-                        <div class="inlinel">
-                            <h3>Plot</h3>
-                        </div>
-                        <div class="inlineSesL">
-                            <h3>Session:</h3>
-                        </div>
-                        <div class="inlineInfo">
-                            {{ post.ses }}
-                        </div>
-                        <div class="inlineStampL">
-                            <h3>Logged:</h3>
-                        </div>
-                        <div class="inlineInfo">
-                            {{ post.time.replace(microsecond=0) }}
-                        </div>
-                        {{ post.plot|safe }}
-                    </td>
-                    <td valign="top" width="60%">
-                        <p>
-                            <button onclick="deleteEntry({{ post.id }})" class="btn btn-primary btn-xs" title="Remove this entry from the log">
-                                Delete
-                            </button>
-                            <br/>
-                            <br/>
-                            <br/>
-                            {{ post.comment }}
-                        </p>
-                    </td>
-                </tr>
-            </table>
-        {% endfor %}
-    {% else %}
-        No metadata stored
-    {% endif %}
-<footer>
-    <div class="text-center">
-        <p>Copyright (c) UChicago Argonne, LLC. All rights reserved.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 text-center"><br>
+                        <button class="btn btn-danger" onclick="delete_modal()">Delete</button><br><br>
+                    </div>
+                    <div class="col-md-6 text-center"><br>
+                        <button class="btn btn-info" onclick="share_modal()">Share</button><br><br>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-center">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="comment" class="form-control-label">Comment(s):</label>
+                        <textarea class="form-control" rows="5" id="comment" name="comment"></textarea><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <button class="btn btn-info " onclick="save_comment()" title="Save the new comment">Save Comment</button><br><br>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</footer>
-</body>
-</html>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalTitle">Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="delete-modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="delete_session()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shareModalTitle">Share</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="share-modal-body">
+                    <p>Choose a user to share the file with:</p>
+                    <table class="table table-bordered text-center">
+                            <thead>
+                                <tr>
+                                    <th>Users</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                {% for user in users %}
+                                    <tr class="click-user" id="{{ user.id }}" name="{{ user.username }}">
+                                        <td>{{ user.username }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-info" onclick="share_session()">Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/static/session/session.js"></script>
+{% endblock scripts %}

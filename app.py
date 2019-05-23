@@ -68,6 +68,7 @@ from sdproc.sdproc import sdprocApp
 from sdproc.logbook import logbookApp
 from sdproc.comment import commentApp
 from sdproc.file import fileApp
+from sdproc.sessions.routes import sessions
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -80,6 +81,7 @@ app.register_blueprint(hrmApp)
 app.register_blueprint(logbookApp)
 app.register_blueprint(fileApp)
 app.register_blueprint(commentApp)
+app.register_blueprint(sessions)
 
 """ REMOVE THIS ON SERVER """
 @app.before_request
