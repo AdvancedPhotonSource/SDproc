@@ -163,4 +163,4 @@ def sesData():
 				data.append({'form': form, 'plot': plot, 'id': instance.id, 'comment': comment, 'columns': columns,
 				             'bools': bools, 'name': instance.name, 'time': instance.timestamp,
 				             'ses': instance.session})
-	return render_template("session.html", data=data)
+	return render_template("logbook.html", data=data)

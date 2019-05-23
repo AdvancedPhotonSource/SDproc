@@ -92,7 +92,7 @@ def index2():
             user_sessions = None
             user_data_files = None
 
-    return render_template('session.html', title='Select Session', sessions=user_sessions, data_files = user_data_files, users = users)
+    return render_template('logbook.html', title='Select Session', sessions=user_sessions, data_files = user_data_files, users = users)
 
 
 @sessions.route('/clear_cmeta', methods=['GET', 'POST'])
