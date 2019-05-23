@@ -157,8 +157,8 @@ def rename():
 def move():
     parent = request.form.get("parent")
     node = request.form.get("node")
-    print parent
-    print node
+    print parent;
+    print node;
 
     currNode = dataFile.query.filter_by(id=node).first()
 
