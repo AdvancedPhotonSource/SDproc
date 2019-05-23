@@ -73,7 +73,47 @@
     {% block static %}{% endblock static %}
 </head>
 <body>
-
+    <!--<nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle collapsed" aria-controls="navbar" aria-expanded="false" data-target="#navbar" data-toggle="collapse" type="button">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="login">Scandataproc</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li id="navUpload"><a href="upload">Manage Files</a></li>
+                    <li id="navSelect"><a href="select">Select Session</a></li>
+                    <li id="navData"><a href="data">Scans</a></li>
+                    <li id="navProcess"><a href="process">Sum</a></li>
+                    <li id="navModifyDAT"><a href="modifyDAT">Modify DAT</a></li>
+                    <li id="navProfile"><a href="profile">Profile</a></li>
+                    {% if current_user.is_authenticated %}
+                        {% if user.isAdmin == 1 %}
+                            <li id="navAdmin"><a href="admin">Admin</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                {% if current_user.is_authenticated %}
+                    <ul class="nav navbar-nav navbar-right">
+                        <div class="margin-info pull-right">
+                            <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
+                                <br/>
+                                <a href="/db">Logbook</a>
+                                <br/>
+                                <a onclick="logout()">Logout</a>
+                                <br/>
+                            </p>
+                        </div>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    -->
     <header class="site-header">
         <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
             <div class="container">
@@ -89,8 +129,8 @@
                         <a class="nav-item nav-link" href="{{ url_for('hrm.process') }}">Sum</a>
                         <a class="nav-item nav-link" href="{{ url_for('hrm.modifyDAT') }}">Modify DAT</a>
                         {% if current_user.is_authenticated %}
-                            {% if current_user.isAdmin == 1 %}
-                                <a class="nav-item nav-link" href="{{ url_for('user.admin') }}">Admin</a>
+                            {% if user.isAdmin == 1 %}
+                                <a class="nav-item nav-link" href="{{ url_for('users.register2') }}">Admin</a>
                             {% endif %}
                         {% endif %}
                     </div>
@@ -101,7 +141,7 @@
                             <a class="nav-item nav-link" href="{{ url_for('logbook.sesData') }}">Logbook</a>
                             <a class="nav-item nav-link" href="{{ url_for('user.logout') }}">Logout</a>
                         {% else %}
-                            <a class="nav-item nav-link" href="{{ url_for('users.login2') }}">Login</a>
+                            <a class="nav-item nav-link" href="{{ url_for('user.login') }}">Login</a>
                             <a class="nav-item nav-link" href="{{ url_for('users.register2') }}">Register</a>
                         {% endif %}
                     </div>
@@ -112,7 +152,7 @@
 
     <main role="main" class="container">
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
@@ -130,13 +170,10 @@
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script>
-        var $x = jQuery.noConflict();
-    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-    <footer id="footer">
+    <footer>
         <div class="text-center">
             <p>Copyright (c) UChicago Argonne, LLC. All rights reserved.</p>
         </div>
