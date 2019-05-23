@@ -179,13 +179,6 @@ function sendfileForm()
         processData: false,
         async: false,
         success: function (){
-            /*$('#navTable').load("/SDproc/upload #navTable>*", function(){
-                setupRows();
-                setupClick();
-                resetForm();
-                sortTable($('#filePicker'));
-                return;
-            })*/
             $('#tree').jstree(true).refresh();
         },
         error: function(request){
