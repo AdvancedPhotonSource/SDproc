@@ -65,7 +65,6 @@ fileApi = FileDbApi()
 @userApp.route('/', methods=['GET', 'POST'])
 def toLogin():
 	'''Ensures users will be redirected to login page even without /login'''
-	os.system("whoami")
 	return redirect(url_for('user.login'))
 
 
