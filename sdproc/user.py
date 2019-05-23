@@ -42,7 +42,7 @@
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
-import json
+import json, os
 from datetime import datetime
 from sqlalchemy import and_
 
@@ -51,7 +51,7 @@ from flask_login import login_required, login_user, current_user
 from werkzeug.utils import redirect
 
 from db.db_model import User, sessionFiles, notification, db, currentMeta, dataFile, HRM, currentDAT, userFiles, \
-    sessionFilesMeta, sessionMeta
+	sessionFilesMeta, sessionMeta
 from forms.login_form import LoginForm
 
 from forms.register_form import RegisterForm
@@ -64,76 +64,77 @@ fileApi = FileDbApi()
 
 @userApp.route('/', methods=['GET', 'POST'])
 def toLogin():
-    '''Ensures users will be redirected to login page even without /login'''
-    return redirect(url_for('user.login'))
+	'''Ensures users will be redirected to login page even without /login'''
+	os.system("whoami")
+	return redirect(url_for('user.login'))
 
 
 @userApp.route('/reg', methods=['GET', 'POST'])
 def register():
-    '''
-    Template generator method for the register page.
+	'''
+	Template generator method for the register page.
 
-     Accepts register form, creates baseline user, sends notification to admin requesting account approval.
-     :return:
-    '''
-    form = RegisterForm(request.form)
-    if request.method == 'POST' and form.validate():
-        user = User()
-        form.populate_obj(user)
-        strength = user.is_strong_pass(form.password.data)
-        if strength['password_ok']:
-            user.set_password(form.password.data)
-            user.approved = 0
-            user.isAdmin = 0
+	 Accepts register form, creates baseline user, sends notification to admin requesting account approval.
+	 :return:
+	'''
+	form = RegisterForm(request.form)
+	if request.method == 'POST' and form.validate():
+		user = User()
+		form.populate_obj(user)
+		strength = user.is_strong_pass(form.password.data)
+		if strength['password_ok']:
+			user.set_password(form.password.data)
+			user.approved = 0
+			user.isAdmin = 0
 
-            db.session.add(user)
+			db.session.add(user)
 
-            notif = notification()
-            notif.originUser = user.username
-            notif.type = 'Create Account'
-            notif.timestamp = datetime.now()
+			notif = notification()
+			notif.originUser = user.username
+			notif.type = 'Create Account'
+			notif.timestamp = datetime.now()
 
-            db.session.add(notif)
+			db.session.add(notif)
 
-            db.session.commit()
+			db.session.commit()
 
-            return redirect(url_for('user.login'))
-        else:
-            for key, value in strength.iteritems():
-                if value:
-                    flash(key)
-    return render_template('register.html', form=form)
+			return redirect(url_for('user.login'))
+		else:
+			for key, value in strength.iteritems():
+				if value:
+					flash(key)
+	return render_template('register.html', form=form)
 
 
 @userApp.route('/login', methods=['GET', 'POST'])
 def login():
-    '''
-    Template generator method for the login page
+	'''
+	Template generator method for the login page
 
-    Accepts login form and ensure that the user has permission to login.
+	Accepts login form and ensure that the user has permission to login.
 
-    This is done by using Flask's builtin login_user after checking that the user is approved in the database
-    :return:
-    '''
-    form = LoginForm(request.form)
-    if request.method == 'POST' and form.validate():
-        user = form.get_user()
-        # user.approved = 1
-        # user.isAdmin = 1
-        if user.approved == 1:
-            login_user(user)
-            clear_cmeta()
-            clear_rowa_wrapper()
-            current_user.current_session = "None"
-            db.session.commit()
-            return redirect(url_for('sessions.index2'))
-        if user.approved == 2:
-            refusePrompt = "Your account has been frozen"
-            return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
-        if user.approved == 0:
-            refusePrompt = "Wait for an admin to approve your account"
-            return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
-    return render_template('login_form.html', form=form, session=session)
+	This is done by using Flask's builtin login_user after checking that the user is approved in the database
+	:return:
+	'''
+	form = LoginForm(request.form)
+	if request.method == 'POST' and form.validate():
+		user = form.get_user()
+		# user.approved = 1
+		# user.isAdmin = 1
+		if user.approved == 1:
+			login_user(user)
+			clear_cmeta()
+			clear_rowa_wrapper()
+			current_user.current_session = "None"
+			db.session.commit()
+			return redirect(url_for('sessions.index2'))
+		if user.approved == 2:
+			refusePrompt = "Your account has been frozen"
+			return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
+		if user.approved == 0:
+			refusePrompt = "Wait for an admin to approve your account"
+			return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
+	return render_template('login_form.html', form=form, session=session)
 
 @userApp.route('/logout')
 @login_required
@@ -146,207 +147,207 @@ def logout():
 @userApp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    '''
-    Template generator method for the profile page.
+	'''
+	Template generator method for the profile page.
 
-    Sends information on the current user and their notifications as template.
+	Sends information on the current user and their notifications as template.
 
-    This is done by querying respective databases.
-    :return:
-    '''
-    notifData = []
-    thisProfile = []
+	This is done by querying respective databases.
+	:return:
+	'''
+	notifData = []
+	thisProfile = []
 
-    thisProfile.insert(0, {'username': current_user.username, 'email': current_user.email,
-                           'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
-                           'commentChar': current_user.commentChar})
+	thisProfile.insert(0, {'username': current_user.username, 'email': current_user.email,
+						   'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
+						   'commentChar': current_user.commentChar})
 
-    # notifications = notification.query.order_by('id')
-    # for instance in notifications:
-    #    userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
-    #    if userInfo != None:
-    #        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
-    #                             'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
-    #                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
-    #                             'reason': userInfo.reason})
-    return render_template('profile.html', user=current_user, notifications=notifData, userProf=thisProfile)
+	# notifications = notification.query.order_by('id')
+	# for instance in notifications:
+	#    userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
+	#    if userInfo != None:
+	#        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
+	#                             'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
+	#                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
+	#                             'reason': userInfo.reason})
+	return render_template('profile.html', user=current_user, notifications=notifData, userProf=thisProfile)
 
 
 @userApp.route('/updateProf', methods=['GET', 'POST'])
 @login_required
 def updateProf():
-    '''
-    Updates the current user's profile in the database with any new information they may have added.
+	'''
+	Updates the current user's profile in the database with any new information they may have added.
 
-    This is done by accepting request information (AJAX generally) and updating the User database accordingly
-    :return:
-    '''
-    user_instance = db.session.query(User).filter_by(username=current_user.username).first()
-    comChar = request.form.get('comChar', type=str)
-    password = request.form.get('pass', type=str)
-    email = request.form.get('email', type=str)
+	This is done by accepting request information (AJAX generally) and updating the User database accordingly
+	:return:
+	'''
+	user_instance = db.session.query(User).filter_by(username=current_user.username).first()
+	comChar = request.form.get('comChar', type=str)
+	password = request.form.get('pass', type=str)
+	email = request.form.get('email', type=str)
 
-    if comChar != '0':
-        user_instance.commentChar = comChar
-    if password != '0':
-        user_instance.set_password(password)
-    if email != '0':
-        user_instance.email = email
-    db.session.commit()
-    return 'Updated'
+	if comChar != '0':
+		user_instance.commentChar = comChar
+	if password != '0':
+		user_instance.set_password(password)
+	if email != '0':
+		user_instance.email = email
+	db.session.commit()
+	return 'Updated'
 
 
 @userApp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-    '''
-    Template generator method for the admin page.
+	'''
+	Template generator method for the admin page.
 
-    Gets all sessions, files, users, and notifications.
+	Gets all sessions, files, users, and notifications.
 
-    This is done by querying each respective sqlite database.
-    Information is sent with the template to be parsed as needed by the user.
-    :return:
-    '''
-    if current_user.isAdmin != 1:
-        return redirect(url_for('index'))
-    names = db.session.query(User)
-    sesData = []
-    fileData = []
-    notifData = []
-    hrmData = []
-    sessions = sessionFiles.query.all()
-    for instance in sessions:
-        lastMod = instance.last_used
-        sesData.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
-                           'authed': instance.authed,
-                           'modified': lastMod})
-    files = dataFile.query.order_by('id')
-    for instance in files:
-        fsize = FileUtility.size(instance.path)
-        lastMod = FileUtility.modified(instance.path)
-        temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
-        modname = [instance.name + temp]
-        fileData.insert(0,
-                        {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
-                         'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+	This is done by querying each respective sqlite database.
+	Information is sent with the template to be parsed as needed by the user.
+	:return:
+	'''
+	if current_user.isAdmin != 1:
+		return redirect(url_for('index'))
+	names = db.session.query(User)
+	sesData = []
+	fileData = []
+	notifData = []
+	hrmData = []
+	sessions = sessionFiles.query.all()
+	for instance in sessions:
+		lastMod = instance.last_used
+		sesData.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
+						   'authed': instance.authed,
+						   'modified': lastMod})
+	files = dataFile.query.order_by('id')
+	for instance in files:
+		fsize = FileUtility.size(instance.path)
+		lastMod = FileUtility.modified(instance.path)
+		temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
+		modname = [instance.name + temp]
+		fileData.insert(0,
+						{'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
+						 'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
-    notifications = notification.query.order_by('id')
-    for instance in notifications:
-        userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
-        if userInfo != None:
-            notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
-                                 'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
-                                 'fullName': userInfo.fullName, 'institution': userInfo.institution,
-                                 'reason': userInfo.reason})
+	notifications = notification.query.order_by('id')
+	for instance in notifications:
+		userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
+		if userInfo != None:
+			notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
+								 'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
+								 'fullName': userInfo.fullName, 'institution': userInfo.institution,
+								 'reason': userInfo.reason})
 
-    hrms = HRM.query.order_by('id')
-    for instance in hrms:
-        hrmData.insert(0, {'name': instance.name, 'hrm_e0': instance.hrm_e0, 'hrm_bragg1': instance.hrm_bragg1,
-                           'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
-                           'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
-                           'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
+	hrms = HRM.query.order_by('id')
+	for instance in hrms:
+		hrmData.insert(0, {'name': instance.name, 'hrm_e0': instance.hrm_e0, 'hrm_bragg1': instance.hrm_bragg1,
+						   'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
+						   'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
+						   'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
 
-    return render_template('admin.html', user=current_user, fileData=fileData, sesData=sesData,
-                           names=names, notifications=notifData, hrms=hrms)
+	return render_template('admin.html', user=current_user, fileData=fileData, sesData=sesData,
+						   names=names, notifications=notifData, hrms=hrms)
 
 
 @userApp.route('/freeze', methods=['GET', 'POST'])
 @login_required
 def freeze():
-    '''
-    Freezes the designated user's account so that they may no longer login
+	'''
+	Freezes the designated user's account so that they may no longer login
 
-    This is done by setting 'aUser'.approved to be 2.
+	This is done by setting 'aUser'.approved to be 2.
 
-    Only accessable by admins.
-    :return:
-    '''
-    user = request.form.get('user', type=str)
-    freeze = request.form.get('freeze', type=int)
-    user_instance = db.session.query(User).filter_by(username=user).first()
-    if freeze == 1:
-        user_instance.approved = 2
-    else:
-        user_instance.approved = 1
-    db.session.commit()
-    return 'Updated'
+	Only accessable by admins.
+	:return:
+	'''
+	user = request.form.get('user', type=str)
+	freeze = request.form.get('freeze', type=int)
+	user_instance = db.session.query(User).filter_by(username=user).first()
+	if freeze == 1:
+		user_instance.approved = 2
+	else:
+		user_instance.approved = 1
+	db.session.commit()
+	return 'Updated'
 
 @userApp.route('/clear_cmeta', methods=['GET', 'POST'])
 @login_required
 def clear_cmeta():
-    '''
-    Function that clears the current user's currentMeta Table.
+	'''
+	Function that clears the current user's currentMeta Table.
 
-    This is usually called when starting a new session or resuming an old one so that prexisting data does not cause conflicts.
-    :return:
-    '''
-    current_user.current_session = 'None'
-    deleting = db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all()
-    for i in deleting:
-        db.session.delete(i)
-    deleting = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).all()
-    for i in deleting:
-        db.session.delete(i)
-    db.session.commit()
-    return 'Cleared'
+	This is usually called when starting a new session or resuming an old one so that prexisting data does not cause conflicts.
+	:return:
+	'''
+	current_user.current_session = 'None'
+	deleting = db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all()
+	for i in deleting:
+		db.session.delete(i)
+	deleting = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).all()
+	for i in deleting:
+		db.session.delete(i)
+	db.session.commit()
+	return 'Cleared'
 
 
 @userApp.route('/clearPart_cmeta', methods=['GET', 'POST'])
 @login_required
 def clearPart_cmeta():
-    '''
-    Function that deletes a single file from the current users currentMeta table.
+	'''
+	Function that deletes a single file from the current users currentMeta table.
 
-    This is called when removing a file on the format page.
-    :return:
-    '''
-    idthis = request.form.get('id', type=int)
-    deleting = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                         currentMeta.file_id == idthis,
-                                                         currentMeta.session == current_user.current_session)).first()
-    db.session.delete(deleting)
-    db.session.commit()
-    temp = db.session.query(currentMeta).all()
-    return 'Cleared'
+	This is called when removing a file on the format page.
+	:return:
+	'''
+	idthis = request.form.get('id', type=int)
+	deleting = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+														 currentMeta.file_id == idthis,
+														 currentMeta.session == current_user.current_session)).first()
+	db.session.delete(deleting)
+	db.session.commit()
+	temp = db.session.query(currentMeta).all()
+	return 'Cleared'
 
 @userApp.route('/clear_rowa', methods=['GET', 'POST'])
 @login_required
 def clear_rowa_wrapper():
-    '''Simple function to clear the run_once_with_args decorator for loading the base comments of files.'''
-    fileApi.setBaseComment(-1, current_user.get_id(), current_user.current_session)
-    return 'Cleared'
+	'''Simple function to clear the run_once_with_args decorator for loading the base comments of files.'''
+	fileApi.setBaseComment(-1, current_user.get_id(), current_user.current_session)
+	return 'Cleared'
 
 @userApp.route('/notifInfo', methods=['GET', 'POST'])
 @login_required
 def notifInfo():
 	'''
-    Supplementary template generator method for admin.
+	Supplementary template generator method for admin.
 
-    Provides additional information about a notification.
+	Provides additional information about a notification.
 
-    This is done by querying the sqlite database 'notification' based on the ID given.
-    :return:
-    '''
+	This is done by querying the sqlite database 'notification' based on the ID given.
+	:return:
+	'''
 	notifID = request.form.get('id', type=int)
 	notifInfo = db.session.query(notification).filter_by(id=notifID).first()
 	userInfo = db.session.query(User).filter_by(username=notifInfo.originUser).first()
 	userData = {'username': userInfo.username, 'email': userInfo.email,
-	            'fullName': userInfo.fullName, 'institution': userInfo.institution,
-	            'reason': userInfo.reason}
+				'fullName': userInfo.fullName, 'institution': userInfo.institution,
+				'reason': userInfo.reason}
 	return render_template('admin.html', user=current_user, userProf=userData)
 
 @userApp.route('/shareSes', methods=['GET', 'POST'])
 @login_required
 def shareSes():
 	'''
-    Shares a session with another user.
+	Shares a session with another user.
 
-    Similar to the admin sharing feature, but for users.
+	Similar to the admin sharing feature, but for users.
 
-    *Should probably be implemented with other sharing features*
-    :return:
-    '''
+	*Should probably be implemented with other sharing features*
+	:return:
+	'''
 	idthis = request.form.get('id', type=int)
 	shareUser = request.form.get('toUser', type=str)
 	type = request.form.get('type', type=str)
@@ -378,13 +379,13 @@ def shareSes():
 @login_required
 def shareFile():
 	'''
-    Shares a file with another user.
+	Shares a file with another user.
 
-    Similar to the admin sharing feature, but for users.
+	Similar to the admin sharing feature, but for users.
 
-    *Should probably be implemented with other sharing features*
-    :return:
-    '''
+	*Should probably be implemented with other sharing features*
+	:return:
+	'''
 	idthis = request.form.get('id', type=int)
 	shareUser = request.form.get('toUser', type=str)
 	thisUser = db.session.query(User).filter_by(username=shareUser).first()
@@ -406,11 +407,11 @@ def shareFile():
 @login_required
 def set_ses():
 	'''
-    Function that updates currentMeta/currentDAT based on which type of session is selected by the user.
+	Function that updates currentMeta/currentDAT based on which type of session is selected by the user.
 
-    By setting these tables the user is then able to view/alter the information on the corresponding tabs.
-    :return:
-    '''
+	By setting these tables the user is then able to view/alter the information on the corresponding tabs.
+	:return:
+	'''
 	if request.method == 'POST':
 		files = []
 		sesID = request.form.get('id', type=int)
@@ -477,12 +478,12 @@ def set_ses():
 @login_required
 def saveSession():
 	'''
-    This saves the current session so that the user may resume from the select page whenever they want.
+	This saves the current session so that the user may resume from the select page whenever they want.
 
-    The currentMeta table is parsed and saved into the sessionFiles and sessionFilesMeta tables for more permanence.
-    A check is done to ensure that the user cannot save the session under a name that has already been created.
-    :return:
-    '''
+	The currentMeta table is parsed and saved into the sessionFiles and sessionFilesMeta tables for more permanence.
+	A check is done to ensure that the user cannot save the session under a name that has already been created.
+	:return:
+	'''
 	checked = request.form.get("checked", type=int)
 	namechk = request.form.get("name", type=str)
 	if checked == 0:
@@ -540,13 +541,13 @@ def saveSession():
 @login_required
 def solveNotif():
 	'''
-    Resolves a notification based on the action taken.
+	Resolves a notification based on the action taken.
 
-    This is done by updating the User based on if they were accepted or not.
+	This is done by updating the User based on if they were accepted or not.
 
-    Only currently setup to handle account creation requests.
-    :return:
-    '''
+	Only currently setup to handle account creation requests.
+	:return:
+	'''
 	id = request.form.get('id', type=int)
 	action = request.form.get('action', type=int)
 	notif = db.session.query(notification).filter_by(id=id).first()
@@ -594,13 +595,13 @@ def solveNotif():
 @login_required
 def getInfo():
 	'''
-    Supplementary template generator for the admin page.
+	Supplementary template generator for the admin page.
 
-    Provides additional information about a file/session/user
+	Provides additional information about a file/session/user
 
-    This is done through queries on their corresponding databases.
-    :return:
-    '''
+	This is done through queries on their corresponding databases.
+	:return:
+	'''
 	table = request.form.get('table', type=str)
 	id = request.form.get('id', type=int)
 	user = request.form.get('user', type=str)
@@ -626,16 +627,16 @@ def getInfo():
 			temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
 			modname = [instance.name + temp]
 			userFiles.insert(0,
-			                 {'name': instance.name, 'path': instance.path, 'id': instance.id,
-			                  'comment': instance.comment,
-			                  'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+							 {'name': instance.name, 'path': instance.path, 'id': instance.id,
+							  'comment': instance.comment,
+							  'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
 		sessions = sessionFiles.query.all()
 		for instance in sessions:
 			lastMod = instance.last_used
 			userSessions.insert(0,
-			                    {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
-			                     'authed': instance.authed, 'modified': lastMod})
+								{'name': instance.name, 'id': instance.id, 'comment': instance.comment,
+								 'authed': instance.authed, 'modified': lastMod})
 	if table == 'Session':
 		session_instance = db.session.query(sessionFiles).filter_by(id=id).first()
 		if session_instance != None:
@@ -644,17 +645,17 @@ def getInfo():
 				user = db.session.query(User).filter_by(id=name).first()
 				sessionUsers.insert(0, {'sUser': user})
 	return render_template('admin.html', user=user, fileUsers=fileUsers, userFiles=userFiles,
-	                       userSessions=userSessions, sessionUsers=sessionUsers, freeze=freeze)
+						   userSessions=userSessions, sessionUsers=sessionUsers, freeze=freeze)
 
 @userApp.route('/addThing', methods=['GET', 'POST'])
 @login_required
 def addThing():
 	'''
-    Helper method for the /admin page used to add something to the user/file/session database.
+	Helper method for the /admin page used to add something to the user/file/session database.
 
-    This is done by taking the ID of something that already exists in the database and updating the authentication list.
-    :return:
-    '''
+	This is done by taking the ID of something that already exists in the database and updating the authentication list.
+	:return:
+	'''
 	if request.method == 'POST':
 		thing = request.form.get('id', type=str)
 		location = request.form.get('from', type=str)
@@ -711,12 +712,12 @@ def addThing():
 @login_required
 def removeThing():
 	'''
-    Updates the user/file/session database with a deletion as requested by the admin page
+	Updates the user/file/session database with a deletion as requested by the admin page
 
-    This is done by getting information from a request and deleting the appropriate thing from the authentication list.
-    If this changes leaves the authentication list empty then the thing is deleted from the database.
-    :return:
-    '''
+	This is done by getting information from a request and deleting the appropriate thing from the authentication list.
+	If this changes leaves the authentication list empty then the thing is deleted from the database.
+	:return:
+	'''
 	if request.method == 'POST':
 		thing = request.form.get('id', type=str)
 		location = request.form.get('from', type=str)
