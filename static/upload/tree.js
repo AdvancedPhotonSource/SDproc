@@ -42,24 +42,24 @@ $(document).ready(function(){
         'plugins' : [ "dnd", "contextmenu", "wholerow", "unique", "types" ]
     })
     .on('rename_node.jstree', function (e, data) {
-        $.post("/renameN", { node: data.node.id, newName: data.text })
+        $.post("/SDproc/renameN", { node: data.node.id, newName: data.text })
         .done(function (d) {
             $('#tree').jstree(true).refresh();
         })
     })
     .on('create_node.jstree', function (e, data) {
-        $.post("/createNode", { parent: data.node.parent, title: data.node.text })
+        $.post("/SDproc/createNode", { parent: data.node.parent, title: data.node.text })
         //$('#tree').jstree(true).refresh();
     })
     .on('move_node.jstree', function (e, data) {
-        $.post("/moveNode", { parent: data.parent, node: data.node.id });
+        $.post("/SDproc/moveNode", { parent: data.parent, node: data.node.id });
     })
     .on('delete_node.jstree', function (e, data) {
-        $.post("/deleteNode", { node: data.node.id });
+        $.post("/SDproc/deleteNode", { node: data.node.id });
     })
     .on("select_node.jstree", function (e, data) {
         //alert(data.node.id);
-        $.post('/show_NewComment', { id: data.node.id },
+        $.post('/SDproc/show_NewComment', { id: data.node.id },
                 function(data){
                     $('#comment').val(data);
                 });
@@ -74,6 +74,6 @@ function saveNewComment() {
     } else {
         var nodeID = $("#tree").jstree("get_selected")[0];
         var x = document.getElementById("comment").value;
-        $.post("/saveNC", { id : nodeID, comment : x });
+        $.post("/SDproc/saveNC", { id : nodeID, comment : x });
     }
 }
