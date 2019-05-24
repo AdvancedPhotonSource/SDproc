@@ -9,9 +9,7 @@ files = Blueprint('files', __name__)
 @files.route('/upload_files', methods=['GET', 'POST'])
 @login_required
 def upload_files():
-    file_types = ['mda', 'dat', 'txt']
     form = FileUploadForm()
-    form.file_type.choices = file_types
     if form.validate_on_submit():
         files = form.files.data
         for file in files:
