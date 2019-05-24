@@ -86,13 +86,13 @@ def index2():
     else:
         try:
             user_sessions = sessionFiles.query.filter_by(user_id=current_user.id)
-            user_data_files = dataFile.query.filter_by(and_(type='dat', authed=str(current_user.id)))
+            user_data_files = dataFile.query.filter(and_(dataFile.type=='dat', dataFile.authed==str(current_user.id)))
         except Exception, e:
             print(str(e))
             user_sessions = None
             user_data_files = None
 
-    return render_template('logbook.html', title='Select Session', sessions=user_sessions, data_files = user_data_files, users = users)
+    return render_template('session.html', title='Select Session', sessions=user_sessions, data_files = user_data_files, users = users)
 
 
 @sessions.route('/clear_cmeta', methods=['GET', 'POST'])

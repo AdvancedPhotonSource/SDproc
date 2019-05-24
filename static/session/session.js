@@ -10,7 +10,7 @@ $x(document).ready(function(){
             $x(this).addClass('active').siblings().removeClass('active');
             var type = $x(this)[0].getAttribute("type");
 
-            $x.post('/get_session_comment', { id: $x(this).attr('id'), type: type },
+            $x.post('/SDproc/get_session_comment', { id: $x(this).attr('id'), type: type },
                 function(data) {
                     $x('#comment').val(data);
                 });
@@ -38,7 +38,7 @@ function continue_session() {
     if (!selected) {
         alert('Please select a session or data file.');
     } else {
-        $x.post("/continue_session", { type: type, id: id }, function(data){
+        $x.post("/SDproc/continue_session", { type: type, id: id }, function(data){
             if (type == 'dat') {
                 document.location.href="/SDproc/modifyDAT";
             } else {
@@ -58,7 +58,7 @@ function continue_session() {
 
 function new_session() {
 document.location.href="/SDproc/data";
-    $x.post('/new_session2');
+    $x.post('/SDproc/new_session2');
 }
 
  function delete_modal() {
@@ -137,7 +137,7 @@ function share_session() {
         alert('Please select a user.');
     } else {
         $x("#shareModal").modal('hide');
-        $x.post("/share_session", { user_id: user_id, type: session_type, session_id: session_id })
+        $x.post("/SDproc/share_session", { user_id: user_id, type: session_type, session_id: session_id })
         .done(function() {
             document.location.reload(); // refreshes the whole page but just want to refresh the table
         });
@@ -162,7 +162,7 @@ function delete_session(type, id) {
     }
 
     $x("#deleteModal").modal('hide');
-    $x.post("/delete_session", { type: type, id: id })
+    $x.post("/SDproc/delete_session", { type: type, id: id })
     .done(function() {
         document.location.reload(); // refreshes the whole page but just want to refresh the table
     });
@@ -186,6 +186,6 @@ function save_comment() {
         alert('Please select a session or data file.');
     } else {
         var comment = document.getElementById("comment").value;
-        $x.post("/save_session_comment", { type: type, id: id, comment: comment })
+        $x.post("/SDproc/save_session_comment", { type: type, id: id, comment: comment })
     }
 }
