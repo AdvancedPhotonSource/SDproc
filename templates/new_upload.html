@@ -107,13 +107,8 @@
                                 {% endif %}
                             </div>
                             <div class="form-group">
-                                {% if form.file_type in ['SelectField'] %}
-                                    <ul>
-                                        {% for key, value, checked in field.iter_choices() %}
-                                            <li>{{ value }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
+                                {{ form.file_type.label() }}
+                                {{ form.file_type() }}
                             </div>
                         </fieldset>
                         <div class="form-group">
