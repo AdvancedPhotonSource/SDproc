@@ -93,23 +93,6 @@
                                     {% endfor %}
                                 {% endif %}
                             </div>
-                            <div class="form-group">
-                                {{ form.comment_character.label(class="form-control-label") }}
-                                {% if form.comment_character.errors %}
-                                    {{ form.comment_character(class="form-control form-control-lg is-invalid") }}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.comment_character.errors %}
-                                            <span>{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    {{ form.comment_character(class="form-control form-control-lg") }}
-                                {% endif %}
-                            </div>
-                            <div class="form-group">
-                                {{ form.file_type.label() }}
-                                {{ form.file_type() }}
-                            </div>
                         </fieldset>
                         <div class="form-group">
                         {{ form.submit(class="btn btn-outline-info") }}
