@@ -16,11 +16,11 @@ def save_files(form_files):
     for file in form_files:
         random_hex = secrets.token_hex(4)
         f_name, f_ext = os.path.splitext(file.filename)
-        unique_name = random_hex + "_" + f_name + f_ext
-        file_path = os.path.join(current_app.root_path, 'static/uploaded_files/mda', unique_name)
+        unique_name = f_name + "_" + random_hex + f_ext
+        f_path = file_path(f_ext, unique_name)
         save_data_file(f_name, unique_name, file, f_ext)
         save_user_file()
-        file.save(file_path)
+        file.save(f_path)
 
 
 def save_data_file(file_name, unique_name, file, f_ext):
@@ -65,6 +65,12 @@ def comment_character(f_ext, file):
     else:
         comment_char = file.read(1)
     return comment_char
+
+
+def file_path(f_ext, unique_name):
+    type = file_type(f_ext)
+    path = os.path.join(current_app.root_path, 'static/uploaded_files', type, unique_name)
+    return path
 
 
 def file_type(f_ext):

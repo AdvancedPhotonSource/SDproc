@@ -1,9 +1,10 @@
 import json
+import os
 
 from sqlalchemy import desc
-from db.db_model import dataFile, db
+from db.db_model import dataFile, db, userFiles
 from sdproc.files.forms import FileUploadForm
-from flask import Blueprint, render_template, url_for, request
+from flask import Blueprint, render_template, request, current_app
 from flask_login import login_required, current_user
 from sdproc.files.utils import save_files
 
@@ -132,7 +133,11 @@ def delete():
     currNode = dataFile.query.filter_by(id=node).first()
 
     if currNode.treeType == "File":
+        user_file = userFiles.query.filter_by(file_id=currNode.id).first()
+        path = os.path.join(current_app.root_path, 'static/uploaded_files', currNode.type, currNode.path)
+        os.remove(path)
         db.session.delete(currNode)
+        db.session.delete(user_file)
     else:
         recursive(currNode.id)
         db.session.delete(currNode)
@@ -146,7 +151,11 @@ def recursive(parentID):
     nodes = dataFile.query.filter_by(parentID=parentID)
     for node in nodes:
         if node.treeType == "File":
+            user_file = userFiles.query.filter_by(file_id=node.id).first()
+            path = os.path.join(current_app.root_path, 'static/uploaded_files', node.type, node.path)
+            os.remove(path)
             db.session.delete(node)
+            db.session.delete(user_file)
         else:
             recursive(node.id)
             db.session.delete(node)
