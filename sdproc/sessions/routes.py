@@ -176,7 +176,7 @@ def new_session2():
 
 
 def data_file_path(file_name):
-    file_path = os.path.join(current_app.root_path, 'static/dataFiles/outData', file_name)
+    file_path = os.path.join(current_app.root_path, 'static/saved_files/dat', file_name)
     return file_path
 
 
@@ -219,7 +219,7 @@ def continue_session():
     elif type == "dat":
         try:
             data_file = dataFile.query.filter_by(id=id).first()
-            path = data_file_path(data_file.name)
+            path = data_file_path(data_file.path)
             x_values = []
             y_values = []
             with open(path, 'r') as current_file:

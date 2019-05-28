@@ -75,7 +75,7 @@ def upload():
 
     Sends all files in a template for the user to use so long as they are authenticated.
 
-    this is done with a database query and authenticated in upload.html.
+    this is done with a database query and authenticated in old_upload.html.
     :return:
     '''
     user = current_user
@@ -93,7 +93,7 @@ def upload():
                         'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
     if request.method == 'POST':
         return redirect(url_for('index'))
-    return render_template('upload.html', data=data, user=user, names=names)
+    return render_template('old_upload.html', data=data, user=user, names=names)
 
 
 @fileApp.route('/linkGlobus', methods=['GET', 'POST'])

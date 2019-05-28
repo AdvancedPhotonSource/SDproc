@@ -41,10 +41,8 @@ dependencies:
   - libxml2=2.9.8=h26e45fe_1
   - markupsafe=1.0=py27h14c3975_1
   - matplotlib=2.2.3=py27hb69df0a_0
-  - mkl=2019.0=118
   - mkl_fft=1.0.6=py27h7dd41cf_0
   - mkl_random=1.0.1=py27h4414c95_1
-  - sdproc_mpld3=0.3=py27_0
   - ncurses=6.1=hf484d3e_0
   - numpy=1.15.2=py27h1d66e8a_1
   - numpy-base=1.15.2=py27h81de0dd_1
@@ -83,9 +81,11 @@ dependencies:
     - globus-sdk==1.6.0
     - globusonline-transfer-api-client==0.10.18
     - idna==2.7
+    - mpld3==0.3
     - ipaddress==1.0.22
     - pycparser==2.19
     - pyjwt==1.6.4
+    - python2-secrets==1.0.5
     - requests==2.19.1
     - urllib3==1.23
 prefix: /local/djarosz/progs/anaconda2/envs/SDproc

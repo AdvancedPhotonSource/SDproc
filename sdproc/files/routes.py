@@ -19,7 +19,7 @@ def upload_files():
     if form.validate_on_submit():
         files_uploaded = form.files.data
         save_files(files_uploaded)
-    return render_template('new_upload.html', title='New Upload', form=form)
+    return render_template('upload.html', title='New Upload', form=form)
 
 
 '''The beginning of methods for file structure'''
@@ -116,8 +116,6 @@ def rename():
 def move():
     parent = request.form.get("parent")
     node = request.form.get("node")
-    print parent;
-    print node;
 
     currNode = dataFile.query.filter_by(id=node).first()
 
