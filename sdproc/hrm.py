@@ -43,7 +43,9 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
 
-from flask import render_template, request, Blueprint, url_for, redirect, flash, send_from_directory
+import os
+
+from flask import render_template, request, Blueprint, url_for, redirect, flash, send_from_directory, current_app
 from flask_login import current_user, login_required
 from flask_app import app
 
@@ -59,6 +61,7 @@ from utilities.sdproc_mpld3.hide_legend import HideLegend
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import secrets
 
 from utilities.file_utility import FileUtility
 from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
@@ -332,6 +335,7 @@ def generateOutput():
 	form = InputForm(request.form)
 	id = request.form.get('idnum', type=str)
 	outType = request.form.get('outType', type=int)
+	print outType
 	cordData = request.form.get('cordData', type=str)
 	sesID = request.form.get('session', type=int)
 	datFName = request.form.get('datFName', type=str)
@@ -469,7 +473,8 @@ def generateOutput():
 			userFile.user_id = current_user.id
 			db.session.add(userFile)
 			db.session.commit()
-		with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
+		path = os.path.join(current_app.root_path, 'static/saved_files', "dat", filename)
+		with open(path, 'r') as DATfile:
 			data = DATfile.read()
 		return data
 	elif outType == 6:
@@ -493,8 +498,8 @@ def generateOutput():
 		colNames.append("Signal")
 		filename = FileUtility.writeOutput(output, colNames, datFName, '')
 		dfile = dataFile()
-		dfile.name = datFName
-		dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
+		dfile.name = datFName + ".dat"
+		dfile.path = filename
 		dfile.comment = ''
 		dfile.authed = current_user.get_id()
 		user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()

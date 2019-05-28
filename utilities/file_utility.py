@@ -44,9 +44,11 @@
 '''
 
 import os
+import secrets
 from datetime import datetime
 
 from flask_login import current_user
+from flask import current_app
 
 from db.db_model import db, dataFile
 from flask_app import app
@@ -196,10 +198,14 @@ class FileUtility:
 		if comChar == None:
 			comChar = '#'
 		if isinstance(name, list):
-			filename = lname + ' ' + str(FileUtility.getTime())
+			random_hex = secrets.token_hex(4)
+			filename = lname + '_' + random_hex + ".dat"
+			path = os.path.join(current_app.root_path, 'static/saved_files', "dat", filename)
 		else:
-			filename = name + ' ' + str(FileUtility.getTime())
-		f = open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'w')
+			random_hex = secrets.token_hex(4)
+			filename = name + "_" + random_hex + ".dat"
+			path = os.path.join(current_app.root_path, 'static/saved_files', "dat", filename)
+		f = open(path, 'w')
 		if isinstance(name, list):
 			f.write('#Files Included:')
 			f.write('\n')
