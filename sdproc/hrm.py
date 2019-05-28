@@ -332,7 +332,6 @@ def generateOutput():
 	form = InputForm(request.form)
 	id = request.form.get('idnum', type=str)
 	outType = request.form.get('outType', type=int)
-	print outType
 	cordData = request.form.get('cordData', type=str)
 	sesID = request.form.get('session', type=int)
 	datFName = request.form.get('datFName', type=str)

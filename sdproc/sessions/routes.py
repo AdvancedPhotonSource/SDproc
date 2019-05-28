@@ -199,7 +199,6 @@ def continue_session():
             current_meta = currentMeta() # makes a currentMeta() object
             form.populate_obj(current_meta) # populates fields in the currentMeta object from the form
             current_meta.path = file_path("." + data_file.type, data_file.path)
-            print current_meta.path
             current_meta.comment = file_meta.comment
             current_meta.checked = file_meta.checked
             current_meta.against_E = file_meta.against_E
