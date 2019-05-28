@@ -79,6 +79,7 @@ def file_type(f_ext):
     :param f_ext: the file extension. e.g. .mda, .txt, .dat
     :return: file type. e.g. mda, txt, dat
     """
+    type = None
     if f_ext == ".mda":
         type = "mda"
     elif f_ext == ".dat":

@@ -47,8 +47,8 @@ from flask import render_template, request, Blueprint, url_for, redirect, flash,
 from flask_login import current_user, login_required
 from flask_app import app
 
-
 from sessions.routes import add_user_file
+from files.utils import file_path
 
 import matplotlib
 import mpld3
@@ -152,15 +152,16 @@ def dataFormat():
 	fdata = []
 	hrmData = []
 	nameID = str(uuid.uuid4())
-	files = dataFile.query.all()
+	files = dataFile.query.filter_by(type="mda").all()
 	for instance in files:
 		fsize = FileUtility.size(instance.path)
 		lastMod = FileUtility.modified(instance.path)
 		temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
 		modname = [instance.name + temp]
+		path = file_path("." + instance.type, instance.path)
 		if instance.type != 'dat':
 			fdata.insert(0,
-			             {'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,
+			             {'name': instance.name, 'path': path, 'id': instance.id, 'comment': instance.comment,
 			              'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
 	hrms = HRM.query.order_by('id')
@@ -182,7 +183,7 @@ def dataFormat():
 		idthis = request.form.get('idnext', type=int)
 		file_instance = db.session.query(dataFile).filter(dataFile.id == idthis).first()
 		try:
-			fpath = file_instance.path
+			fpath = file_path("." + file_instance.type, file_instance.path)
 		except AttributeError:
 			flash('Please select a file')
 			return redirect(url_for('dataFormat'))
@@ -199,10 +200,11 @@ def dataFormat():
 			addLabels = []
 			normLabels = []
 			labels = []
+			path = file_path("." + file_instance.type, file_instance.path)
 			if str(file_instance.type) == 'mda':
-				data, name, unusedpath = FileUtility.readMda(file_instance.path)
+				data, name, unusedpath = FileUtility.readMda(path)
 			else:
-				data, name, unusedpath = FileUtility.readAscii(file_instance.path, file_instance.comChar)
+				data, name, unusedpath = FileUtility.readAscii(path, file_instance.comChar)
 			for i in range(len(bools)):
 				if bools[i].data:
 					if columns[i].data == None:
@@ -263,9 +265,11 @@ def dataFormat():
 			db.session.commit()
 		else:
 			if str(file_instance.type) == 'mda':
-				data, name, unusedpath = FileUtility.readMda(file_instance.path)
+				path = file_path("." + file_instance.type, file_instance.path)
+				data, name, unusedpath = FileUtility.readMda(path)
 			else:
-				data, name, unusedpath = FileUtility.readAscii(file_instance.path, file_instance.comChar)
+				path = file_path("." + file_instance.type, file_instance.path)
+				data, name, unusedpath = FileUtility.readAscii(path, file_instance.comChar)
 			etype = data[1]
 			used = []
 			againstE = 'Point #'
@@ -573,10 +577,11 @@ def process():
 			legendNames = []
 			endmax = []
 			allFileNames = []
+			path = file_path("." + file_instance.type, file_instance.path)
 			if str(file_instance.type) == 'mda':
-				data, name, unusedpath = GraphingUtility.readMda(file_instance.path)
+				data, name, unusedpath = GraphingUtility.readMda(path)
 			else:
-				data, name, unusedpath = GraphingUtility.readAscii(file_instance.path, file_instance.comChar)
+				data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
 			fitType = format_instance.fit_type
 			if fitType == 'Unfit':
 				used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
@@ -661,10 +666,11 @@ def process():
 				form = GraphingUtility.populate_from_instance(format_instance)
 				columns, bools = GraphingUtility.splitForm(form)
 				basedColumns = GraphingUtility.zeroBaseColumns(columns)
+				path = file_path("." + file_instance.type, file_instance.path)
 				if str(file_instance.type) == 'mda':
-					data, name, unusedpath = FileUtility.readMda(file_instance.path)
+					data, name, unusedpath = FileUtility.readMda(path)
 				else:
-					data, name, unusedpath = GraphingUtility.readAscii(file_instance.path, file_instance.comChar)
+					data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
 				if bools[1].data:
 					energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
 					                                     GraphingUtility.unicode_to_int(basedColumns[4].data),

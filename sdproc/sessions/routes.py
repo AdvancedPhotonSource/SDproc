@@ -7,6 +7,7 @@ from utilities.graphing_utility import GraphingUtility
 from utilities.file_utility import FileUtility
 from sqlalchemy import and_, desc
 from sdproc.user import clear_rowa_wrapper
+from sdproc.files.utils import file_path
 sessions = Blueprint('sessions', __name__)
 
 
@@ -193,10 +194,12 @@ def continue_session():
         session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
         for file in session_files:
             file_meta = sessionMeta.query.filter_by(id=file.sessionMeta_id).first()
+            data_file = dataFile.query.filter_by(id=file_meta.file_id).first()
             form = GraphingUtility.populate_from_instance(file_meta) # populates the input form
             current_meta = currentMeta() # makes a currentMeta() object
             form.populate_obj(current_meta) # populates fields in the currentMeta object from the form
-            current_meta.path = file_meta.path
+            current_meta.path = file_path("." + data_file.type, data_file.path)
+            print current_meta.path
             current_meta.comment = file_meta.comment
             current_meta.checked = file_meta.checked
             current_meta.against_E = file_meta.against_E
