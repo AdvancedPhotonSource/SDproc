@@ -2,7 +2,7 @@ import json
 import os
 
 from sqlalchemy import desc
-from db.db_model import dataFile, db, userFiles
+from db.db_model import dataFile, db, userFiles, sessionFilesMeta, sessionMeta
 from sdproc.files.forms import FileUploadForm
 from flask import Blueprint, render_template, request, current_app
 from flask_login import login_required, current_user
@@ -128,19 +128,25 @@ def move():
 
 @files.route("/deleteNode", methods=["GET", "POST"])
 def delete():
-    node = request.form.get("node")
+    file_id = request.form.get("node")
 
-    currNode = dataFile.query.filter_by(id=node).first()
+    data_file = dataFile.query.filter_by(id=file_id).first()
 
-    if currNode.treeType == "File":
-        user_file = userFiles.query.filter_by(file_id=currNode.id).first()
-        path = os.path.join(current_app.root_path, 'static/uploaded_files', currNode.type, currNode.path)
-        os.remove(path)
-        db.session.delete(currNode)
+    if data_file.treeType == "File":
+        user_file = userFiles.query.filter_by(file_id=data_file.id).first()  # remove from user files
+        path = os.path.join(current_app.root_path, 'static/uploaded_files', data_file.type, data_file.path)
+        os.remove(path)  # remove from directory
+        session_metas = sessionMeta.query.filter_by(file_id=data_file.id).all()
+        if session_metas is not None:
+            for session_meta in session_metas:
+                session_file = sessionFilesMeta.query.filter_by(sessionMeta_id=session_meta.id).first()
+                db.session.delete(session_file)
+                db.session.delete(session_meta)
+        db.session.delete(data_file)
         db.session.delete(user_file)
     else:
-        recursive(currNode.id)
-        db.session.delete(currNode)
+        recursive(data_file.id)
+        db.session.delete(data_file)
 
     db.session.commit()
     return "done"
