@@ -62,85 +62,85 @@ from utilities.graphing_utility import GraphingUtility
 userApp = Blueprint('user', __name__)
 fileApi = FileDbApi()
 
-# @userApp.route('/', methods=['GET', 'POST'])
-# def toLogin():
-# 	'''Ensures users will be redirected to login page even without /login'''
-# 	return redirect(url_for('user.login'))
+@userApp.route('/', methods=['GET', 'POST'])
+def toLogin():
+	'''Ensures users will be redirected to login page even without /login'''
+	return redirect(url_for('user.login'))
 
 
-# @userApp.route('/reg', methods=['GET', 'POST'])
-# def register():
-# 	'''
-# 	Template generator method for the register page.
-#
-# 	 Accepts register form, creates baseline user, sends notification to admin requesting account approval.
-# 	 :return:
-# 	'''
-# 	form = RegisterForm(request.form)
-# 	if request.method == 'POST' and form.validate():
-# 		user = User()
-# 		form.populate_obj(user)
-# 		strength = user.is_strong_pass(form.password.data)
-# 		if strength['password_ok']:
-# 			user.set_password(form.password.data)
-# 			user.approved = 0
-# 			user.isAdmin = 0
-#
-# 			db.session.add(user)
-#
-# 			notif = notification()
-# 			notif.originUser = user.username
-# 			notif.type = 'Create Account'
-# 			notif.timestamp = datetime.now()
-#
-# 			db.session.add(notif)
-#
-# 			db.session.commit()
-#
-# 			return redirect(url_for('user.login'))
-# 		else:
-# 			for key, value in strength.iteritems():
-# 				if value:
-# 					flash(key)
-# 	return render_template('old_register.html', form=form)
+@userApp.route('/reg', methods=['GET', 'POST'])
+def register():
+	'''
+	Template generator method for the register page.
+
+	 Accepts register form, creates baseline user, sends notification to admin requesting account approval.
+	 :return:
+	'''
+	form = RegisterForm(request.form)
+	if request.method == 'POST' and form.validate():
+		user = User()
+		form.populate_obj(user)
+		strength = user.is_strong_pass(form.password.data)
+		if strength['password_ok']:
+			user.set_password(form.password.data)
+			user.approved = 0
+			user.isAdmin = 0
+
+			db.session.add(user)
+
+			notif = notification()
+			notif.originUser = user.username
+			notif.type = 'Create Account'
+			notif.timestamp = datetime.now()
+
+			db.session.add(notif)
+
+			db.session.commit()
+
+			return redirect(url_for('user.login'))
+		else:
+			for key, value in strength.iteritems():
+				if value:
+					flash(key)
+	return render_template('register.html', form=form)
 
 
-# @userApp.route('/login', methods=['GET', 'POST'])
-# def login():
-# 	'''
-# 	Template generator method for the login page
-#
-# 	Accepts login form and ensure that the user has permission to login.
-#
-# 	This is done by using Flask's builtin login_user after checking that the user is approved in the database
-# 	:return:
-# 	'''
-# 	form = LoginForm(request.form)
-# 	if request.method == 'POST' and form.validate():
-# 		user = form.get_user()
-# 		# user.approved = 1
-# 		# user.isAdmin = 1
-# 		if user.approved == 1:
-# 			login_user(user)
-# 			clear_cmeta()
-# 			clear_rowa_wrapper()
-# 			current_user.current_session = "None"
-# 			db.session.commit()
-# 			return redirect(url_for('sessions.index2'))
-# 		if user.approved == 2:
-# 			refusePrompt = "Your account has been frozen"
-# 			return render_template('old_login_form.html', form=form, session=session, refusePrompt=refusePrompt)
-# 		if user.approved == 0:
-# 			refusePrompt = "Wait for an admin to approve your account"
-# 			return render_template('old_login_form.html', form=form, session=session, refusePrompt=refusePrompt)
-# 	return render_template('old_login_form.html', form=form, session=session)
+@userApp.route('/login', methods=['GET', 'POST'])
+def login():
+	'''
+	Template generator method for the login page
 
-# @userApp.route('/logout')
-# @login_required
-# def logout():
-# 	'''Logs out a user by clearing session information'''
-# 	session.clear()
-# 	return redirect(url_for('user.login'))
+	Accepts login form and ensure that the user has permission to login.
+
+	This is done by using Flask's builtin login_user after checking that the user is approved in the database
+	:return:
+	'''
+	form = LoginForm(request.form)
+	if request.method == 'POST' and form.validate():
+		user = form.get_user()
+		# user.approved = 1
+		# user.isAdmin = 1
+		if user.approved == 1:
+			login_user(user)
+			clear_cmeta()
+			clear_rowa_wrapper()
+			current_user.current_session = "None"
+			db.session.commit()
+			return redirect(url_for('sessions.index2'))
+		if user.approved == 2:
+			refusePrompt = "Your account has been frozen"
+			return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
+		if user.approved == 0:
+			refusePrompt = "Wait for an admin to approve your account"
+			return render_template('login_form.html', form=form, session=session, refusePrompt=refusePrompt)
+	return render_template('login_form.html', form=form, session=session)
+
+@userApp.route('/logout')
+@login_required
+def logout():
+	'''Logs out a user by clearing session information'''
+	session.clear()
+	return redirect(url_for('user.login'))
 
 
 @userApp.route('/profile', methods=['GET', 'POST'])
