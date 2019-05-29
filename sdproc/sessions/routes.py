@@ -21,6 +21,8 @@ def delete_session():
         session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
 
         for file in session_files:
+            session_meta = sessionMeta.query.filter_by(id=file.sessionMeta_id).first()
+            db.session.delete(session_meta)
             db.session.delete(file)
 
         db.session.delete(session)
@@ -133,7 +135,7 @@ def share_session():
         db.session.add(new_session)
         db.session.commit()
         session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=shared_session.id).all()
-        add_user_file(session_files)
+        add_session_metas(session_files)
         flash("You have shared your file.", "success")
         return ""
     elif type == 'dat':
@@ -148,6 +150,62 @@ def share_session():
         return ""
 
 
+def add_session_metas(session_files):
+    session_files = session_files
+    counter = 0
+    list = [0]
+
+    for x in session_files:
+        counter += 1
+        list.append(counter)
+        shared_meta = sessionMeta.query.filter_by(id=x.sessionMeta_id).first()
+        session_meta = sessionMeta()
+        session_meta.fileName = shared_meta.fileName
+        session_meta.path = shared_meta.path
+        session_meta.comment = shared_meta.comment
+        session_meta.file_id = shared_meta.file_id
+        session_meta.session = shared_meta.session
+        session_meta.checked = shared_meta.checked
+
+        session_meta.fit_type = shared_meta.fit_type
+        session_meta.fit_pos = shared_meta.fit_pos
+        session_meta.fit_range = shared_meta.fit_range
+        session_meta.fit_localRange = shared_meta.fit_localRange
+        session_meta.fit_energy = shared_meta.fit_energy
+        session_meta.fit_signal = shared_meta.fit_signal
+
+        session_meta.against_E = shared_meta.against_E
+
+        session_meta.hrm = shared_meta.hrm
+
+        session_meta.energy = shared_meta.energy
+        session_meta.xtal1A = shared_meta.xtal1A
+        session_meta.xtal2A = shared_meta.xtal2A
+        session_meta.xtal1T = shared_meta.xtal1T
+        session_meta.xtal2T = shared_meta.xtal2T
+        session_meta.signal = shared_meta.signal
+        session_meta.norm = shared_meta.norm
+        session_meta.extra = shared_meta.extra
+
+        session_meta.ebool = shared_meta.ebool
+        session_meta.ecbool = shared_meta.ecbool
+        session_meta.etcbool = shared_meta.etcbool
+        session_meta.a1bool = shared_meta.a1bool
+        session_meta.a2bool = shared_meta.a2bool
+        session_meta.t1bool = shared_meta.t1bool
+        session_meta.t2bool = shared_meta.t2bool
+        session_meta.tcbool = shared_meta.tcbool
+        session_meta.sbool = shared_meta.sbool
+        session_meta.snbool = shared_meta.snbool
+        session_meta.nbool = shared_meta.nbool
+        session_meta.nfbool = shared_meta.nfbool
+        session_meta.xbool = shared_meta.xbool
+        db.session.add(session_meta)
+    db.session.commit()
+    list.remove(counter)
+    add_session_files(list)
+
+
 def add_user_file(user):
     user = user
     new_file = dataFile.query.order_by(desc('id')).first()
@@ -157,12 +215,12 @@ def add_user_file(user):
     db.session.commit()
 
 
-def add_session_files(session_files):
-    session_files = session_files
+def add_session_files(list):
     new_session = sessionFiles.query.order_by(desc('id')).first()
+    new_meta = sessionMeta.query.order_by(desc('id')).first()
 
-    for file in session_files:
-        new_session_file = sessionFilesMeta(sessionFiles_id=new_session.id, sessionMeta_id=file.sessionMeta_id)
+    for x in reversed(list):
+        new_session_file = sessionFilesMeta(sessionFiles_id=new_session.id, sessionMeta_id=(new_meta.id - x))
         db.session.add(new_session_file)
 
     db.session.commit()
