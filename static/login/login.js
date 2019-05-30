@@ -42,17 +42,17 @@
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 */
-$(window).on('unload', function(){
+$x(window).on('unload', function(){
     localStorage.clear();
-})
-
-$(document).ready(function(){
-    if(localStorage.getItem("usingDAT") == 1){
-        $("#navData").addClass('diabled');
-        $('#navProcess').addClass('diabled');
-    }
-    else{
-        $('#navData').removeClass('disabled');
-        $('#navProcess').removeClass('disabled');
-    }
 });
+
+//$(document).ready(function(){
+//    if(localStorage.getItem("usingDAT") == 1){
+//        $("#navData").addClass('diabled');
+//        $('#navProcess').addClass('diabled');
+//    }
+//    else{
+//        $('#navData').removeClass('disabled');
+//        $('#navProcess').removeClass('disabled');
+//    }
+//});

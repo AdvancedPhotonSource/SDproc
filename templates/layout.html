@@ -67,7 +67,7 @@
     <header class="site-header">
         <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
             <div class="container">
-                <a class="navbar-brand mr-4" href="/">Scandataproc</a>
+                <a class="navbar-brand mr-4" href="{{ url_for('users.toLogin2') }}">Scandataproc</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -89,10 +89,10 @@
                         {% if current_user.is_authenticated %}
                             <a class="nav-item nav-link" href="{{ url_for('user.profile') }}">Profile</a>
                             <a class="nav-item nav-link" href="{{ url_for('sessions.index2') }}">Logbook</a>
-                            <a class="nav-item nav-link" href="{{ url_for('user.logout') }}">Logout</a>
+                            <a class="nav-item nav-link" href="{{ url_for('users.logout2') }}">Logout</a>
                         {% else %}
-                            <a class="nav-item nav-link" href="{{ url_for('user.login') }}">Login</a>
-                            <a class="nav-item nav-link" href="{{ url_for('user.register') }}">Register</a>
+                            <a class="nav-item nav-link" href="{{ url_for('users.login2') }}">Login</a>
+                            <a class="nav-item nav-link" href="{{ url_for('users.register2') }}">Register</a>
                         {% endif %}
                     </div>
                 </div>
