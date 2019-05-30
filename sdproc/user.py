@@ -143,57 +143,57 @@ fileApi = FileDbApi()
 # 	return redirect(url_for('user.login'))
 
 
-@userApp.route('/profile', methods=['GET', 'POST'])
-@login_required
-def profile():
-	'''
-	Template generator method for the profile page.
+# @userApp.route('/profile', methods=['GET', 'POST'])
+# @login_required
+# def profile():
+# 	'''
+# 	Template generator method for the profile page.
+#
+# 	Sends information on the current user and their notifications as template.
+#
+# 	This is done by querying respective databases.
+# 	:return:
+# 	'''
+# 	notifData = []
+# 	thisProfile = []
+#
+# 	thisProfile.insert(0, {'username': current_user.username, 'email': current_user.email,
+# 						   'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
+# 						   'commentChar': current_user.commentChar})
+#
+# 	# notifications = notification.query.order_by('id')
+# 	# for instance in notifications:
+# 	#    userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
+# 	#    if userInfo != None:
+# 	#        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
+# 	#                             'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
+# 	#                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
+# 	#                             'reason': userInfo.reason})
+# 	return render_template('profile.html', user=current_user, notifications=notifData, userProf=thisProfile)
 
-	Sends information on the current user and their notifications as template.
 
-	This is done by querying respective databases.
-	:return:
-	'''
-	notifData = []
-	thisProfile = []
-
-	thisProfile.insert(0, {'username': current_user.username, 'email': current_user.email,
-						   'fullName': current_user.fullName, 'institution': current_user.institution, 'password': '',
-						   'commentChar': current_user.commentChar})
-
-	# notifications = notification.query.order_by('id')
-	# for instance in notifications:
-	#    userInfo = db.session.query(User).filter_by(username=instance.originUser).first()
-	#    if userInfo != None:
-	#        notifData.insert(0, {'id': instance.id, 'name': instance.originUser, 'time': instance.timestamp,
-	#                             'type': instance.type, 'username': userInfo.username, 'email': userInfo.email,
-	#                             'fullName': userInfo.fullName, 'institution': userInfo.institution,
-	#                             'reason': userInfo.reason})
-	return render_template('profile.html', user=current_user, notifications=notifData, userProf=thisProfile)
-
-
-@userApp.route('/updateProf', methods=['GET', 'POST'])
-@login_required
-def updateProf():
-	'''
-	Updates the current user's profile in the database with any new information they may have added.
-
-	This is done by accepting request information (AJAX generally) and updating the User database accordingly
-	:return:
-	'''
-	user_instance = db.session.query(User).filter_by(username=current_user.username).first()
-	comChar = request.form.get('comChar', type=str)
-	password = request.form.get('pass', type=str)
-	email = request.form.get('email', type=str)
-
-	if comChar != '0':
-		user_instance.commentChar = comChar
-	if password != '0':
-		user_instance.set_password(password)
-	if email != '0':
-		user_instance.email = email
-	db.session.commit()
-	return 'Updated'
+# @userApp.route('/updateProf', methods=['GET', 'POST'])
+# @login_required
+# def updateProf():
+# 	'''
+# 	Updates the current user's profile in the database with any new information they may have added.
+#
+# 	This is done by accepting request information (AJAX generally) and updating the User database accordingly
+# 	:return:
+# 	'''
+# 	user_instance = db.session.query(User).filter_by(username=current_user.username).first()
+# 	comChar = request.form.get('comChar', type=str)
+# 	password = request.form.get('pass', type=str)
+# 	email = request.form.get('email', type=str)
+#
+# 	if comChar != '0':
+# 		user_instance.commentChar = comChar
+# 	if password != '0':
+# 		user_instance.set_password(password)
+# 	if email != '0':
+# 		user_instance.email = email
+# 	db.session.commit()
+# 	return 'Updated'
 
 
 @userApp.route('/admin', methods=['GET', 'POST'])
