@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from flask import Blueprint, url_for, flash, render_template, redirect, session
+from flask import Blueprint, url_for, flash, render_template, redirect, session, request
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from sdproc.user import clear_rowa_wrapper
 from sdproc.sessions.routes import clear_cmeta
 from db.db_model import db, User, notification
-from sdproc.users.forms import RegistrationForm, LoginForm
+from sdproc.users.forms import RegistrationForm, LoginForm, UpdateProfileForm
 
 users = Blueprint('users', __name__)
 
@@ -36,7 +36,7 @@ def register2():
         db.session.add(notif)
         db.session.commit()
         flash('Your account is pending approval from the admin.', 'success')
-        return redirect(url_for('user.login'))
+        return redirect(url_for('users.login2'))
     return render_template('new_reg.html', title='Register', form=form)
 
 
@@ -71,6 +71,30 @@ def login2():
 def logout2():
     session.clear()
     clear_rowa_wrapper()
-    clear_cmeta
+    clear_cmeta()
     logout_user()
     return redirect(url_for('users.login2'))
+
+
+@users.route("/profile2", methods=['GET', 'POST'])
+@login_required
+def profile2():
+    form = UpdateProfileForm()
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.fullName = form.full_name.data
+        current_user.institution = form.institution.data
+        current_user.commentChar = form.comment_char.data
+        # current_user.pwhash = form.password.data
+        db.session.commit()
+        flash('Your account has been updated', 'success')
+        return redirect(url_for('users.profile2'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.full_name.data = current_user.fullName
+        form.institution.data = current_user.institution
+        form.comment_char.data = current_user.commentChar
+        # form.password.data = current_user.pwhash.decode('utf-8')
+    return render_template('new_profile.html', title='Profile', form=form)

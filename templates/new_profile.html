@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+
+{% block static %}
+    <!--<link href="/static/profile/profile.css" rel="stylesheet" type="text/css">
+    <script src="/static/profile/profile.js"></script>-->
+{% endblock static %}
+
+{% block content %}
+    <div id="notifModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="notifTitle">Profile:</h4>
+                </div>
+                <div class="notifModalBody" id="notifID">
+                    <div class="notifTable text-center">
+                        <table id="notifTable">
+                            <tbody class="notifBod">
+                                {% if userProf %}
+                                    <tr>
+                                        <td><b class="pull-left">Username:</b>{{ userProf.username }}</td>
+                                        <td><b class="pull-left">Institution:</b>{{ userProf.institution }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b class="pull-left">Full Name:</b>{{ userProf.fullName }}</td>
+                                        <td><b class="pull-left">Reason:</b>{{ userProf.reason }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b class="pull-left">Email:</b>{{ userProf.email }}</td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="content-section">
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Profile Info</legend>
+                <div class="form-group">
+                    {{ form.full_name.label(class="form-control-label") }}
+
+                    {% if form.full_name.errors %}
+                        {{ form.full_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.full_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.full_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.username.label(class="form-control-label") }}
+
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.username(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.email.label(class="form-control-label") }}
+
+                    {% if form.email.errors %}
+                        {{ form.email(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <!-- Need to make a password field -->
+                <div class="form-group">
+                    {{ form.institution.label(class="form-control-label") }}
+
+                    {% if form.institution.errors %}
+                        {{ form.institution(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.institution.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.institution(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.comment_char.label(class="form-control-label") }}
+
+                    {% if form.comment_char.errors %}
+                        {{ form.comment_char(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.comment_char.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.comment_char(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+        </div>
+        <div class="col-md-6">
+            <div class="notifications text-center" id="notifications">
+                <h3>Notifications:</h3>
+                <table>
+                    <tbody>
+                        {% if notifications %}
+                            {% for task in notifications %}
+                                <tr class="item notifTR">
+                                    <td class="name" colspan="2" id="{{ task.id }}">
+                                        {{ task.type }}
+                                    </td>
+                                    <td>
+                                        {{ task.name }}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-default" onclick="showInfo({{ task.id }})">Info</button>
+                                    </td>
+                                    <td>
+                                        {{ task.time }}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success" onclick="approve({{ task.id }})">Approve</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" onclick="decline({{ task.id }})">Decline</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            No Notifications
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block scripts %}{% endblock scripts %}
