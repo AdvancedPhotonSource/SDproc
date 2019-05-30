@@ -80,7 +80,7 @@ with context %}
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="login">
+            <a class="navbar-brand" href="/">
                 Scandataproc
             </a>
         </div>
@@ -112,7 +112,7 @@ with context %}
                     </a>
                 </li>
                 <li>
-                    <a href="profile">
+                    <a href="{{ url_for('users.profile2') }}">
                         Profile
                     </a>
                 </li>
@@ -126,11 +126,11 @@ with context %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <div class="margin-info pull-right">
-                    <p class="margin-text" align="right">Logged in as <a href="/profile">{{ user.username }}</a>
+                    <p class="margin-text" align="right">Logged in as <a href="{{ url_for('users.profile2') }}">{{ user.username }}</a>
                         <br/>
-                        <a href="/db">Logbook</a>
+                        <a href="{{ url_for('logbook.sesData') }}">Logbook</a>
                         <br/>
-                        <a onclick="logout()">Logout</a>
+                        <a href="{{ url_for('users.logout2') }}">Logout</a>
                         <br/>
                     </p>
                 </div>

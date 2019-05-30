@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 import re
@@ -17,19 +18,19 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Sign Up')
 
     @staticmethod
-    def validate_username(username):
+    def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user:
             raise ValidationError('That username is already taken. Please choose a different one.')
 
     @staticmethod
-    def validate_email(email):
+    def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('That email is already taken. Please choose a different one.')
 
     @staticmethod
-    def validate_password(password):
+    def validate_password(self, password):
         password = password.data
         if re.search(r"\d", password) is None:
             raise ValidationError('Your password must have at least one digit.')
@@ -45,3 +46,27 @@ class LoginForm(FlaskForm):
     username = StringField(label='Username', validators=[DataRequired()])
     password = PasswordField(label='Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+
+class UpdateProfileForm(FlaskForm):
+    full_name = StringField(label='Full Name', validators=[DataRequired()])
+    username = StringField(label='Username', validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField(label='Email', validators=[DataRequired(), Email()])
+    institution = StringField(label='Institution', validators=[DataRequired()])
+    comment_char = StringField(label='Comment Char')
+    # password = PasswordField(label="Password", validators=[DataRequired(), Length(min=2)])
+    submit = SubmitField('Update Profile')
+
+    @staticmethod
+    def validate_username(self, username):
+        if username.data != current_user.username:
+            user = User.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError('That username is taken. Please choose a different one.')
+
+    @staticmethod
+    def validate_email(self,  email):
+        if email.data != current_user.email:
+            user = User.query.filter_by(username=email.data).first()
+            if user:
+                raise ValidationError('That email is taken. Please choose a different one.')
