@@ -70,8 +70,11 @@ from sdproc.comment import commentApp
 from sdproc.file import fileApp
 from sdproc.sessions.routes import sessions
 from sdproc.files.routes import files
+from sdproc.users.routes import users
 
 login_manager = LoginManager()
+login_manager.login_view = 'users.login2'
+login_manager.login_message_category = 'info'
 login_manager.init_app(app)
 
 userDbApi = UserDbApi()
@@ -84,6 +87,7 @@ app.register_blueprint(fileApp)
 app.register_blueprint(commentApp)
 app.register_blueprint(sessions)
 app.register_blueprint(files)
+app.register_blueprint(users)
 
 """ REMOVE THIS ON SERVER """
 @app.before_request
