@@ -82,7 +82,7 @@ def index2():
     This is done with a database query and authenticated in view_output.html.
     :return:
     """
-    users = User.query.filter(id != current_user.id).all()
+    users = User.query.filter(User.id != current_user.id).all()
     if current_user.id == 1:
         user_sessions = sessionFiles.query.all()
         user_data_files = dataFile.query.filter_by(type='dat')
@@ -95,7 +95,8 @@ def index2():
             user_sessions = None
             user_data_files = None
 
-    return render_template('session.html', title='Select Session', sessions=user_sessions, data_files = user_data_files, users = users)
+    return render_template('session.html', title='Select Session', sessions=user_sessions, data_files=user_data_files,
+                           users=users)
 
 
 @sessions.route('/clear_cmeta', methods=['GET', 'POST'])

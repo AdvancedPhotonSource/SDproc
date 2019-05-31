@@ -196,6 +196,144 @@ fileApi = FileDbApi()
 # 	return 'Updated'
 
 
+# @userApp.route('/shareSes', methods=['GET', 'POST'])
+# @login_required
+# def shareSes():
+# 	'''
+# 	Shares a session with another user.
+#
+# 	Similar to the admin sharing feature, but for users.
+#
+# 	*Should probably be implemented with other sharing features*
+# 	:return:
+# 	'''
+# 	idthis = request.form.get('id', type=int)
+# 	shareUser = request.form.get('toUser', type=str)
+# 	type = request.form.get('type', type=str)
+# 	thisUser = db.session.query(User).filter_by(username=shareUser).first()
+# 	toAuth = thisUser.id
+# 	if type == 'dat':
+# 		dat_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+# 		auths = dat_instance.authed.split(',')
+# 		if toAuth in auths:
+# 			return 'Already Shared'
+# 		else:
+# 			dat_instance.authed = dat_instance.authed + ',' + str(toAuth)
+# 			userFile = userFiles()
+# 			userFile.file_id = idthis
+# 			userFile.user_id = thisUser.id
+# 			db.session.add(userFile)
+# 			db.session.commit()
+# 	else:
+# 		session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
+# 		auths = session_instance.authed.split(',')
+# 		if toAuth in auths:
+# 			return 'Already Shared'
+# 		else:
+# 			session_instance.authed = session_instance.authed + ',' + str(toAuth)
+# 			db.session.commit()
+# 	return 'Shared'
+#
+# @userApp.route('/shareFile', methods=['GET', 'POST'])
+# @login_required
+# def shareFile():
+# 	'''
+# 	Shares a file with another user.
+#
+# 	Similar to the admin sharing feature, but for users.
+#
+# 	*Should probably be implemented with other sharing features*
+# 	:return:
+# 	'''
+# 	idthis = request.form.get('id', type=int)
+# 	shareUser = request.form.get('toUser', type=str)
+# 	thisUser = db.session.query(User).filter_by(username=shareUser).first()
+# 	toAuth = thisUser.id
+# 	file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+# 	auths = file_instance.authed.split(',')
+# 	if toAuth in auths:
+# 		return 'Already Shared'
+# 	else:
+# 		file_instance.authed = file_instance.authed + ',' + str(toAuth)
+# 		userFile = userFiles()
+# 		userFile.file_id = idthis
+# 		userFile.user_id = thisUser.id
+# 		db.session.add(userFile)
+# 		db.session.commit()
+# 	return 'Shared'
+#
+# @userApp.route('/set_ses', methods=['GET', 'POST'])
+# @login_required
+# def set_ses():
+# 	'''
+# 	Function that updates currentMeta/currentDAT based on which type of session is selected by the user.
+#
+# 	By setting these tables the user is then able to view/alter the information on the corresponding tabs.
+# 	:return:
+# 	'''
+# 	if request.method == 'POST':
+# 		files = []
+# 		sesID = request.form.get('id', type=int)
+# 		type = request.form.get('type', type=str)
+# 		if type == 'dat':
+# 			dat = db.session.query(dataFile).filter_by(id=sesID).first()
+# 			with open(dat.path, 'r') as DATfile:
+# 				data = DATfile.read()
+# 				cDAT = currentDAT()
+# 				cDAT.user = current_user
+# 				cDAT.file_id = dat.id
+# 				xs = []
+# 				ys = []
+# 				user = db.session.query(User).filter_by(username=current_user.username).first()
+# 				data = data.split("\n")
+# 				try:
+# 					data = [x for x in data if not x.startswith(user.commentChar)]
+# 				except TypeError:
+# 					data = [x for x in data if not x.startswith('#')]
+# 					flash('No comment preference set, defaulting to #')
+# 				for i in data:
+# 					if not i:
+# 						continue
+# 					line = i.split()
+# 					xs.append(float(line[0]))
+# 					ys.append(float(line[1]))
+# 				DAT = [xs, ys]
+# 				DAT = json.dumps(DAT)
+# 				cDAT.DAT = DAT
+# 				cDAT.originDAT = DAT
+# 				if dat.name is not None:
+# 					cDAT.DATname = dat.name
+# 				db.session.add(cDAT)
+# 				db.session.commit()
+# 			return 'Saved'
+# 		allSes = db.session.query(sessionFiles).filter_by(id=sesID).first()
+# 		metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
+# 		for meta in metas:
+# 			actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
+# 			form = GraphingUtility.populate_from_instance(actualMeta)
+# 			newCurrent = currentMeta()
+# 			form.populate_obj(newCurrent)
+# 			newCurrent.path = actualMeta.path
+# 			newCurrent.comment = actualMeta.comment
+# 			newCurrent.checked = actualMeta.checked
+# 			newCurrent.against_E = actualMeta.against_E
+# 			newCurrent.file_id = actualMeta.file_id
+# 			newCurrent.fit_type = actualMeta.fit_type
+# 			newCurrent.fit_pos = actualMeta.fit_pos
+# 			newCurrent.fit_range = actualMeta.fit_range
+# 			newCurrent.hrm = actualMeta.hrm
+# 			newCurrent.user = current_user
+# 			newCurrent.session = allSes.name
+# 			db.session.add(newCurrent)
+# 			db.session.commit()
+# 			files.append(newCurrent.file_id)
+# 		current_user.current_session = allSes.name
+# 		db.session.commit()
+# 		data = json.dumps(files)
+# 		return data
+# 	return 'Set'
+
+
 @userApp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
@@ -336,142 +474,6 @@ def notifInfo():
 				'reason': userInfo.reason}
 	return render_template('admin.html', user=current_user, userProf=userData)
 
-@userApp.route('/shareSes', methods=['GET', 'POST'])
-@login_required
-def shareSes():
-	'''
-	Shares a session with another user.
-
-	Similar to the admin sharing feature, but for users.
-
-	*Should probably be implemented with other sharing features*
-	:return:
-	'''
-	idthis = request.form.get('id', type=int)
-	shareUser = request.form.get('toUser', type=str)
-	type = request.form.get('type', type=str)
-	thisUser = db.session.query(User).filter_by(username=shareUser).first()
-	toAuth = thisUser.id
-	if type == 'dat':
-		dat_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-		auths = dat_instance.authed.split(',')
-		if toAuth in auths:
-			return 'Already Shared'
-		else:
-			dat_instance.authed = dat_instance.authed + ',' + str(toAuth)
-			userFile = userFiles()
-			userFile.file_id = idthis
-			userFile.user_id = thisUser.id
-			db.session.add(userFile)
-			db.session.commit()
-	else:
-		session_instance = db.session.query(sessionFiles).filter_by(id=idthis).first()
-		auths = session_instance.authed.split(',')
-		if toAuth in auths:
-			return 'Already Shared'
-		else:
-			session_instance.authed = session_instance.authed + ',' + str(toAuth)
-			db.session.commit()
-	return 'Shared'
-
-@userApp.route('/shareFile', methods=['GET', 'POST'])
-@login_required
-def shareFile():
-	'''
-	Shares a file with another user.
-
-	Similar to the admin sharing feature, but for users.
-
-	*Should probably be implemented with other sharing features*
-	:return:
-	'''
-	idthis = request.form.get('id', type=int)
-	shareUser = request.form.get('toUser', type=str)
-	thisUser = db.session.query(User).filter_by(username=shareUser).first()
-	toAuth = thisUser.id
-	file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-	auths = file_instance.authed.split(',')
-	if toAuth in auths:
-		return 'Already Shared'
-	else:
-		file_instance.authed = file_instance.authed + ',' + str(toAuth)
-		userFile = userFiles()
-		userFile.file_id = idthis
-		userFile.user_id = thisUser.id
-		db.session.add(userFile)
-		db.session.commit()
-	return 'Shared'
-
-@userApp.route('/set_ses', methods=['GET', 'POST'])
-@login_required
-def set_ses():
-	'''
-	Function that updates currentMeta/currentDAT based on which type of session is selected by the user.
-
-	By setting these tables the user is then able to view/alter the information on the corresponding tabs.
-	:return:
-	'''
-	if request.method == 'POST':
-		files = []
-		sesID = request.form.get('id', type=int)
-		type = request.form.get('type', type=str)
-		if type == 'dat':
-			dat = db.session.query(dataFile).filter_by(id=sesID).first()
-			with open(dat.path, 'r') as DATfile:
-				data = DATfile.read()
-				cDAT = currentDAT()
-				cDAT.user = current_user
-				cDAT.file_id = dat.id
-				xs = []
-				ys = []
-				user = db.session.query(User).filter_by(username=current_user.username).first()
-				data = data.split("\n")
-				try:
-					data = [x for x in data if not x.startswith(user.commentChar)]
-				except TypeError:
-					data = [x for x in data if not x.startswith('#')]
-					flash('No comment preference set, defaulting to #')
-				for i in data:
-					if not i:
-						continue
-					line = i.split()
-					xs.append(float(line[0]))
-					ys.append(float(line[1]))
-				DAT = [xs, ys]
-				DAT = json.dumps(DAT)
-				cDAT.DAT = DAT
-				cDAT.originDAT = DAT
-				if dat.name is not None:
-					cDAT.DATname = dat.name
-				db.session.add(cDAT)
-				db.session.commit()
-			return 'Saved'
-		allSes = db.session.query(sessionFiles).filter_by(id=sesID).first()
-		metas = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=sesID).all()
-		for meta in metas:
-			actualMeta = db.session.query(sessionMeta).filter_by(id=meta.sessionMeta_id).first()
-			form = GraphingUtility.populate_from_instance(actualMeta)
-			newCurrent = currentMeta()
-			form.populate_obj(newCurrent)
-			newCurrent.path = actualMeta.path
-			newCurrent.comment = actualMeta.comment
-			newCurrent.checked = actualMeta.checked
-			newCurrent.against_E = actualMeta.against_E
-			newCurrent.file_id = actualMeta.file_id
-			newCurrent.fit_type = actualMeta.fit_type
-			newCurrent.fit_pos = actualMeta.fit_pos
-			newCurrent.fit_range = actualMeta.fit_range
-			newCurrent.hrm = actualMeta.hrm
-			newCurrent.user = current_user
-			newCurrent.session = allSes.name
-			db.session.add(newCurrent)
-			db.session.commit()
-			files.append(newCurrent.file_id)
-		current_user.current_session = allSes.name
-		db.session.commit()
-		data = json.dumps(files)
-		return data
-	return 'Set'
 
 @userApp.route('/save_ses', methods=['GET', 'POST'])
 @login_required

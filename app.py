@@ -64,13 +64,13 @@ from db.api.user_db_api import UserDbApi
 
 from sdproc.user import userApp
 from sdproc.hrm import hrmApp
-from sdproc.sdproc import sdprocApp
 from sdproc.logbook import logbookApp
 from sdproc.comment import commentApp
 from sdproc.file import fileApp
 from sdproc.sessions.routes import sessions
 from sdproc.files.routes import files
 from sdproc.users.routes import users
+from sdproc.admin.routes import admin
 
 login_manager = LoginManager()
 login_manager.login_view = 'users.login2'
@@ -79,7 +79,6 @@ login_manager.init_app(app)
 
 userDbApi = UserDbApi()
 
-app.register_blueprint(sdprocApp)
 app.register_blueprint(userApp)
 app.register_blueprint(hrmApp)
 app.register_blueprint(logbookApp)
@@ -88,6 +87,7 @@ app.register_blueprint(commentApp)
 app.register_blueprint(sessions)
 app.register_blueprint(files)
 app.register_blueprint(users)
+app.register_blueprint(admin)
 
 """ REMOVE THIS ON SERVER """
 @app.before_request
