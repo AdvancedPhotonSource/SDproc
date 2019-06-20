@@ -58,6 +58,7 @@ from forms.register_form import RegisterForm
 from utilities.file_utility import FileUtility
 from db.api.file_db_api import FileDbApi
 from utilities.graphing_utility import GraphingUtility
+from files.utils import file_path
 
 userApp = Blueprint('user', __name__)
 fileApi = FileDbApi()
@@ -359,11 +360,12 @@ def admin():
 		sesData.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
 						   'authed': instance.authed,
 						   'modified': lastMod})
-	files = dataFile.query.order_by('id')
+	files = dataFile.query.filter_by(treeType="File").all()
 	for instance in files:
-		fsize = FileUtility.size(instance.path)
-		lastMod = FileUtility.modified(instance.path)
-		temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
+		path = file_path("." + instance.type, instance.path)
+		fsize = FileUtility.size(path)
+		lastMod = FileUtility.modified(path)
+		temp = lastMod
 		modname = [instance.name + temp]
 		fileData.insert(0,
 						{'name': instance.name, 'path': instance.path, 'id': instance.id, 'comment': instance.comment,

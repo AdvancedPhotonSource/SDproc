@@ -1,0 +1,67 @@
+.separator{
+    position: absolute;
+    top: 225px;
+    width: 100%;
+    margin-left: -2px;
+    margin-right: auto;
+    border-top-style: dashed;
+    border-width: 1px;
+}
+.allCols{
+    display: inline-block;
+    text-align: center;
+    margin-top: 70px;
+}
+
+.selectGroup{
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+}
+.sessionGroup{
+    float: left;
+    margin-right: 20px;
+    margin-left: 60px;
+    margin-top: 15px;
+    padding: 10px;
+    width: 30%;
+}
+.sessionName{
+    margin-bottom: 5px;
+    font-weight:bold;
+    border:1px dotted;
+    padding:10px;
+}
+.stretcher{
+    width: 100%;
+}
+.sesBtn{
+    display: block;
+    width: 50% !important;
+    margin: 0 auto;
+    margin-left: auto !important;
+}
+.addDropGroup{
+    float: left;
+    position: relative;
+    left: 10%;
+    margin-right: 10px;
+}
+.plusBtn{
+    margin-top: 40px;
+}
+
+.minusBtn{
+    margin-top: 20px;
+}
+.selectorGroup{
+    float: left;
+    position: relative;
+    left: 10%;
+    width: 40%;
+}
+.pane{
+    display: inline-block;
+    overflow-y: scroll;
+    max-height: 113px;
+}

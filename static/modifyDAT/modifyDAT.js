@@ -1,69 +1,69 @@
-$(document).ready( function() {
-    if (jQuery.trim($('#process_plot').text()) == "No DAT selected"){
+$x(document).ready( function() {
+    if (jQuery.trim($x('#process_plot').text()) == "No DAT selected"){
         alert('Please select or generate a DAT file');
     }
     else{
-        $.post('/SDproc/show_comment', {format: 3}, function(data){
-            $('#comment').val(data)
+        $x.post('/SDproc/show_comment', {format: 3}, function(data){
+            $x('#comment').val(data)
         })
     }
-    if ($('#flatRad').is(':checked')){
-        $('#flatVal').prop('disabled', false);
-        $('#leftX').prop('disabled', true);
-        $('#leftY').prop('disabled', true);
-        $('#rightX').prop('disabled', true);
-        $('#rightY').prop('disabled', true);
+    if ($x('#flatRad').is(':checked')){
+        $x('#flatVal').prop('disabled', false);
+        $x('#leftX').prop('disabled', true);
+        $x('#leftY').prop('disabled', true);
+        $x('#rightX').prop('disabled', true);
+        $x('#rightY').prop('disabled', true);
     }
-    if ($('#linearRad').is(':checked')){
-        $('#flatVal').prop('disabled', true);
-        $('#leftX').prop('disabled', false);
-        $('#leftY').prop('disabled', false);
-        $('#rightX').prop('disabled', false);
-        $('#rightY').prop('disabled', false);
+    if ($x('#linearRad').is(':checked')){
+        $x('#flatVal').prop('disabled', true);
+        $x('#leftX').prop('disabled', false);
+        $x('#leftY').prop('disabled', false);
+        $x('#rightX').prop('disabled', false);
+        $x('#rightY').prop('disabled', false);
     }
-    if ($('#avRad').is(':checked')){
-        $('#leftX').prop('disabled', true);
-        $('#leftY').prop('disabled', true);
-        $('#rightX').prop('disabled', true);
-        $('#rightY').prop('disabled', true);
-        $('#flatVal').prop('disabled', true);
+    if ($x('#avRad').is(':checked')){
+        $x('#leftX').prop('disabled', true);
+        $x('#leftY').prop('disabled', true);
+        $x('#rightX').prop('disabled', true);
+        $x('#rightY').prop('disabled', true);
+        $x('#flatVal').prop('disabled', true);
     }
-    $('#calcLeftYLabel').hide()
-    $('#calcRightYLabel').hide()
+    $x('#calcLeftYLabel').hide()
+    $x('#calcRightYLabel').hide()
 
     if(localStorage.getItem("usingDAT") == 1){
-        $("#navData").addClass('disabled');
-        $('#navProcess').addClass('disabled');
+        $x("#navData").addClass('disabled');
+        $x('#navProcess').addClass('disabled');
     }
     else{
-        $('#navData').removeClass('disabled');
-        $('#navProcess').removeClass('disabled');
+        $x('#navData').removeClass('disabled');
+        $x('#navProcess').removeClass('disabled');
     }
 })
 
 function showLine(){
-    if ($('#flatRad').is(':checked')){
-        var flatVal = $('#flatVal').val()
-        $.post('/SDproc/showLineDAT', {flatVal: flatVal}, function(data){
-            $('#process_plot').html($(data).find('#process_plot').html())
+    if ($x('#flatRad').is(':checked')){
+        var flatVal = $x('#flatVal').val()
+        $x.post('/SDproc/showLineDAT', {flatVal: flatVal}, function(data){
+            $x('#process_plot').html($x(data).find('#process_plot').html())
         })
     }
-    else if ($('#calcRad').is(':checked')){
-        var leftIn = $('#leftIn').val()
-        var rightIn = $('#rightIn').val()
-        $.post('/SDproc/showLineDAT', {right: rightIn, left: leftIn}, function(data){
+    else if ($x('#calcRad').is(':checked')){
+        var leftIn = $x('#leftIn').val()
+        var rightIn = $x('#rightIn').val()
+        $x.post('/SDproc/showLineDAT', {right: rightIn, left: leftIn}, function(data){
             var data = JSON.parse(data)
-            $('#process_plot').html(data[0])
+            $x('#process_plot').html(data[0])
             localStorage.setItem('averageLin', data[1])
-            $('#calcLeftY').text('Left Y: ');
-            $('#calcRightY').text('Right Y: ');
+            $x('#calcLeftY').text('Left Y: ');
+            $x('#calcRightY').text('Right Y: ');
         })
     }
-    else if ($('givRad').is(':checked')){
-        var lX = $('#leftX').val()
-        var lY = $('#leftY').val()
-        var rX = $('#rightX').val()
-        var rY = $('#rightY').val()
+    else if ($x('givRad').is(':checked')){
+        var lX = $x('#leftX').val()
+        var lY = $x('#leftY').val()
+        var rX = $x('#rightX').val()
+        var rY = $x('#rightY').val()
     }
     else{
         alert('Please select an option to show.');
@@ -71,84 +71,84 @@ function showLine(){
 }
 
 function remBackground(show){
-    if ($('#flatRad').is(':checked')){
-        var flatVal = $('#flatVal').val()
-        $.post('/SDproc/remBackDAT', {show: show, flatVal: flatVal}, function(data){
+    if ($x('#flatRad').is(':checked')){
+        var flatVal = $x('#flatVal').val()
+        $x.post('/SDproc/remBackDAT', {show: show, flatVal: flatVal}, function(data){
             if (show == 0){
-                $('#process_plot').html($(data).find('#process_plot').html())
+                $x('#process_plot').html($x(data).find('#process_plot').html())
             }
             else{
-                $('#process_plot').html($(data))
+                $x('#process_plot').html($x(data))
             }
         })
     }
-    else if ($('#givRad').is(':checked')){
-        var lX = $('#leftX').val()
-        var lY = $('#leftY').val()
-        var rX = $('#rightX').val()
-        var rY = $('#rightY').val()
-        $.post('/SDproc/remBackDAT', {show: show, leftX : lX, leftY : lY, rightX: rX, rightY: rY}, function(data){
+    else if ($x('#givRad').is(':checked')){
+        var lX = $x('#leftX').val()
+        var lY = $x('#leftY').val()
+        var rX = $x('#rightX').val()
+        var rY = $x('#rightY').val()
+        $x.post('/SDproc/remBackDAT', {show: show, leftX : lX, leftY : lY, rightX: rX, rightY: rY}, function(data){
             if (show == 0){
-                $('#process_plot').html($(data).find('#process_plot').html())
+                $x('#process_plot').html($x(data).find('#process_plot').html())
             }
             else{
-                $('#process_plot').html($(data))
+                $x('#process_plot').html($x(data))
             }
         })
     }
-    else if ($('#calcRad').is(':checked')){
-        var leftIn = $('#calcLeftX').val()
-        var rightIn = $('#calcRightX').val()
-        $.post('/SDproc/remBackDAT', {show: show, leftIn: leftIn, rightIn: rightIn}, function(data){
+    else if ($x('#calcRad').is(':checked')){
+        var leftIn = $x('#calcLeftX').val()
+        var rightIn = $x('#calcRightX').val()
+        $x.post('/SDproc/remBackDAT', {show: show, leftIn: leftIn, rightIn: rightIn}, function(data){
         if (show == 0){
-            $('#process_plot').html($(data).find('#process_plot').html())
+            $x('#process_plot').html($x(data).find('#process_plot').html())
         }
         else{
             var data = JSON.parse(data)
-            $('#process_plot').html($(data[0]))
-            $('#calcLeftY').text(data[1])
-            $('#calcRightY').text(data[2])
-            $('#calcLeftYLabel').show()
-            $('#calcRightYLabel').show()
+            $x('#process_plot').html($x(data[0]))
+            $x('#calcLeftY').text(data[1])
+            $x('#calcRightY').text(data[2])
+            $x('#calcLeftYLabel').show()
+            $x('#calcRightYLabel').show()
         }
         })
     }
 }
 
 function resetPlot(){
-    $.post('/SDproc/resetDAT', function(data){
-        $('#process_plot').html($(data).find('#process_plot').html())
+    $x.post('/SDproc/resetDAT', function(data){
+        $x('#process_plot').html($x(data).find('#process_plot').html())
     })
 }
 
-$(function (){
-    $('input[type=radio][name=methodRad]').on('change', function(event){
-        if ($('#flatRad').is(':checked')){
-            $('#flatVal').prop('disabled', false);
-            $('#leftX').prop('disabled', true);
-            $('#leftY').prop('disabled', true);
-            $('#rightX').prop('disabled', true);
-            $('#rightY').prop('disabled', true);
-            $('#calcLeftX').prop('disabled', true);
-            $('#calcRightX').prop('disabled', true);
+$x(function (){
+    $x('input[type=radio][name=methodRad]').on('change', function(event){
+        if ($x('#flatRad').is(':checked')){
+            $x('#flatVal').prop('disabled', false);
+            $x('#leftX').prop('disabled', true);
+            $x('#leftY').prop('disabled', true);
+            $x('#rightX').prop('disabled', true);
+            $x('#rightY').prop('disabled', true);
+            $x('#calcLeftX').prop('disabled', true);
+            $x('#calcRightX').prop('disabled', true);
         }
-        if ($('#calcRad').is(':checked')){
-            $('#flatVal').prop('disabled', true);
-            $('#calcLeftX').prop('disabled', false);
-            $('#calcRightX').prop('disabled', false);
-            $('#leftX').prop('disabled', true);
-            $('#leftY').prop('disabled', true);
-            $('#rightX').prop('disabled', true);
-            $('#rightY').prop('disabled', true);
+        if ($x('#calcRad').is(':checked')){
+            $x('#flatVal').prop('disabled', true);
+            $x('#calcLeftX').prop('disabled', false);
+            $x('#calcRightX').prop('disabled', false);
+            $x('#leftX').prop('disabled', true);
+            $x('#leftY').prop('disabled', true);
+            $x('#rightX').prop('disabled', true);
+            $x('#rightY').prop('disabled', true);
         }
-        if ($('#givRad').is(':checked')){
-            $('#leftX').prop('disabled', false);
-            $('#leftY').prop('disabled', false);
-            $('#rightX').prop('disabled', false);
-            $('#rightY').prop('disabled', false);
-            $('#flatVal').prop('disabled', true);
-            $('#calcLeftX').prop('disabled', true);
-            $('#calcRightX').prop('disabled', true);
+        if ($x('#givRad').is(':checked')){
+            $x('#leftX').prop('disabled', false);
+            $x('#leftY').prop('disabled', false);
+            $x('#rightX').prop('disabled', false);
+            $x('#rightY').prop('disabled', false);
+            $x('#flatVal').prop('disabled', true);
+            $x('#calcLeftX').prop('disabled', true);
+            $x('#calcRightX').prop('disabled', true);
         }
     })
 })
@@ -157,32 +157,32 @@ function outputFile(){
     BootstrapDialog.show({
         title: 'Save Options',
         message: function(dialog){
-            if (jQuery.trim($('#sesName').text()) == 'None'){
-                var $content = $('<input type="text" id="DATname" placeholder="Name of DAT file">')
+            if (jQuery.trim($x('#sesName').text()) == 'None'){
+                var $xcontent = $x('<input type="text" id="DATname" placeholder="Name of DAT file">')
             }
             else{
-                var temp = jQuery.trim($('#sesName').text())
-                var $content = $('<input type="text" id="DATname">')
-                $content[0].value = temp
+                var temp = jQuery.trim($x('#sesName').text())
+                var $xcontent = $x('<input type="text" id="DATname">')
+                $xcontent[0].value = temp
             }
-            return $content
+            return $xcontent
         },
         buttons: [{
             label: 'Save to Server',
             action: function(dialogItself){
-                $.post('/SDproc/generateOutput', {outType: 7, datFName: $('#DATname').val()}, function(data){
+                $x.post('/SDproc/generateOutput', {outType: 7, datFName: $x('#DATname').val()}, function(data){
                     alert('Saved');
-                    $('#sesName').html(data);
+                    $x('#sesName').html(data);
                     dialogItself.close();
                 })
             }
         }, {
             label: 'Save Locally',
             action: function(dialogItself){
-                $('#output-form').attr('action', '/SDproc/generateOutput')
-                $('#outType').val(6);
-                $('#datFName').val($('#DATname').val())
-                $('#output-form')[0].submit();
+                $x('#output-form').attr('action', '/SDproc/generateOutput')
+                $x('#outType').val(6);
+                $x('#datFName').val($x('#DATname').val())
+                $x('#output-form')[0].submit();
                 dialogItself.close();
             }
         }]
@@ -196,18 +196,18 @@ function logout(){
     }
     else{
         previous = localStorage.getItem('usingDAT');
-        $.post("/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1}, function(){
+        $x.post("/SDproc/save_comment", { idprev: previous, comment: $x('#comment').val(), format: 1}, function(){
             window.location.href = ("logout")
         });
     }
 }
 
 
-$(window).on('unload', function(){
-    if (jQuery.trim($('#process_plot').text()) == "No DAT selected"){
+$x(window).on('unload', function(){
+    if (jQuery.trim($x('#process_plot').text()) == "No DAT selected"){
         return;
     }
     else{
-        $.post( "/SDproc/save_comment", {comment: $('#comment').val(), format: 3})
+        $x.post( "/SDproc/save_comment", {comment: $x('#comment').val(), format: 3})
     }
 })

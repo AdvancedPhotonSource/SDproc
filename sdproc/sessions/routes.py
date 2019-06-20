@@ -1,8 +1,19 @@
 import os
+import uuid
+
+import numpy
+import matplotlib
+import mpld3
+
+from sdproc.forms.input_form import InputForm
+from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
+
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from flask import Blueprint, request, flash, json, redirect, url_for, render_template, current_app
 from flask_login import current_user, login_required
 from db.db_model import db, currentDAT, currentMeta, User, dataFile, userFiles, sessionFiles, sessionFilesMeta, \
-    sessionMeta
+    sessionMeta, HRM
 from utilities.graphing_utility import GraphingUtility
 from utilities.file_utility import FileUtility
 from sqlalchemy import and_, desc

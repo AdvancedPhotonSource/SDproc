@@ -49,10 +49,11 @@ from datetime import datetime
 from operator import and_
 
 # import globus_sdk
-from flask import Blueprint, render_template, url_for, request, send_from_directory
+from flask import Blueprint, render_template, url_for, request, send_from_directory, current_app
 from flask_login import login_required, current_user
 # from globusonline.transfer.api_client import get_access_token, TransferAPIClient
 from werkzeug.utils import redirect, secure_filename
+from files.utils import file_path
 
 from db.db_model import User, sessionFiles, db, currentMeta, dataFile, userFiles, \
     sessionFilesMeta, sessionMeta
@@ -211,7 +212,9 @@ def updateSumCheck():
 def headerFile():
     idthis = request.form.get('id', type=int)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-    header = FileUtility.getHeader(file_instance.name, file_instance.path)
+    path = file_path("." + file_instance.type, file_instance.path)
+    print file_instance.name
+    header = FileUtility.getHeader(file_instance.name, path)
     return json.dumps(header)
 
 
@@ -354,9 +357,11 @@ def sendOut(filename, displayName):
     The simplistic name of the file that the user chose.
     :return:
     '''
+    path = os.path.join(current_app.root_path, 'static/saved_files', "dat")
     if displayName != 'None' and displayName is not None:
-        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename,
+        # display name is the name shown at the bottom of browser that you click to open
+        return send_from_directory(directory=path, filename=filename,
                                    as_attachment=True, attachment_filename=displayName + '.dat')
     else:
-        return send_from_directory(directory=app.config['UPLOAD_DIR'] + '/outData', filename=filename,
+        return send_from_directory(directory=path, filename=filename,
                                    as_attachment=True)

@@ -1,6 +1,6 @@
-$(document).ready(function(){
+$y(document).ready(function(){
 
-     $("#tree").jstree({
+     $y("#tree").jstree({
         'core' : {
             'data' : {
                "url" : "scans_data",
@@ -23,14 +23,14 @@ $(document).ready(function(){
 function sortTable(table) {
     tbody = table.find('tbody')
     tbody.find('tr').sort(function(a, b){
-        return $('td:first', a).text().localeCompare($('td:first', b).text());
+        return $y('td:first', a).text().localeCompare($y('td:first', b).text());
     }).appendTo(tbody);
 }
 
 function show_table(file_id, file_name) {
-    $('#sel1 > tbody:last-child')
+    $y('#sel1 > tbody:last-child')
             .append('<tr style="cursor: pointer;" data-value="'+ file_id +'" class="file"><td class="fileNameCell">' + file_name + '</td><td><input checked onclick="updateSumCheck(this)" type="checkbox"></td></tr>');
-    $('#pane').show();
+    $y('#pane').show();
     if (localStorage.getItem('use_files') === null) {
         var files = [];
         files.push(file_id);
@@ -40,24 +40,24 @@ function show_table(file_id, file_name) {
         files.push(file_id);
         localStorage.setItem('use_files', JSON.stringify(files));
     }
-    $('#fileModal').modal('toggle');
-    sortTable($('#sel1'));
+    $y('#fileModal').modal('toggle');
+    sortTable($y('#sel1'));
 }
 
 function graph(file_id, file_name) {
     var ses = localStorage.getItem('usingSes');
-        $('#fileName').text(file_name);
+        $y('#fileName').text(file_name);
         if (localStorage.getItem('previous2') === null)
         {
             localStorage.setItem('previous2', file_id);
-            $.post('/SDproc/data', { idnext: file_id , plot: 1},
+            $y.post('/SDproc/data', { idnext: file_id , plot: 1},
             function(data){
-                $('#metaForm_id').html( $(data).find('#metaForm_id').html());
-                $('#plot_spot').html( $(data).find('#plot_spot').html());
-                $('#currentAE').html( $(data).find('#currentAE').html());
-                $.post('/SDproc/show_comment', { idnext: localStorage.getItem('previous2'), format: 1, ses: ses},
+                $y('#metaForm_id').html( $y(data).find('#metaForm_id').html());
+                $y('#plot_spot').html( $y(data).find('#plot_spot').html());
+                $y('#currentAE').html( $y(data).find('#currentAE').html());
+                $y.post('/SDproc/show_comment', { idnext: localStorage.getItem('previous2'), format: 1, ses: ses},
                 function(data){
-                    $('#comment').val(data)
+                    $y('#comment').val(data)
                     setPlotAgainst();
                 })
             })
@@ -66,14 +66,14 @@ function graph(file_id, file_name) {
         {
             var nextID = file_id
             previous = localStorage.getItem('previous2');
-            $('#idnum').val(previous);
+            $y('#idnum').val(previous);
             localStorage.setItem('previous2', file_id);
-            $('#meta-form').submit();
-            $.post( "/SDproc/save_comment", { idprev: previous, comment: $('#comment').val(), format: 1},
+            $y('#meta-form').submit();
+            $y.post( "/SDproc/save_comment", { idprev: previous, comment: $y('#comment').val(), format: 1},
             function(){
-                $.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
+                $y.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
                 function(data){
-                    $('#comment').val(data)
+                    $y('#comment').val(data)
                     setPlotAgainst();
                 })
             })

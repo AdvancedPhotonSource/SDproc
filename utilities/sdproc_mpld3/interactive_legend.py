@@ -47,9 +47,9 @@ import mpld3
 
 
 class InteractiveLegend(mpld3.plugins.PluginBase):
-	""""A plugin that allows the user to toggle lines though clicking on the legend"""
+    """"A plugin that allows the user to toggle lines though clicking on the legend"""
 
-	JAVASCRIPT = """
+    JAVASCRIPT = """
         mpld3.register_plugin("interactive_legend", InteractiveLegend);
         InteractiveLegend.prototype = Object.create(mpld3.Plugin.prototype);
         InteractiveLegend.prototype.constructor = InteractiveLegend;
@@ -164,7 +164,7 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
 
             if (this.props.sized == 1){
                 var boxes = legend.selectAll("rect");
-                var lastbox = $(boxes[0]).last();
+                var lastbox = $x(boxes[0]).last();
                 lastbox[0].__onclick();
             }
             else{
@@ -233,13 +233,13 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
         };
     """
 
-	def __init__(self, lines, labels, sized, nameID, css):
-		self.css_ = css or ""
+    def __init__(self, lines, labels, sized, nameID, css):
+        self.css_ = css or ""
 
-		self.lines = lines
+        self.lines = lines
 
-		self.dict_ = {"type": "interactive_legend",
-		              "line_ids": [mpld3.utils.get_id(line) for line in lines],
-		              "labels": labels,
-		              "nameID": nameID,
-		              "sized": sized}
+        self.dict_ = {"type": "interactive_legend",
+                      "line_ids": [mpld3.utils.get_id(line) for line in lines],
+                      "labels": labels,
+                      "nameID": nameID,
+                      "sized": sized}

@@ -191,7 +191,7 @@ select[multiple].scan-list{
 
 .separator{
     position: absolute;
-    top: 225px;
+    top: 250px;
     width: 100%;
     margin-left: -2px;
     margin-right: auto;
@@ -255,7 +255,14 @@ select[multiple].scan-list{
     width: auto;
     height: 100%;
 }
+.pull-left {
+    padding-right: 10px;
+    padding-left: 10px;
+}
 
+.pull-left {
+    float: left!important;
+}
 .formVariables{
     float: left;
     margin-top: 10px;
@@ -263,7 +270,7 @@ select[multiple].scan-list{
 
 .HRM-select{
     position: relative;
-    width: 50%;
+    width: 10%;
     bottom: 13px;
     left: -44px;
     top: -10px;
@@ -343,13 +350,12 @@ select[multiple].scan-list{
     margin-top: -1px;
 }
 
-.input-group{
+.input-group {
     position: relative;
     top: 20px;
     width: 488px;
     left: 10px;
 }
-
 .doneBtn{
     position: relative;
     bottom: 150px;
