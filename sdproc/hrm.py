@@ -75,23 +75,24 @@ from sqlalchemy import and_, desc
 
 hrmApp = Blueprint('hrm', __name__)
 
+
 @hrmApp.route('/hrmInfo', methods=['GET', 'POST'])
 @login_required
 def hrmInfo():
 	'''
-    Supplementary template generator method for admin.
+	Supplementary template generator method for admin.
 
-    Provides additional information about a HRM.
+	Provides additional information about a HRM.
 
-    This is done by querying the sqlite database 'HRM' based on the ID given.
-    :return:
-    '''
+	This is done by querying the sqlite database 'HRM' based on the ID given.
+	:return:
+	'''
 	hrmID = request.form.get('id', type=int)
 	hrmInfo = db.session.query(HRM).filter_by(id=hrmID).first()
 	hrmData = {'name': hrmInfo.name, 'hrm_e0': hrmInfo.hrm_e0, 'hrm_bragg1': hrmInfo.hrm_bragg1,
-	           'hrm_bragg2': hrmInfo.hrm_bragg2, 'hrm_geo': hrmInfo.hrm_geo,
-	           'hrm_alpha1': hrmInfo.hrm_alpha1, 'hrm_alpha2': hrmInfo.hrm_alpha2,
-	           'hrm_theta1_sign': hrmInfo.hrm_theta1_sign, 'hrm_theta2_sign': hrmInfo.hrm_theta2_sign}
+			   'hrm_bragg2': hrmInfo.hrm_bragg2, 'hrm_geo': hrmInfo.hrm_geo,
+			   'hrm_alpha1': hrmInfo.hrm_alpha1, 'hrm_alpha2': hrmInfo.hrm_alpha2,
+			   'hrm_theta1_sign': hrmInfo.hrm_theta1_sign, 'hrm_theta2_sign': hrmInfo.hrm_theta2_sign}
 	return render_template('admin.html', user=current_user, hrmData=hrmData)
 
 
@@ -99,13 +100,13 @@ def hrmInfo():
 @login_required
 def addHRM():
 	'''
-    Supplementary template updater method for admin.
+	Supplementary template updater method for admin.
 
-    Adds a HRM with the details provided by the user.
+	Adds a HRM with the details provided by the user.
 
-    This is done by adding a new entry in the sqlite database 'HRM'.
-    :return:
-    '''
+	This is done by adding a new entry in the sqlite database 'HRM'.
+	:return:
+	'''
 	id = request.form.get('id', type=int)
 	hrm = db.session.query(HRM).filter_by(id=id).first()
 	if hrm is None:
@@ -137,17 +138,18 @@ def addHRM():
 		return 'Updated'
 	return 'Added'
 
+
 @hrmApp.route('/data', methods=['GET', 'POST'])
 @login_required
 def dataFormat():
 	'''
-    Template generator for the data page.
+	Template generator for the data page.
 
-    Has a multitude of options that allow the user to display file information in the form of a plot.
-    Options are saved to a live-updated session for each respective file that persists through temporarily leaving the page.
-    Defaults are assigned to all files within this method.
-    :return:
-    '''
+	Has a multitude of options that allow the user to display file information in the form of a plot.
+	Options are saved to a live-updated session for each respective file that persists through temporarily leaving the page.
+	Defaults are assigned to all files within this method.
+	:return:
+	'''
 	user = current_user
 	thisSession = current_user.current_session
 	findPlot = request.form.get('plot', type=int)
@@ -157,22 +159,23 @@ def dataFormat():
 	nameID = str(uuid.uuid4())
 	files = dataFile.query.filter_by(type="mda").all()
 	for instance in files:
-		fsize = FileUtility.size(instance.path)
-		lastMod = FileUtility.modified(instance.path)
-		temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
+		path = file_path("." + instance.type, instance.path)
+		fsize = FileUtility.size(path)
+		lastMod = FileUtility.modified(path)
+		temp = lastMod
 		modname = [instance.name + temp]
 		path = file_path("." + instance.type, instance.path)
 		if instance.type != 'dat':
 			fdata.insert(0,
-			             {'name': instance.name, 'path': path, 'id': instance.id, 'comment': instance.comment,
-			              'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
+						 {'name': instance.name, 'path': path, 'id': instance.id, 'comment': instance.comment,
+						  'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
 	hrms = HRM.query.order_by('id')
 	for instance in hrms:
 		hrmData.insert(0, {'name': instance.name, 'hrm_e0': instance.hrm_e0, 'hrm_bragg1': instance.hrm_bragg1,
-		                   'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
-		                   'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
-		                   'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
+						   'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
+						   'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
+						   'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
 
 	if findPlot != 1:
 		form = InputForm(request.form)
@@ -185,14 +188,14 @@ def dataFormat():
 	else:
 		idthis = request.form.get('idnext', type=int)
 		file_instance = db.session.query(dataFile).filter(dataFile.id == idthis).first()
-		try:
-			fpath = file_path("." + file_instance.type, file_instance.path)
-		except AttributeError:
-			flash('Please select a file')
-			return redirect(url_for('dataFormat'))
+		# try:
+		# 	fpath = file_path("." + file_instance.type, file_instance.path)
+		# except AttributeError:
+		# 	flash('Please select a file')
+		# 	return redirect(url_for('dataFormat'))
 		format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-		                                                            currentMeta.file_id == file_instance.id,
-		                                                            currentMeta.session == current_user.current_session)).first()
+																	currentMeta.file_id == file_instance.id,
+																	currentMeta.session == current_user.current_session)).first()
 		if format_instance is not None:
 			againstE = format_instance.against_E
 			form = GraphingUtility.populate_from_instance(format_instance)
@@ -212,31 +215,42 @@ def dataFormat():
 				if bools[i].data:
 					if columns[i].data == None:
 						if i == 1:
-							energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-							                     GraphingUtility.unicode_to_int(basedColumns[4].data), format_instance.hrm)
+							energy = GraphingUtility.energy_xtal(data,
+																 GraphingUtility.unicode_to_int(basedColumns[3].data),
+																 GraphingUtility.unicode_to_int(basedColumns[4].data),
+																 format_instance.hrm)
 							additional.append(energy)
 							addLabels.append('Energy xtal')
 							energy = numpy.divide(energy, 1000000)
 						elif i == 2:
-							energy = GraphingUtility.energy_xtal_temp(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-							                          GraphingUtility.unicode_to_int(basedColumns[4].data),
-							                          GraphingUtility.unicode_to_int(basedColumns[5].data),
-							                          GraphingUtility.unicode_to_int(basedColumns[6].data), format_instance.hrm)
+							energy = GraphingUtility.energy_xtal_temp(data, GraphingUtility.unicode_to_int(
+								basedColumns[3].data),
+																	  GraphingUtility.unicode_to_int(
+																		  basedColumns[4].data),
+																	  GraphingUtility.unicode_to_int(
+																		  basedColumns[5].data),
+																	  GraphingUtility.unicode_to_int(
+																		  basedColumns[6].data), format_instance.hrm)
 							additional.append(energy)
 							addLabels.append('Energy xtal w/T')
 							energy = numpy.divide(energy, 1000000)
 						elif i == 7:
-							energy = GraphingUtility.temp_corr(data, GraphingUtility.unicode_to_int(basedColumns[5].data),
-							                   GraphingUtility.unicode_to_int(basedColumns[6].data), format_instance.hrm)
+							energy = GraphingUtility.temp_corr(data,
+															   GraphingUtility.unicode_to_int(basedColumns[5].data),
+															   GraphingUtility.unicode_to_int(basedColumns[6].data),
+															   format_instance.hrm)
 							additional.append(energy)
 							addLabels.append('Temp. corr')
 						elif i == 9:
-							signal = GraphingUtility.signal_normalized(data, GraphingUtility.unicode_to_int(basedColumns[8].data),
-							                           GraphingUtility.unicode_to_int(basedColumns[10].data))
+							signal = GraphingUtility.signal_normalized(data, GraphingUtility.unicode_to_int(
+								basedColumns[8].data),
+																	   GraphingUtility.unicode_to_int(
+																		   basedColumns[10].data))
 							additional.append(signal)
 							addLabels.append('Signal Normalized')
 						else:
-							norm = GraphingUtility.norm_factors(data, GraphingUtility.unicode_to_int(basedColumns[10].data))
+							norm = GraphingUtility.norm_factors(data,
+																GraphingUtility.unicode_to_int(basedColumns[10].data))
 							additional.append(norm)
 							addLabels.append('Normalized')
 						continue
@@ -246,18 +260,23 @@ def dataFormat():
 			if againstE == 'Energy':
 				etype = data[GraphingUtility.unicode_to_int(basedColumns[0].data)]
 			elif againstE == 'Energy xtal':
-				etype = numpy.divide(GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-				                                 GraphingUtility.unicode_to_int(basedColumns[4].data), format_instance.hrm), 1000000)
+				etype = numpy.divide(
+					GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
+												GraphingUtility.unicode_to_int(basedColumns[4].data),
+												format_instance.hrm), 1000000)
 			elif againstE == 'Energy xtal w/T':
-				etype = numpy.divide(GraphingUtility.energy_xtal_temp(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-				                                      GraphingUtility.unicode_to_int(basedColumns[4].data),
-				                                      GraphingUtility.unicode_to_int(basedColumns[5].data),
-				                                      GraphingUtility.unicode_to_int(basedColumns[6].data), format_instance.hrm),
-				                     1000000)
+				etype = numpy.divide(
+					GraphingUtility.energy_xtal_temp(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
+													 GraphingUtility.unicode_to_int(basedColumns[4].data),
+													 GraphingUtility.unicode_to_int(basedColumns[5].data),
+													 GraphingUtility.unicode_to_int(basedColumns[6].data),
+													 format_instance.hrm),
+					1000000)
 			elif againstE == 'Energy Fitted':
-				code, ycords, form = GraphingUtility.peakFit(idthis, format_instance.fit_energy, format_instance.fit_signal, unit,
-				                             format_instance.fit_type, format_instance.fit_range,
-				                             format_instance.fit_pos, format_instance.fit_localRange)
+				code, ycords, form = GraphingUtility.peakFit(idthis, format_instance.fit_energy,
+															 format_instance.fit_signal, unit,
+															 format_instance.fit_type, format_instance.fit_range,
+															 format_instance.fit_pos, format_instance.fit_localRange)
 				etype = ycords[0]
 			else:
 				etype = 0
@@ -300,16 +319,15 @@ def dataFormat():
 			format.checked = True
 			hrmInstance = db.session.query(HRM).filter_by(name='Fe-inline-1meV').first()
 			hrm = {'name': hrmInstance.name, 'hrm_e0': hrmInstance.hrm_e0, 'hrm_bragg1': hrmInstance.hrm_bragg1,
-			       'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo,
-			       'hrm_alpha1': hrmInstance.hrm_alpha1,
-			       'hrm_alpha2': hrmInstance.hrm_alpha2, 'hrm_theta1_sign': hrmInstance.hrm_theta1_sign,
-			       'hrm_theta2_sign': hrmInstance.hrm_theta2_sign}
+				   'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo,
+				   'hrm_alpha1': hrmInstance.hrm_alpha1,
+				   'hrm_alpha2': hrmInstance.hrm_alpha2, 'hrm_theta1_sign': hrmInstance.hrm_theta1_sign,
+				   'hrm_theta2_sign': hrmInstance.hrm_theta2_sign}
 			hrm = json.dumps(hrm)
 			format.hrm = hrm
 			format.session = current_user.current_session
 			format.user = current_user
 
-			# used.append(1)
 			used.append(10)
 			labels = [['Signal']]
 			code = GraphingUtility.plotData(data, used, 'Point', None, labels, etype, unit)
@@ -319,19 +337,19 @@ def dataFormat():
 
 			code = format.plot
 			form = GraphingUtility.populate_from_instance(format)
-	return render_template("data_format.html", user=user, code=code, form=form, againstE=againstE, data=fdata,
-	                       ses=thisSession, hrm=hrmData)
+	return render_template("new_df.html", user=user, code=code, form=form, againstE=againstE, data=fdata, ses=thisSession, hrm=hrmData)
+
 
 @hrmApp.route('/generateOutput', methods=['GET', 'POST'])
 @login_required
 def generateOutput():
 	'''
-    This pulls data from a request to determine which type of file needs to be generated and redirects the file to output.
+	This pulls data from a request to determine which type of file needs to be generated and redirects the file to output.
 
-    The outType that is sent from the request data determines which type of output to compile the given data into.
-    If the output is being saved to the server a copy is made in app.config['UPLOAD_DIR'].  Otherwise the file is sent to /sendOut where it is downloaded to the user's computer.
-    :return:
-    '''
+	The outType that is sent from the request data determines which type of output to compile the given data into.
+	If the output is being saved to the server a copy is made in app.config['UPLOAD_DIR'].  Otherwise the file is sent to /sendOut where it is downloaded to the user's computer.
+	:return:
+	'''
 	form = InputForm(request.form)
 	id = request.form.get('idnum', type=str)
 	outType = request.form.get('outType', type=int)
@@ -343,14 +361,18 @@ def generateOutput():
 	output = []
 	colNames = []
 	if outType == 1:
+		# this means the user clicked the output button on the Scans tab
+		# lets the user download the output of mda and save the file
 		file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
 		format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-		                                                            currentMeta.file_id == int(id),
-		                                                            currentMeta.session == current_user.current_session)).first()
+																	currentMeta.file_id == int(id),
+																	currentMeta.session == current_user.current_session)).first()
 		if str(file_instance.type) == 'mda':
-			data, name, unusedpath = FileUtility.readMda(file_instance.path)
+			path = file_path("." + file_instance.type, file_instance.path)
+			data, name, unusedpath = FileUtility.readMda(path)
 		else:
-			data, name, unusedpath = FileUtility.readAscii(file_instance.path, file_instance.comChar)
+			path = file_path("." + file_instance.type, file_instance.path)
+			data, name, unusedpath = FileUtility.readAscii(path, file_instance.comChar)
 		columns, bools = GraphingUtility.splitForm(form)
 		basedColumns = GraphingUtility.zeroBaseColumns(columns)
 		for i in range(len(bools)):
@@ -358,24 +380,30 @@ def generateOutput():
 				if columns[i].data == None:
 					if i == 1:
 						energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-						                                     GraphingUtility.unicode_to_int(basedColumns[4].data), format_instance.hrm)
+															 GraphingUtility.unicode_to_int(basedColumns[4].data),
+															 format_instance.hrm)
 						output.append(energy)
 						colNames.append('Energy xtal')
 					elif i == 2:
-						energy = GraphingUtility.energy_xtal_temp(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-						                          GraphingUtility.unicode_to_int(basedColumns[4].data),
-						                          GraphingUtility.unicode_to_int(basedColumns[5].data),
-						                          GraphingUtility.unicode_to_int(basedColumns[6].data), format_instance.hrm)
+						energy = GraphingUtility.energy_xtal_temp(data,
+																  GraphingUtility.unicode_to_int(basedColumns[3].data),
+																  GraphingUtility.unicode_to_int(basedColumns[4].data),
+																  GraphingUtility.unicode_to_int(basedColumns[5].data),
+																  GraphingUtility.unicode_to_int(basedColumns[6].data),
+																  format_instance.hrm)
 						output.append(energy)
 						colNames.append('Energy xtal temp')
 					elif i == 7:
 						energy = GraphingUtility.temp_corr(data, GraphingUtility.unicode_to_int(basedColumns[5].data),
-						                                   GraphingUtility.unicode_to_int(basedColumns[6].data), format_instance.hrm)
+														   GraphingUtility.unicode_to_int(basedColumns[6].data),
+														   format_instance.hrm)
 						output.append(energy)
 						colNames.append('Temp Corr')
 					elif i == 9:
-						signal = GraphingUtility.signal_normalized(data, GraphingUtility.unicode_to_int(basedColumns[8].data),
-						                           GraphingUtility.unicode_to_int(basedColumns[10].data))
+						signal = GraphingUtility.signal_normalized(data,
+																   GraphingUtility.unicode_to_int(basedColumns[8].data),
+																   GraphingUtility.unicode_to_int(
+																	   basedColumns[10].data))
 						output.append(signal)
 						colNames.append('Signal Normalized')
 					else:
@@ -403,6 +431,7 @@ def generateOutput():
 		else:
 			filename = FileUtility.writeOutput(output, colNames, file_instance.name, '')
 	elif outType == 3:
+		# save sum (data file) locally
 		jidlist = json.loads(id)
 		cords = json.loads(cordData)
 		output = []
@@ -432,7 +461,8 @@ def generateOutput():
 			dfile.comChar = user_instance.commentChar
 			dfile.type = 'dat'
 			currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
-			parentNode = db.session.query(dataFile).filter(and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+			parentNode = db.session.query(dataFile).filter(
+				and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
 			dfile.parentID = parentNode.id
 			dfile.treeType = "File"
 			db.session.add(dfile)
@@ -445,6 +475,8 @@ def generateOutput():
 			data = DATfile.read()
 		return data
 	elif outType == 5:
+		# clicked the sum button on the Sum tab
+		# onclick shows the graph and saves a file
 		jidlist = json.loads(id)
 		cords = json.loads(cordData)
 		output = []
@@ -464,7 +496,8 @@ def generateOutput():
 			dfile.comChar = user_instance.commentChar
 			dfile.type = 'dat'
 			currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
-			parentNode = db.session.query(dataFile).filter(and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+			parentNode = db.session.query(dataFile).filter(
+				and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
 			dfile.parentID = parentNode.id
 			dfile.treeType = "File"
 			db.session.add(dfile)
@@ -506,7 +539,8 @@ def generateOutput():
 		dfile.comChar = user_instance.commentChar
 		dfile.type = 'dat'
 		currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
-		parentNode = db.session.query(dataFile).filter(and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+		parentNode = db.session.query(dataFile).filter(
+			and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
 		dfile.parentID = parentNode.id
 		dfile.treeType = "File"
 		db.session.add(dfile)
@@ -515,10 +549,10 @@ def generateOutput():
 		return datFName
 	if datFName is not None:
 		return redirect(url_for('file.sendOut', filename=filename, displayName=datFName))
-		#sendOut(filename, datFName)
+	# sendOut(filename, datFName)
 	else:
 		return redirect(url_for('file.sendOut', filename=filename, displayName='None'))
-		#sendOut(filename, 'None')
+	# sendOut(filename, 'None')
 
 	return "Done"
 
@@ -546,11 +580,11 @@ def generateOutput():
 @login_required
 def process():
 	'''
-    Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their currentMeta.
+	Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their currentMeta.
 
-    Summing can be done with a binning or interpolation method.  Maxes are extracted the same either way.
-    :return:
-    '''
+	Summing can be done with a binning or interpolation method.  Maxes are extracted the same either way.
+	:return:
+	'''
 	user = current_user
 	idthis = request.form.get('idnext', type=int)
 	idlist = request.form.get('idList', type=str)
@@ -570,8 +604,8 @@ def process():
 				flash('Please select a file')
 				return redirect(url_for('waitProc'))
 			format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-			                                                            currentMeta.file_id == file_instance.id,
-			                                                            currentMeta.session == current_user.current_session)).first()
+																		currentMeta.file_id == file_instance.id,
+																		currentMeta.session == current_user.current_session)).first()
 			againstE = format_instance.against_E
 			form = GraphingUtility.populate_from_instance(format_instance)
 			columns, bools = GraphingUtility.splitForm(form)
@@ -595,23 +629,26 @@ def process():
 			else:
 				if bools[1].data:
 					energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-					                                     GraphingUtility.unicode_to_int(basedColumns[4].data),
-					                     format_instance.hrm)
+														 GraphingUtility.unicode_to_int(basedColumns[4].data),
+														 format_instance.hrm)
 					additional.append(energy)
 					legendNames.append(basedColumns[1].id)
 				elif bools[2].data:
-					energy = GraphingUtility.energy_xtal_temp(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-					                                          GraphingUtility.unicode_to_int(basedColumns[4].data),
-					                                          GraphingUtility.unicode_to_int(basedColumns[5].data),
-					                                          GraphingUtility.unicode_to_int(basedColumns[6].data), format_instance.hrm)
+					energy = GraphingUtility.energy_xtal_temp(data,
+															  GraphingUtility.unicode_to_int(basedColumns[3].data),
+															  GraphingUtility.unicode_to_int(basedColumns[4].data),
+															  GraphingUtility.unicode_to_int(basedColumns[5].data),
+															  GraphingUtility.unicode_to_int(basedColumns[6].data),
+															  format_instance.hrm)
 					additional.append(energy)
 					legendNames.append(basedColumns[2].id)
 				else:
 					used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
 					legendNames.append(basedColumns[0].id)
 				if bools[9].data:
-					signal = GraphingUtility.signal_normalized(data, GraphingUtility.unicode_to_int(basedColumns[8].data),
-					                                           GraphingUtility.unicode_to_int(basedColumns[10].data))
+					signal = GraphingUtility.signal_normalized(data,
+															   GraphingUtility.unicode_to_int(basedColumns[8].data),
+															   GraphingUtility.unicode_to_int(basedColumns[10].data))
 					additional.append(signal)
 					legendNames.append(basedColumns[9].id)
 				else:
@@ -643,7 +680,7 @@ def process():
 				outputData.append(ycords[0].tolist())
 				outputData.append(ycords[1])
 				outputs = json.dumps(outputData)
-			code = GraphingUtility.simplePlot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
+			code = GraphingUtility.simple_plot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
 		if idthis is None:
 			jidlist = json.loads(idlist)
 			alldata = []
@@ -664,8 +701,8 @@ def process():
 					return redirect(url_for('waitProc'))
 				format_instance = db.session.query(currentMeta).filter(
 					and_(currentMeta.user_id == current_user.get_id(),
-					     currentMeta.file_id == file_instance.id,
-					     currentMeta.session == current_user.current_session)).first()
+						 currentMeta.file_id == file_instance.id,
+						 currentMeta.session == current_user.current_session)).first()
 				againstE = format_instance.against_E
 				form = GraphingUtility.populate_from_instance(format_instance)
 				columns, bools = GraphingUtility.splitForm(form)
@@ -677,20 +714,23 @@ def process():
 					data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
 				if bools[1].data:
 					energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-					                                     GraphingUtility.unicode_to_int(basedColumns[4].data),
-					                     format_instance.hrm)
+														 GraphingUtility.unicode_to_int(basedColumns[4].data),
+														 format_instance.hrm)
 					used.append(energy)
 				elif bools[2].data:
-					energy = GraphingUtility.energy_xtal_temp(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-					                                          GraphingUtility.unicode_to_int(basedColumns[4].data),
-					                                          GraphingUtility.unicode_to_int(basedColumns[5].data),
-					                                          GraphingUtility.unicode_to_int(basedColumns[6].data), format_instance.hrm)
+					energy = GraphingUtility.energy_xtal_temp(data,
+															  GraphingUtility.unicode_to_int(basedColumns[3].data),
+															  GraphingUtility.unicode_to_int(basedColumns[4].data),
+															  GraphingUtility.unicode_to_int(basedColumns[5].data),
+															  GraphingUtility.unicode_to_int(basedColumns[6].data),
+															  format_instance.hrm)
 					used.append(energy)
 				else:
 					used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
 				if bools[9].data:
-					signal = GraphingUtility.signal_normalized(data, GraphingUtility.unicode_to_int(basedColumns[8].data),
-					                           GraphingUtility.unicode_to_int(basedColumns[10].data))
+					signal = GraphingUtility.signal_normalized(data,
+															   GraphingUtility.unicode_to_int(basedColumns[8].data),
+															   GraphingUtility.unicode_to_int(basedColumns[10].data))
 					used.append(signal)
 					allLegendNames.append(basedColumns[9].id)
 				else:
@@ -726,15 +766,17 @@ def process():
 				allagainstE.append(againstE)
 				allFileNames.append(file_instance.name)
 			if binWidth == None:
-				code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergePlots(allycords, allxmax, allagainstE, alldata,
-				                                                allLegendNames,
-				                                                allFileNames, pltLeg)
+				code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergePlots(allycords, allxmax, allagainstE,
+																				alldata,
+																				allLegendNames,
+																				allFileNames, pltLeg)
 				sumX = sumX.tolist()
 				sumY = sumY.tolist()
 			else:
-				code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames,
-				                                              allFileNames,
-				                                              pltLeg, binWidth)
+				code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergeBin(allycords, allxmax, allagainstE, alldata,
+																			  allLegendNames,
+																			  allFileNames,
+																			  pltLeg, binWidth)
 			if output == 1:
 				outputs = []
 				outputs.append(sumX)
@@ -757,19 +799,19 @@ def process():
 		db.session.add(processEntry)
 		db.session.commit()
 	senddata.append({'max': endmax, 'filenames': allFileNames})
-	return render_template("data_process.html", user=user, ses=current_user.current_session, code=code, data=senddata,
-	                       outputs=outputs)
+	return render_template("new_dp.html", user=user, ses=current_user.current_session, code=code, data=senddata,
+						   outputs=outputs)
 
 
 @hrmApp.route('/peakFit', methods=['GET', 'POST'])
 @login_required
 def peak_at_max():
 	'''
-    Peak fitting function that uses either the file defaults or what the user has done to the file on the format page.
+	Peak fitting function that uses either the file defaults or what the user has done to the file on the format page.
 
-    Currently peak fitting is done using a centroid analysis.  All files are peak fitted before being summed up on the sum page.
-    :return:
-    '''
+	Currently peak fitting is done using a centroid analysis.  All files are peak fitted before being summed up on the sum page.
+	:return:
+	'''
 	idthis = request.form.get('idnum', type=int)
 	fitType = request.form.get('fitType', type=str)
 	inputCord = request.form.get('inputCord', type=float)
@@ -779,41 +821,42 @@ def peak_at_max():
 	signalType = ' '.join(request.form.get('signal', type=str).split())
 	energyType = ' '.join(request.form.get('energy', type=str).split())
 	unit = request.form.get('unit', type=str)
-	code, ycords, form = GraphingUtility.peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord, localRange)
+	code, ycords, form = GraphingUtility.peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord,
+												 localRange)
 	if sendOut == 1:
 		ycords[0] = ycords[0].tolist()
 		return json.dumps(ycords)
-	return render_template("data_format.html", user=current_user, ses=current_user.current_session, code=code,
-	                       form=form,
-	                       shiftVal=str(abs(ycords[0][0])))
+	return render_template("new_df.html", user=current_user, ses=current_user.current_session, code=code,
+						   form=form,
+						   shiftVal=str(abs(ycords[0][0])))
 
 
 @hrmApp.route('/modifyDAT', methods=['GET', 'POST'])
 @login_required
 def modifyDAT():
 	'''
-    Template function for the modifyDAT page.
+	Template function for the modifyDAT page.
 
-    Essentially just plotting the DAT information stored in the user's currentDAT.
+	Essentially just plotting the DAT information stored in the user's currentDAT.
 
-    Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
-    :return:
-    '''
+	Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
+	:return:
+	'''
 	try:
 		DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
 	except Exception, e:
 		code = 'No DAT selected'
-		return render_template("modifyDAT.html", user=current_user, ses=current_user.current_session, code=code)
+		return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
 	if DAT == None:
 		code = 'No DAT selected'
-		return render_template("modifyDAT.html", user=current_user, ses=current_user.current_session, code=code)
+		return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
 	user = db.session.query(User).filter_by(username=current_user.username).first()
 	fig = plt.figure(figsize=(10, 7))
 	css = """
-    .legend-box{
-        cursor: pointer;
-    }
-    """
+	.legend-box{
+		cursor: pointer;
+	}
+	"""
 	xs = []
 	ys = []
 	labels = []
@@ -830,20 +873,20 @@ def modifyDAT():
 	mpld3.plugins.connect(fig, HideLegend(nameID))
 	code = mpld3.fig_to_html(fig)
 	plt.close('all')
-	return render_template("modifyDAT.html", user=current_user, ses=DAT.DATname, code=code)
+	return render_template("new_mdat.html", user=current_user, ses=DAT.DATname, code=code)
 
 
 @hrmApp.route('/setDAT', methods=['GET', 'POST'])
 @login_required
 def setDAT():
 	'''
-    Updates the current DAT file that the user is viewing with a DAT file that was selected.
+	Updates the current DAT file that the user is viewing with a DAT file that was selected.
 
-    This is usually called from the /select page when choosing a DAT file.
+	This is usually called from the /select page when choosing a DAT file.
 
-    Sets the user's currentDAT.
-    :return:
-    '''
+	Sets the user's currentDAT.
+	:return:
+	'''
 	DAT = request.form.get('DAT', type=str)
 	DName = request.form.get('DName', type=str)
 	meta = db.metadata
@@ -883,14 +926,14 @@ def setDAT():
 @login_required
 def remBackDAT():
 	'''
-    Removes the background data from a DAT file based on user specifications.
+	Removes the background data from a DAT file based on user specifications.
 
-    Either removes a flat value, a linear value, or a averaged linear value from the DAT data stored in currentDAT.
+	Either removes a flat value, a linear value, or a averaged linear value from the DAT data stored in currentDAT.
 
-    Updates currentDAT with the data for the new line.
-    :return:
-    Calls /modifyDAT as that will plot the altered currentDAT.
-    '''
+	Updates currentDAT with the data for the new line.
+	:return:
+	Calls /modifyDAT as that will plot the altered currentDAT.
+	'''
 	show = request.form.get('show', type=int)
 	flatVal = request.form.get('flatVal', type=int)
 	if flatVal != None:
@@ -942,11 +985,11 @@ def remBackDAT():
 		if show == 0:
 			cords = GraphingUtility.calcAverageBack(leftIn, rightIn)
 			leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[4]]),
-			                                         numpy.array([cords[1], cords[5]]), 1)
+													 numpy.array([cords[1], cords[5]]), 1)
 			middleSlope, middleIntercept = numpy.polyfit(numpy.array([cords[4], cords[2]]),
-			                                             numpy.array([cords[5], cords[3]]), 1)
+														 numpy.array([cords[5], cords[3]]), 1)
 			rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[2], cords[6]]),
-			                                           numpy.array([cords[3], cords[7]]), 1)
+													   numpy.array([cords[3], cords[7]]), 1)
 			DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
 			data = json.loads(DAT.DAT)
 			tempX = []
@@ -986,64 +1029,66 @@ def resetDAT():
 	DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
 	DAT.DAT = DAT.originDAT
 	db.session.commit()
-	return redirect(url_for('modifyDAT'))
+	return redirect(url_for('hrm.modifyDAT'))
 
 
 @hrmApp.route('/updateHRM', methods=['GET', 'POST'])
 @login_required
 def updateHRM():
 	'''
-    Sets the HRM to one of the static parameter sets in the HRM database
+	Sets the HRM to one of the static parameter sets in the HRM database
 
-    HRM is used primarily with energy_xtal, energy_xtal_temp, and temp_corr on the /format page.
-    :return:
-    '''
+	HRM is used primarily with energy_xtal, energy_xtal_temp, and temp_corr on the /format page.
+	:return:
+	'''
 	idthis = request.form.get('idnum', type=int)
 	hrm = request.form.get('hrm', type=str)
 	format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-	                                                            currentMeta.file_id == idthis,
-	                                                            currentMeta.session == current_user.current_session)).first()
+																currentMeta.file_id == idthis,
+																currentMeta.session == current_user.current_session)).first()
 	hrmInstance = db.session.query(HRM).filter_by(name=hrm).first()
 	hrm = {'name': hrmInstance.name, 'hrm_e0': hrmInstance.hrm_e0, 'hrm_bragg1': hrmInstance.hrm_bragg1,
-	       'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo, 'hrm_alpha1': hrmInstance.hrm_alpha1,
-	       'hrm_alpha2': hrmInstance.hrm_alpha2, 'hrm_theta1_sign': hrmInstance.hrm_theta1_sign,
-	       'hrm_theta2_sign': hrmInstance.hrm_theta2_sign}
+		   'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo, 'hrm_alpha1': hrmInstance.hrm_alpha1,
+		   'hrm_alpha2': hrmInstance.hrm_alpha2, 'hrm_theta1_sign': hrmInstance.hrm_theta1_sign,
+		   'hrm_theta2_sign': hrmInstance.hrm_theta2_sign}
 	hrm = json.dumps(hrm)
 	format_instance.hrm = hrm
 	db.session.commit()
 	return hrmInstance.name
 
+
 @hrmApp.route('/close_plots', methods=['GET', 'POST'])
 @login_required
 def close_plots():
 	'''
-    Closes all existing plots.
+	Closes all existing plots.
 
-    As the program is generating a large number of plots quite regularly this is a function to easily allow them to be closed.
-    :return:
-    '''
+	As the program is generating a large number of plots quite regularly this is a function to easily allow them to be closed.
+	:return:
+	'''
 	if request.method == 'POST':
 		plt.close("all")
 	return 'Closed'
+
 
 @hrmApp.route('/save_graph', methods=['GET', 'POST'])
 @login_required
 def save_graph():
 	'''
-    Updates the current session with information that the user has supplied on the data page.
+	Updates the current session with information that the user has supplied on the data page.
 
-    This session is stored temporarily for each file and is updated whenever a change is made on the data page.
-    The data is passed in the InputForm that is defined in forms.py and saved in the currentMeta database table.
-    :return:
-    '''
+	This session is stored temporarily for each file and is updated whenever a change is made on the data page.
+	The data is passed in the InputForm that is defined in forms.py and saved in the currentMeta database table.
+	:return:
+	'''
 	form = InputForm(request.form)
 	idthis = request.form.get("idnum", type=int)
 	if idthis is not None:
 		againstE = request.form.get("agaE", type=str)
 		file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
 		format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-		                                                            currentMeta.file_id == file_instance.id,
-		                                                            currentMeta.session == current_user.current_session)).first()
+																	currentMeta.file_id == file_instance.id,
+																	currentMeta.session == current_user.current_session)).first()
 
 		format_instance.energy = form.energy.data
 		format_instance.xtal1A = form.xtal1A.data

@@ -8,24 +8,21 @@
 {% block content %}
     <div class="content">
         <div class="jumbotron">
-            <h3>Select How to Proceed</h3>
+            <h4>Select How to Proceed</h4>
             <p>Choose to start a new session or continue a previous session.</p>
-            <p class="smallText">Use browser zoom if everything does not fit on your screen (Ctrl and +/- or Cmd and +/-)</p>
         </div>
-        <div class="row text-center">
-            <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-12 align-btns">
                 <button class="btn btn-primary btn-lg" onclick="continue_session()">Continue Session</button>
-            </div>
-            <div class="col-md-6">
                 <button class="btn btn-primary btn-lg" onclick="new_session()">Start New Session</button>
             </div>
-        </div><br>
+        </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
-                    <div class="col-md-12 text center">
+                    <div class="col-md-12">
                         <label for="search" class="form-control-label">Search</label>
-                        <input class="form-control" id="search" type="text" placeholder="Search.."><br>
+                        <input class="form-control" id="search" type="text" placeholder="Search . . .">
                     </div>
                 </div>
                 <div class="row">
@@ -59,24 +56,22 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6 text-center"><br>
-                        <button class="btn btn-danger" onclick="delete_modal()">Delete</button><br><br>
-                    </div>
-                    <div class="col-md-6 text-center"><br>
-                        <button class="btn btn-info" onclick="share_modal()">Share</button><br><br>
+                    <div class="col-md-12 align-btns">
+                        <button class="btn btn-danger" onclick="delete_modal()">Delete</button>
+                        <button class="btn btn-info" onclick="share_modal()">Share</button>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 text-center">
+            <div class="col-md-6">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-12 text-center">
                         <label for="comment" class="form-control-label">Comment(s):</label>
-                        <textarea class="form-control" rows="5" id="comment" name="comment"></textarea><br>
+                        <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12 ">
-                        <button class="btn btn-info " onclick="save_comment()" title="Save the new comment">Save Comment</button><br><br>
+                    <div class="col-md-12 center-btn">
+                        <button class="btn btn-primary " onclick="save_comment()" title="Save the new comment">Save Comment</button>
                     </div>
                 </div>
             </div>

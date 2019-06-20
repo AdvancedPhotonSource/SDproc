@@ -4,6 +4,13 @@
     border-radius: 3px;
     margin-bottom: 20px;
 }
+.col-md-6, .col-md-12, .col-md-2, .col-md-4 {
+    padding: 1rem;
+}
+.scroll {
+    overflow: auto;
+    height: 350px;
+}
 .content {
     padding: 10px 20px;
     margin-bottom: 20px;
@@ -38,6 +45,9 @@ body {
 .red {
     background-color:red;
 }
+.green {
+    background-color:green;
+}
 #footer {
   margin-bottom: 0;
   position: absolute;
@@ -50,5 +60,18 @@ body {
     padding: 10px 20px;
 
     margin-bottom: 20px;
+}
+.align-btns {
+    display: flex;
+    justify-content:space-evenly;
+}
+.center-btn {
+    display: flex;
+    justify-content: center;
+}\
+.wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 

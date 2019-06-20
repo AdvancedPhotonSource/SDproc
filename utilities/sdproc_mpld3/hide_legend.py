@@ -47,9 +47,9 @@ import mpld3
 
 
 class HideLegend(mpld3.plugins.PluginBase):
-	"""mpld3 plugin to hide legend on plot"""
+    """mpld3 plugin to hide legend on plot"""
 
-	JAVASCRIPT = """
+    JAVASCRIPT = """
     var my_icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABVklEQVR42pXTO0sDQRSG4dmsyXptQ8BKCwsbq4CCiPgDrOwkIsTSf2Ul2KidhaAWYiFBFC1UWKN4VzTeQ0DfDd8u47gpLB4yc3Zy9szMWWOM8ZARz/ltFRvGlmJJ8D928axxy0UDKGMdo8gqfo66te7Xn9owhX3c4AWXGl/hBA1ne8kkh2+8KtEsPpXkHmP4wiN60iq4xYTGG1i1ys6jigX040kvaSbI6y1lBbpQsRIHOMAi9hQbwUec4B13mvgoIbTmb6rGtxJH4zPMG2UqKBg9nMGpxnVtx76+uPROVW6KOES3kkzjAkuqzLcSVKwDj148GB9iUYtzmofOQWV0eNtKeI1l9xYmdeeB9ldDu571qfM6dM1zSvSnlaP7fcAKhtRAUWWbGNezNWdbycBXt4Uq8Rg7cqTu7E1p+WRQ06nH2bPaTmA1lKu5BU+ZG1pof762tJj3A656Tx0L91EcAAAAAElFTkSuQmCC";
     mpld3.register_plugin("hidelegend", HideLegend);
     HideLegend.prototype = Object.create(mpld3.Plugin.prototype);
@@ -85,6 +85,6 @@ class HideLegend(mpld3.plugins.PluginBase):
     }
     """
 
-	def __init__(self, nameID):
-		self.dict_ = {'type': 'hidelegend',
-		              'nameID': nameID}
+    def __init__(self, nameID):
+        self.dict_ = {'type': 'hidelegend',
+                      'nameID': nameID}

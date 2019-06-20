@@ -51,7 +51,6 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
     <link rel="stylesheet" href="/static/layout/main.css">
 
     {% if title %}
@@ -73,14 +72,14 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
-                        <a class="nav-item nav-link" href="{{ url_for('files.upload_files') }}">Manage Files</a>
+                        <a class="nav-item nav-link" href="{{ url_for('files.upload_files') }}"><i class="fas fa-file-upload"></i>Manage Files</a>
                         <a class="nav-item nav-link" href="{{ url_for('sessions.index2') }}">Select Session</a>
                         <a class="nav-item nav-link" href="{{ url_for('hrm.dataFormat') }}">Scans</a>
                         <a class="nav-item nav-link" href="{{ url_for('hrm.process') }}">Sum</a>
                         <a class="nav-item nav-link" href="{{ url_for('hrm.modifyDAT') }}">Modify DAT</a>
                         {% if current_user.is_authenticated %}
                             {% if current_user.isAdmin == 1 %}
-                                <a class="nav-item nav-link" href="{{ url_for('user.admin') }}">Admin</a>
+                                <a class="nav-item nav-link" href="{{ url_for('admin.admin2') }}">Admin</a>
                             {% endif %}
                         {% endif %}
                     </div>
@@ -100,21 +99,24 @@
         </nav>
     </header>
 
-    <main role="main" class="container">
-        <div class="row">
-            <div class="col-md-12">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-                {% block content %}{% endblock content %}
+    <main role="main">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    {% block content %}{% endblock content %}
+                </div>
             </div>
         </div>
+        {% block content_no_container %}{% endblock content_no_container %}
     </main>
 
     <!-- Optional JavaScript -->

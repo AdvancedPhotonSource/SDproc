@@ -50,6 +50,7 @@ import re
 
 db = SQLAlchemy(app)
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
@@ -101,9 +102,9 @@ class User(db.Model):
             'At least one symbol' : symbol_error,
         }
 
+
 class notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     originUser = db.Column(db.String())
     type = db.Column(db.String())
     timestamp = db.Column(db.DateTime())

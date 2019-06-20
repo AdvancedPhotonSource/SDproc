@@ -2,15 +2,15 @@
 
 {% block static %}
     <link rel="stylesheet" href="/static/session/session.css">
-
+    <link rel="stylesheet" href="/static/admin/a.css">
 {% endblock static %}
 
 {% block content %}
     <div class="content">
         <button class="btn btn-info" onclick="show_user()">User</button>
         <button class="btn btn-info" onclick="show_HRM()">HRM</button>
-        <div class="row" id="user">
-            <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-6" id="user">
                 <div class="row">
                     <div class="col-md-12 text center">
                         <label for="searchUser" class="form-control-label">Search</label>
@@ -28,7 +28,7 @@
                             <tbody id="userTable">
                                 {% if users %}
                                     {% for user in users %}
-                                        <tr class="click" id="{{ user.id }}" name="{{ user.username }}">
+                                        <tr class="click-user" id="{{ user.id }}" name="{{ user.username }}">
                                             <td>{{ user.username }}</td>
                                         </tr>
                                     {% endfor %}
@@ -38,10 +38,8 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row" id="HRM">
-            <div class="col-md-6">
+            <div class="col-md-6 hide" id="HRM">
                 <div class="row">
                     <div class="col-md-12 text center">
                         <label for="searchHRM" class="form-control-label">Search</label>
@@ -59,7 +57,7 @@
                             <tbody id="hrmTable">
                                 {% if hrms %}
                                     {% for hrm in hrms %}
-                                        <tr class="click" id="{{ hrm.id }}" name="{{ hrm.name }}">
+                                        <tr class="click-hrm" id="{{ hrm.id }}" name="{{ hrm.name }}">
                                             <td>{{ hrm.name }}</td>
                                         </tr>
                                     {% endfor %}
@@ -69,8 +67,129 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-6">
+                <div class="table text-center">
+                    <h3>Notifications:</h3>
+                    <table>
+                        <tbody>
+                            {% if notifications %}
+                                {% for task in notifications %}
+                                    <tr class="click" id="{{ task.id }}">
+                                        <td>{{ task.type }}</td>
+                                        <td>{{ task.originUser }}</td>
+                                        <td><button class="btn btn-info" data-toggle="modal" data-target="#{{ task.originUser }}">Info</button></td>
+                                        <td>{{ task.timestamp }}</td>
+                                        <td><button class="btn btn-success" onclick="approve({{ task.id }})">Approve</button></td>
+                                        <td><button class="btn btn-danger" onclick="decline({{ task.id }})">Decline</button></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                No Notifications
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+
+    {% if users %}
+        {% for user in users %}
+            <div class="modal fade" id="userModal-{{ user.username }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="userModalTitle">{{ user.username }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="user-modal-body">
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if hrms %}
+        {% for hrm in hrms %}
+            <div class="modal fade" id="{{ hrm.name }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="hrmModalTitle">{{ hrm.name }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="hrm-modal-body">
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if notifications %}
+        {% for n in new_users %}
+            <div class="modal fade" id="{{ n.username }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="infoModalTitle">{{ n.username }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="info-modal-body">
+                            <div class="content-section">
+                                <form method="POST" action="" enctype="multipart/form-data">
+                                    {{ form.hidden_tag() }}
+                                    <fieldset class="form-group">
+                                        <legend class="border-bottom mb-4">Profile Info</legend>
+                                        <div class="form-group">
+                                            {{ form.full_name.label(class="form-control-label") }}
+                                            {{ form.full_name(class="form-control form-control-lg", readonly="readonly", value=n.fullName) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.username.label(class="form-control-label") }}
+                                            {{ form.username(class="form-control form-control-lg", readonly="readonly", value=n.username) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.email.label(class="form-control-label") }}
+                                            {{ form.email(class="form-control form-control-lg", readonly="readonly", value=n.email) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.institution.label(class="form-control-label") }}
+                                            {{ form.institution(class="form-control form-control-lg", readonly="readonly", value=n.institution) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.reason.label(class="form-control-label") }}
+                                            {{ form.reason(class="form-control form-control-lg", readonly="readonly", value=n.reason) }}
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
 {% endblock content %}
 
 {% block scripts %}

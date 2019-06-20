@@ -5,17 +5,17 @@
 {% block content %}
     <div class="content">
         <div class="jumbotron">
-            <h3>Your Files</h3>
+            <h4>Your Files</h4>
             <p>Upload or delete files to manage your database.</p>
             <div class="row">
                 <div class="col-md-4">
-                    <button class="btn btn-primary btn-md" id="globusConnect" data-toggle="modal" data-target="#globusModal">Link with Globus</button><br><br>
+                    <button class="btn btn-primary btn-md" id="globusConnect" data-toggle="modal" data-target="#globusModal">Link with Globus</button>
                     <p>Enable popups for Globus.</p>
                 </div>
                 <div class="col-md-8">
                     <form method="POST" class="form-inline" action="" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
-                        <div class="form-group mx-sm-3 mb-2">
+                        <div class="form-group mx-sm-3 ">
                             {{ form.files(class="form-control-file") }}
                             {% if form.files.errors %}
                                 {% for error in form.files.errors %}
@@ -31,14 +31,21 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-md-6">
                 <div id="tree"></div>
             </div>
-            <div class="col-sm-6 text-center">
-                <label>Comment:</label>
-                <br/>
-                <textarea class="form-control" rows="5" id="comment" name="comment"></textarea><br><br>
-                <button id="newText" type="submit" class="btn btn-primary btn-lg doneBtn" onclick="saveNewComment()" title="Save the new comment">Save Comment</button>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <label>Comment(s):</label>
+                        <textarea class="form-control" rows="5" id="comment" name="comment"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 center-btn">
+                        <button class="btn btn-primary" onclick="saveNewComment()" title="Save the new comment">Save Comment</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,12 +88,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div>
-        <!-- Form Here -->
-
-                    <!-- end of form -->
     </div>
 
 {% endblock content %}
