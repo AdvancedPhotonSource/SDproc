@@ -39,9 +39,11 @@ body {
 }
 
 .blue {
-    background-color:blue;
+    background-color:lightblue;
 }
-
+.yellow {
+    background-color:yellow;
+}
 .red {
     background-color:red;
 }
@@ -68,7 +70,12 @@ body {
 .center-btn {
     display: flex;
     justify-content: center;
-}\
+}
+.cen {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 .wrapper {
     display: flex;
     align-items: center;

@@ -49,8 +49,4 @@ def approve_user():
     return "approved"
 
 
-@admin.route('/test_data', methods=['GET', 'POST'])
-@login_required
-def test_da():
-    u = User.query.filter_by(id=1).first()
-    return u
+

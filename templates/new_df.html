@@ -1,12 +1,42 @@
 {% extends "layout.html" %}
 
 {% block static %}
-<!--    <link rel="stylesheet" href="/static/scans/scans.css">-->
+    <link rel="stylesheet" href="/static/scans/scans.css">
 <link href="/static/format/teststyle.css" rel="stylesheet">
 {% endblock static %}
 
 {% block content %}
+    <div class="content">
+        <br/><br/>
+        <div class="row ">
+            <div class="col-md-4 text-center  blue">
+                <div class="row">
+                    <div class="col-md-12 border-box">
+                        <b class="" id="">{{ ses }}</b>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 align-btns">
+                        <button type="button" class="btn btn-primary">Save Session</button>
+                        <button type="button" class="btn btn-primary">Sum</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 cen green">
 
+
+                <div class="row  red">
+                    <div class="col-md-12 align-btns ">
+                        <button type="button" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-primary">Add</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 yellow">
+                <br/><br/>dffadfa
+            </div>
+        </div>
+    </div>
 {% endblock content %}
 {% block content_no_container %}
     <div id="fileModal" class="modal" tabindex="-1" role="dialog">
@@ -90,7 +120,7 @@
                     <div class="selectGroup">
                         <div class="sessionGroup">
                             <div class="sessionName">
-                                <b class="sessionText" id="sesName">{{ ses }}</b>
+                                <b class="sessionText" id="df">{{ ses }}</b>
                             </div>
                             <div class="btn-group-vertical stretcher">
                                 <button class="btn btn-primary btn-sm sesBtn" data-toggle="modal" data-target="#ssModal" onclick="populateName()" title="Save this session so that it can be accessed later">
