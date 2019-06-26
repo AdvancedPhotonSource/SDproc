@@ -196,6 +196,7 @@ def dataFormat():
 		format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
 																	currentMeta.file_id == file_instance.id,
 																	currentMeta.session == current_user.current_session)).first()
+		print format_instance
 		if format_instance is not None:
 			againstE = format_instance.against_E
 			form = GraphingUtility.populate_from_instance(format_instance)

@@ -101,8 +101,6 @@ $x(document).ready( function() {
     $x('#logbtn').prop('disabled', false);
     $x('#commentGroup').removeClass('logCommentGroup');
     $x('#commentGroup').addClass('commentGroup');
-    $x('#fitBtn').removeClass('fitBtnShifted');
-    $x('#fitBtn').addClass('fitBtn');
     sortTable($x('#filePicker'));
     localStorage.setItem('justPeakFit', 0);
 });
@@ -396,6 +394,7 @@ function aroundMax(){
     $x('#peakLocation').prop('disabled', true);
     $x('#peakGroup').removeClass('splitInput');
     $x('#localRange').hide();
+    $x('#hide').hide();
 }
 
 function atPoint(){
@@ -405,6 +404,7 @@ function atPoint(){
     $x('#peakLocation').prop('disabled', false);
     $x('#peakGroup').removeClass('splitInput');
     $x('#localRange').hide();
+    $x('#hide').hide();
 }
 
 function nearestPeak(){
@@ -415,12 +415,11 @@ function nearestPeak(){
     $x('#peakLocation').prop('disabled', false);
     $x('#peakGroup').addClass('splitInput');
     $x('#localRange').show();
+    $x('#hide').show();
 }
 
 var waitPeak = $x.Deferred();
 function fitPeak(sendOut){
-    $x('#fitBtn').removeClass('fitBtn');
-    $x('#fitBtn').addClass('fitBtnShifted');
     temp = $x('#peakSignalType').text();
     previous = localStorage.getItem('previous2');
     $x('#metaForm_id input').each(function(){
