@@ -1,8 +1,8 @@
 import json
 import os
 
-from sqlalchemy import desc
-from db.db_model import dataFile, db, userFiles, sessionFilesMeta, sessionMeta
+from sqlalchemy import desc, and_
+from db.db_model import dataFile, db, userFiles, sessionFilesMeta, sessionMeta, currentMeta
 from sdproc.files.forms import FileUploadForm
 from flask import Blueprint, render_template, request, current_app
 from flask_login import login_required, current_user
@@ -183,6 +183,20 @@ def sc():
     node.comment = newcomment
     db.session.commit()
     return "done"
-
-
 '''The end of methods for file structure'''
+
+''' methods for adding/removing files on current meta'''
+@files.route("/remove_current_meta", methods=['GET', 'POST'])
+def remove_current_meta():
+    id = request.form.get("id")
+    file = currentMeta.query.filter(and_(currentMeta.user_id==current_user.id,currentMeta.file_id==id)).first()
+    db.session.delete(file)
+    db.session.commit()
+    return ""
+
+
+@files.route("/add_file_current_meta", methods=['GET', 'POST'])
+def add_file_current_meta():
+    id = request.form.get("id")
+    file = dataFile.query.filter_by(id=id).first()
+
