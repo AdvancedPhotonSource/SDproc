@@ -189,7 +189,7 @@ def sc():
 @files.route("/remove_current_meta", methods=['GET', 'POST'])
 def remove_current_meta():
     id = request.form.get("id")
-    file = currentMeta.query.filter(and_(currentMeta.user_id==current_user.id,currentMeta.file_id==id)).first()
+    file = currentMeta.query.filter(and_(currentMeta.user_id==current_user.id,currentMeta.file_id == id)).first()
     db.session.delete(file)
     db.session.commit()
     return ""

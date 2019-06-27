@@ -188,15 +188,9 @@ def dataFormat():
 	else:
 		idthis = request.form.get('idnext', type=int)
 		file_instance = db.session.query(dataFile).filter(dataFile.id == idthis).first()
-		# try:
-		# 	fpath = file_path("." + file_instance.type, file_instance.path)
-		# except AttributeError:
-		# 	flash('Please select a file')
-		# 	return redirect(url_for('dataFormat'))
 		format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
 																	currentMeta.file_id == file_instance.id,
 																	currentMeta.session == current_user.current_session)).first()
-		print format_instance
 		if format_instance is not None:
 			againstE = format_instance.against_E
 			form = GraphingUtility.populate_from_instance(format_instance)
