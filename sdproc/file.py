@@ -199,10 +199,8 @@ def updateSumCheck():
     '''
     idthis = request.form.get('id', type=int)
     checkVal = request.form.get('check').lower() == "true"
-    format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                currentMeta.file_id == idthis,
-                                                                currentMeta.session == current_user.current_session)).first()
-    format_instance.checked = checkVal
+    file = currentMeta.query.filter(and_(currentMeta.user_id==current_user.id,currentMeta.file_id == idthis)).first()
+    file.checked = checkVal
     db.session.commit()
     return 'Updated'
 
@@ -213,7 +211,6 @@ def headerFile():
     idthis = request.form.get('id', type=int)
     file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
     path = file_path("." + file_instance.type, file_instance.path)
-    print file_instance.name
     header = FileUtility.getHeader(file_instance.name, path)
     return json.dumps(header)
 

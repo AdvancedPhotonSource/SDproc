@@ -445,9 +445,9 @@ def clearPart_cmeta():
 	deleting = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
 														 currentMeta.file_id == idthis,
 														 currentMeta.session == current_user.current_session)).first()
+	print deleting
 	db.session.delete(deleting)
 	db.session.commit()
-	temp = db.session.query(currentMeta).all()
 	return 'Cleared'
 
 @userApp.route('/clear_rowa', methods=['GET', 'POST'])

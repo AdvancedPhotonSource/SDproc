@@ -71,7 +71,7 @@ $x(function (){
             $x('#idnum').val(previous);
             localStorage.setItem('previous2', $x(this).data('value'));
             $x('#meta-form').submit();
-            $x.post( "/SDproc/save_comment", { idprev: previous, comment: $x('#comment').val(), format: 1},
+            $x.post( "/SDproc/saveNC", { id: previous, comment: $x('#comment').val() },
             function(){
                 $x.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
                 function(data){
@@ -232,7 +232,7 @@ function saveSes(){
     {
         previous = localStorage.getItem('previous2');
         $x('#idnum').val(previous);
-        $x.post( "/SDproc/save_comment", { idprev: previous, comment: $x('#comment').val(), format: 1});
+        $x.post( "/SDproc/saveNC", { id: previous, comment: $x('#comment').val() });
         $x.post('/SDproc/save_graph', $x('#meta-form').serialize());
     }
     $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data){
@@ -276,12 +276,12 @@ function log(){
 
 function updateSumCheck(checkbox){
     if ($x(checkbox).is(':checked')){
-        idnum = $x(checkbox).parent().parent().data('value')
-        $x.post('/SDproc/updateSumCheck', {id: idnum, check: "True"})
+        idnum = $x(checkbox).parent().parent().data('value');
+        $x.post('/SDproc/updateSumCheck', {id: idnum, check: "True"});
     }
     else{
-        idnum = $x(checkbox).parent().parent().data('value')
-        $x.post('/SDproc/updateSumCheck', {id: idnum, check: "False"})
+        idnum = $x(checkbox).parent().parent().data('value');
+        $x.post('/SDproc/updateSumCheck', {id: idnum, check: "False"});
     }
 }
 
@@ -303,9 +303,11 @@ function deleteCmeta(){
                     $x(newSelected).addClass('highlight');
                     $x(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
-                    var result = $x.grep(saved_files, function(n,i){
-                        return (n !== String(sel));
-                    })
+                    console.log(saved_files);
+                    var result = $x.grep(saved_files, function(n,i) {
+                        return (n != String(sel));
+                    });
+                    console.log(result);
                     localStorage.setItem('use_files', JSON.stringify(result));
                     $x(newSelected).trigger('click');
                 }
@@ -314,9 +316,11 @@ function deleteCmeta(){
                     $x(newSelected).addClass('highlight');
                     $x(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
+                    console.log(saved_files);
                     var result = $x.grep(saved_files, function(n,i){
-                        return (n !== String(sel));
-                    })
+                        return (n != String(sel));
+                    });
+                    console.log(result);
                     localStorage.setItem('use_files', JSON.stringify(result));
                     $x(newSelected).trigger("click");
                 }
@@ -324,9 +328,11 @@ function deleteCmeta(){
                     $x('#comment').val('');
                     $x(this).remove();
                     var saved_files = JSON.parse(localStorage.getItem('use_files'));
+                    console.log(saved_files);
                     var result = $x.grep(saved_files, function(n,i){
-                        return (n !== String(sel));
-                    })
+                        return (n != String(sel));
+                    });
+                    console.log(result);
                     localStorage.setItem('use_files', JSON.stringify(result));
                 }
             })
@@ -382,7 +388,7 @@ $x(function(){
     $x('#comment').on('change', function(){
         previous = localStorage.getItem('previous2');
         $x('#idnum').val(previous);
-        $x.post('/SDproc/save_comment', {idprev: previous, comment: $x('#comment').val(), format: 1});
+        $x.post('/SDproc/saveNC', {id: previous, comment: $x('#comment').val() });
     })
 })
 
