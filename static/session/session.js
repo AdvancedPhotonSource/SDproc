@@ -21,25 +21,43 @@ $x(document).ready(function(){
           });
         });
 
-function continue_session() {
+
+function get_selected() {
     var table = document.getElementById('sessionTable');
     var selected = false;
     var id = null;
     var type = null;
+    var name = null;
 
     for (var i = 0, row; row = table.rows[i]; i++) {
         if (row.classList.contains('active')) {
             selected = true;
             id = $x(row).attr('id');
             type = $x(row)[0].getAttribute("type");
+            name = $x(row)[0].getAttribute("name");
+            var obj = {
+                sel: selected
+                id: id,
+                type: type,
+                name: name
+            }
         }
     }
+
+    return selected, id, type, name
+}
+
+
+function continue_session() {
+    var selected, id, type, name = get_selected();
 
     if (!selected) {
         alert('Please select a session or data file.');
     } else {
         $x.post("/SDproc/continue_session", { type: type, id: id }, function(data){
             if (type == 'dat') {
+                localStorage.setItem("usingSes", 0);
+                localStorage.setItem("usingDAT", 1);
                 document.location.href="/SDproc/modifyDAT";
             } else {
                 localStorage.setItem("usingDAT", 0);
@@ -57,34 +75,20 @@ function continue_session() {
 }
 
 function new_session() {
-document.location.href="/SDproc/data";
+    document.location.href="/SDproc/data";
     $x.post('/SDproc/new_session2');
 }
 
- function delete_modal() {
-    var table = document.getElementById('sessionTable');
-    var selected = false;
-    var id = null;
-    var type = null;
-    var name = null;
-
-    for (var i = 0, row; row = table.rows[i]; i++) {
-        if (row.classList.contains('active')) {
-            selected = true;
-            id = $x(row).attr('id');
-            type = $x(row)[0].getAttribute("type");
-            name = $x(row)[0].getAttribute("name");
-        }
-    }
+function delete_modal() {
+    var selected, id, type, name = get_selected();
 
     if (!selected) {
         alert('Please select a session or data file.');
     } else {
-
         $x("#deleteModal").modal('show');
         document.getElementById("delete-modal-body").innerHTML = "Are you sure you want to delete " + name + "?";
     }
- }
+}
 
 function share_modal() {
     var table = document.getElementById('sessionTable');

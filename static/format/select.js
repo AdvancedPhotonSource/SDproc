@@ -224,20 +224,19 @@ function populateName(){
 }
 
 function saveSes(){
-    if (localStorage.getItem('previous2') === null)
-    {
+    if (localStorage.getItem('previous2') === null) {
         return;
-    }
-    else
-    {
+    } else {
         previous = localStorage.getItem('previous2');
         $x('#idnum').val(previous);
         $x.post( "/SDproc/saveNC", { id: previous, comment: $x('#comment').val() });
         $x.post('/SDproc/save_graph', $x('#meta-form').serialize());
     }
-    $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data){
+    $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
         var data = JSON.parse(data)
-        if (data.status == null){
+        alert(data);
+        if (data.status == null) {
+            $('#myModal').modal(options);
             BootstrapDialog.show({
                 title: 'Overwrite Session?',
                 message: 'A session with this name already exists, would you like to overwrite it?',
