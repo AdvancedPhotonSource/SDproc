@@ -780,7 +780,7 @@ def process():
 			endmax.append([format(sumxmax, '.6f'), format(sumymax, '.6f')])
 			allFileNames.append('Summed Files')
 	else:
-		fig = plt.figure(figsize=(15, 10))
+		fig = plt.figure(figsize=(7, 6))
 		code = mpld3.fig_to_html(fig)
 	procEntry = db.session.query(logBook).filter_by(name="Process Entry").first()
 	if procEntry != None:
