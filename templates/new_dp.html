@@ -1,108 +1,126 @@
 {% extends "layout.html" %}
 
 {% block static %}
-    <link href="/static/process/teststyle.css" rel="stylesheet">
+    <link href="/static/process/process.css" rel="stylesheet">
 {% endblock static %}
 
 {% block content %}
-
-{% endblock content %}
-{% block content_no_container %}
-    <div id="ssModal" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Settings Used to Plot the Sum:</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body ssModalBody">
-                    <label for="binRad" class="binLabel">Binning</label>
-                    <label for="linearRad" class="linLabel">Linear Interpolation</label>
-                    <input type="radio" class="linearRad" id='linearRad' name="methodRad" aria-label="...">
-                    <div class="input-group">
-                        <span class="input-group-addon">
-                            <input type="radio" id="binRad" name="methodRad" aria-label="...">
-                        </span>
-                        <input type="text" class="form-control" id="binWidth" aria-label="...">
+    <div class="content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12 sessionName text-center">
+                        <div id="sesName">{{ ses }}</div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" onclick="saveSettings()" class="btn btn-primary">Change</button>
+                <div class="row">
+                    <div class="col-md-12 center-btn">
+                        <button class="btn btn-primary" id="continue" title="Move on to modify the DAT you just created" onclick="advance()">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12 center-btn">
+                        <button id="outputBtn" onclick="outputFile()" class="btn btn-primary" title="Display or save output file">
+                            Output
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 center-btn">
+                        <button id="logbook" type="button" onclick="log()" class="btn btn-primary" id="logbtn">
+                            Add to Logbook
+                        </button>
+                        <p id="log_add"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="procButton" class="center-btn">
+                            <button onclick="startProc()" class="btn btn-primary" title="Sum all files">
+                                Sum
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="settingsBtn" class="center-btn">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#ssModal" title="View the settings used to plot the sum">
+                                Sum Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="separator">
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <label id="sel1Label" for="sel1">Check = Add to sum</label>
+                <div class="pane" id="pane">
+                    <table id="sel1" cellspacing="0" style="text-align: center; margin: auto; width: 100%;">
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div id="process_plot">
+                    {{code|safe}}
+                </div>
+            </div>
+        </div>
+        <div class="row hide">
+            <div class="col-md-12">
+                <div>
+                    <div hidden id="cordHolder">{{ outputs|safe }}</div>
+                    <form id="output-form" method=post action="">
+                        <input type="hidden" name="cordData" id="cordData">
+                        <input type="hidden" name="idnum" id="idnum">
+                        <input type="hidden" name="outType" id="outType">
+                        <input type="hidden" name="datFName" id="datFName">
+                        <input type="hidden" name="DBSave" id="DBSave">
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="ssModal" class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Settings Used to Plot the Sum:</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="binRad">Binning</label>
+                        <label for="linearRad">Linear Interpolation</label>
+                        <input type="radio" id='linearRad' name="methodRad" aria-label="...">
+                        <div>
+                            <span class="input-group-addon">
+                                <input type="radio" id="binRad" name="methodRad" aria-label="...">
+                            </span>
+                            <input type="text" class="form-control" id="binWidth" aria-label="...">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" onclick="saveSettings()" class="btn btn-primary">Change</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="container data-select" role="main">
-    <hr class="separator">
-    <div class="selectGroup">
-        <div class="sesGroup" style="text-align:center;">
-            <div class="sessionName" id="sesName">
-                {{ ses }}
-            </div>
-            <div class="text-center">
-                <button class="btn btn-primary btn-sm continue" id="continue" title="Move on to modify the DAT you just created" onclick="advance()">
-                    Continue
-                </button>
-            </div>
-        </div>
-        <div class="secondBtns">
-            <button id="outputBtn" onclick="outputFile()" class="btn btn-primary btn-sm output" title="Display or save output file">
-                Output
-            </button>
-            <div>
-                <button id="logbook" type="button" onclick="log()" class="btn btn-primary btn-sm logbook" id="logbtn">
-                    Add to Logbook
-                </button>
-            </div>
-            <div>
-                <p id="log_add">
-                </p>
-            </div>
-        </div>
-        <div id="procButton" class="procButton">
-            <button onclick="startProc()" class="btn btn-primary btn-lg" title="Sum all files">
-                Sum
-            </button>
-        </div>
-    </div>
-    <div>
-        <br/>
-        <br/>
-        <br/>
-        <div class="selectorGroup">
-            <label id="sel1Label" for="sel1">Check = Add to sum</label>
-            <div class="pane" id="pane">
-                <table id="sel1" cellspacing="0" style="text-align: center; margin: auto; width: 100%;">
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div id="process_plot" class="plot">
-            {{code|safe}}
-        </div>
-        <div style="clear:both;"></div>
-        <div class="text-center settings" id="settingsBtn">
-            <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#ssModal" title="View the settings used to plot the sum">
-                Sum Settings
-            </button>
-        </div>
-        <div hidden id="cordHolder">{{ outputs|safe }}</div>
-        <form id="output-form" method=post action="">
-            <input type="hidden" name="cordData" id="cordData">
-            <input type="hidden" name="idnum" id="idnum">
-            <input type="hidden" name="outType" id="outType">
-            <input type="hidden" name="datFName" id="datFName">
-            <input type="hidden" name="DBSave" id="DBSave">
-        </form>
-    </div>
-</div>
-{% endblock content_no_container %}
+{% endblock content %}
 
 {% block scripts %}
     <script type="text/javascript" src="/static/process/select.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 {% endblock scripts %}
