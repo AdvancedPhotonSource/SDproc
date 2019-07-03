@@ -3,9 +3,9 @@ $x(document).ready( function() {
         alert('Please select or generate a DAT file');
     }
     else{
-        $x.post('/SDproc/show_comment', {format: 3}, function(data){
-            $x('#comment').val(data)
-        })
+//        $x.post('/SDproc/show_comment', {format: 3}, function(data){
+//            $x('#comment').val(data)
+//        })
     }
     if ($x('#flatRad').is(':checked')){
         $x('#flatVal').prop('disabled', false);
@@ -208,6 +208,6 @@ $x(window).on('unload', function(){
         return;
     }
     else{
-        $x.post( "/SDproc/save_comment", {comment: $x('#comment').val(), format: 3})
+//        $x.post( "/SDproc/save_comment", {comment: $x('#comment').val(), format: 3})
     }
 })

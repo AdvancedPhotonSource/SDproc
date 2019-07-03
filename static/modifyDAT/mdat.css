@@ -1,0 +1,13 @@
+.sessionName{
+    font-weight:bold;
+    border:1px dotted;
+    padding:10px;
+}
+
+.blue-border {
+    padding: 10px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
+}

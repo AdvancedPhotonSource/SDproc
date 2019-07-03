@@ -171,7 +171,7 @@ function removeID(id, idArray){
 
 
 $x(window).on('unload', function(){
-    $x.post('/SDproc/close_plots');
+//    $x.post('/SDproc/close_plots');
     if (localStorage.getItem('previous3') === null)
     {
         return;
