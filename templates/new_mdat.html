@@ -1,111 +1,100 @@
 {% extends "layout.html" %}
 
 {% block static %}
-    <link href="/static/modifyDAT/modifyDAT.css" rel="stylesheet">
+    <link href="/static/modifyDAT/mdat.css" rel="stylesheet">
 {% endblock static %}
 
-{% block content %}{% endblock content %}
-{% block content_no_container %}
-    <div id="remBackModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Remove Background</h4>
-            </div>
-            <div class="remBackModalBody">
-
-            </div>
-            <div class="remBackModalFooter">
-                <div class="col-xs-4">
-                    <span class="centerBlock">
-                        <button type="button" onclick="remBackground()" class="btn btn-primary btn-default" data-dismiss="modal">Apply</button>
-                    </span>
+{% block content %}
+    <div class="content">
+        <div class="row red">
+            <div class="col-md-4 yellow">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="text-center sessionName" id="sesName">{{ ses }}</div>
+                    </div>
                 </div>
-                <div class="col-xs-4">
-                    <span class="centerBlock">
-                        <button type="button" class="btn btn-primary btn-default" onclick="resetPlot()" data-dismiss="modal">Reset</button>
-                    </span>
-                </div>
-                <div class="col-xs-4">
-                    <span class="centerBlock">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </span>
+                <div class="row">
+                    <div class="col-md-12 center-btn">
+                        <form class="hide" id="output-form" method="post">
+                            <input type="hidden" name="outType" id="outType">
+                            <input type="hidden" name="datFName" id="datFName">
+                        </form>
+                        <div id="outputBtn">
+                            <button onclick="outputFile()" class="btn btn-primary" title="Display or save output file">
+                                Output
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-    <div class="container data-select" role="main">
-    <br/>
-    <br/>
-    <br/>
-    <div class="sessionName" id="sesName">
-        {{ ses }}
-    </div>
-    <div id="mainContent">
-        <div id="leftCol" class="floatL">
-            <div class="comment">
+            <div class="col-md-8 text-center">
                 <label for="comment">Comment:</label>
-                <textarea class="form-control comment" rows="5" id="comment" name="comment"></textarea>
-            </div>
-            <label for="leftGroup" class="LGLabel">Remove Background</label>
-            <div id="leftGroup" class="leftGroup">
-                <label for="flatRad" class="flatLabel">Flat Value</label>
-                <div class="input-group remFlat">
-                    <span class="input-group-addon">
-                        <input type="radio" id="flatRad" name="methodRad" aria-label="...">
-                    </span>
-                    <input type="text" class="form-control" id="flatVal" placeholder="Y-Value" aria-label="...">
-                </div>
-                <label for="calcRad" class="linLabel">Calculated Average</label>
-                <div class="yCalcLabel" class="yCalcLabel">
-                    <font id="calcLeftYLabel">Left Y</font>
-                    <font id="calcRightYLabel" class="calcRightYLabel">Right Y</font>
-                </div>
-                <div class="input-group remLin">
-                    <span class="input-group-addon">
-                        <input type="radio" id="calcRad" name="methodRad" aria-label="...">
-                    </span>
-                    <input type="text" class="form-control" id="calcLeftX" style="width:25%" placeholder="Left X" aria-label="...">
-                    <input type="text" class="form-control" id="calcRightX" style="width:25%" placeholder="Right X" aria-label="...">
-                    <font id="calcLeftY" class="remLinText" size="3"></font>
-                    <font id="calcRightY" class="remLinText" size="3"></font>
-                </div>
-                <label for="givRad" class="avLabel">Given Average</label>
-                <div class="input-group remGiven">
-                    <span class="input-group-addon">
-                        <input type="radio" id="givRad" name="methodRad" aria-label="...">
-                    </span>
-                    <input type="text" class="form-control" id="leftX" style="width:25%" placeholder="Left X" aria-label="...">
-                    <input type="text" class="form-control" id="leftY" style="width:25%" placeholder="Left Y" aria-label="...">
-                    <input type="text" class="form-control" id="rightX" style="width:25%" placeholder="Right X" aria-label="...">
-                    <input type="text" class="form-control" id="rightY" style="width:25%" placeholder="Right Y" aria-label="...">
-                </div>
-            </div>
-            <div id="leftButtons">
-                <button type="button" class="btn btn-primary btn-default singleLeftButton" onclick="remBackground(0)">Apply</button>
-                <button type="button" class="btn btn-primary btn-default singleLeftButton" onclick="remBackground(1)">Show</button>
-                <button type="button" class="btn btn-primary btn-default singleLeftButton" onclick="resetPlot()">Reset</button>
+                <textarea class="form-control" rows="4" id="comment" name="comment"></textarea>
             </div>
         </div>
-        <div id="rightCol" class="floatR">
-             <div id="process_plot" class="plot">
-                {{code|safe}}
+        <div class="row">
+            <div class="col-md-5 blue">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="text-center">
+                    <label>Remove Background</label>
+                </div>
+                        <div class="blue-border">
+                    <label for="flatRad">Flat Value</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="radio" id="flatRad" name="methodRad">
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" id="flatVal" placeholder="Y-Value">
+                    </div>
+                    <label for="calcRad">Calculated Average</label>
+                    <font id="calcLeftYLabel">Left Y</font>
+                    <font id="calcRightYLabel">Right Y</font>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="radio" id="calcRad" name="methodRad">
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" id="calcLeftX" placeholder="Left X">
+                        <input type="text" class="form-control" id="calcRightX" placeholder="Right X">
+                        <font id="calcLeftY" size="3"></font>
+                        <font id="calcRightY" size="3"></font>
+                    </div>
+
+                    <label for="givRad">Given Average</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="radio" id="givRad" name="methodRad" aria-label="...">
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" id="leftX" aria-label="..." placeholder="Left X">
+                        <input type="text" class="form-control" id="leftY" aria-label="..." placeholder="Left Y">
+                        <input type="text" class="form-control" id="rightX" aria-label="..." placeholder="Right X">
+                        <input type="text" class="form-control" id="rightY"  aria-label="..." placeholder="Right Y">
+                    </div>
+                </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 align-btns">
+                        <button type="button" class="btn btn-primary btn-default" onclick="remBackground(0)">Apply</button>
+                        <button type="button" class="btn btn-primary btn-default" onclick="remBackground(1)">Show</button>
+                        <button type="button" class="btn btn-primary btn-default" onclick="resetPlot()">Reset</button>
+                    </div>
+                </div>
             </div>
-            <form id="output-form" method=post action="">
-                <input type="hidden" name="outType" id="outType">
-                <input type="hidden" name="datFName" id="datFName">
-            </form>
-            <div class="text-center output" id="outputBtn">
-                <button onclick="outputFile()" class="btn btn-primary btn-md" title="Display or save output file">
-                    Output
-                </button>
+            <div class="col-md-7 green">
+                <div id="process_plot">
+                    {{code|safe}}
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock content_no_container %}
+{% endblock content %}
 
 {% block scripts %}
     <script type="text/javascript" src="/static/modifyDAT/modifyDAT.js"></script>

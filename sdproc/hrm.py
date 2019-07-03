@@ -939,7 +939,7 @@ def remBackDAT():
 				data[1][i] = data[1][i] - flatVal
 			DAT.DAT = json.dumps(data)
 			db.session.commit()
-			return redirect(url_for('modifyDAT'))
+			return redirect(url_for('hrm.modifyDAT'))
 		else:
 			DAT = db.session.query(currentDAT).one()
 			data = json.loads(DAT.DAT)

@@ -62,7 +62,7 @@ class InteractiveLegend(mpld3.plugins.PluginBase):
             if (this.props.sized == 1){
                 var svg = document.getElementsByClassName("mpld3-figure");
                 svg[0].setAttribute("viewBox", "0 0 600 480");
-                svg[0].setAttribute("width", 700);
+                svg[0].setAttribute("width", 650);
                 svg[0].setAttribute("height", 600);
             }
             var labels = new Array();

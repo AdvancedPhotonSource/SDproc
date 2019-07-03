@@ -195,7 +195,7 @@ html{
     position: relative;
     min-height: 100%;
 }
-
+/*important for border*/
 .leftGroup{
     position: relative;
     height: 325px;
