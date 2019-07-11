@@ -347,7 +347,7 @@ def allowed_file(filename):
 @login_required
 def sendOut(filename, displayName):
     '''
-    Sends the file to the user for doanloading using flask's send_from_directory
+    Sends the file to the user for downloading using flask's send_from_directory
     :param filename:
     The absolute name of the file that is saved in the database.
     :param displayName:
