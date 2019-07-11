@@ -2,20 +2,11 @@ $x(document).ready(function() {
 });
 
 function remove_file() {
-    var table = document.getElementById('sel1');
-    var selected = false;
-    var id = null;
-
-    for (var i = 0, row; row = table.rows[i]; i++) {
-        if (row.classList.contains('highlight')) {
-            selected = true;
-            id = $x(row).attr('data-value');
-        }
-    }
+    selected = localStorage.getItem('previous2');
 
     if (selected) {
-        alert(id);
-        $x.post("/SDproc/remove_current_meta", { id: id });
+        alert(selected);
+        $x.post("/SDproc/clearPart_cmeta", { id: id });
     } else {
         alert("no file");
     }

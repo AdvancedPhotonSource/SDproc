@@ -46,6 +46,7 @@
                 </div>
             </div>
         </div>
+        <hr class="separator">
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
@@ -318,14 +319,14 @@
                     <div class="content-section">
                         <div class="row">
                             <div class="col-sm-12">
-                                <label for="ssName" class="">Name:</label>
+                                <label for="ssName" class="">Session Name:</label>
                                 <input type="text" class="form-control" id="ssName">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
                                 <label for="ssComment">Comment:</label>
-                                <textarea class="form-control" rows="5" id="ssComment"></textarea>
+                                <textarea class="form-control" rows="5" id="ssComment">{% if comments %}{{comments}}{% endif %}</textarea>
                             </div>
                         </div>
                     </div>

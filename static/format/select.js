@@ -284,58 +284,54 @@ function updateSumCheck(checkbox){
     }
 }
 
-function deleteCmeta(){
-    if (localStorage.getItem('previous2') === null){
+function deleteCmeta() {
+    if (localStorage.getItem('previous2') === null) {
         alert("No file selected")
-    }
-    else{
-        selected = localStorage.getItem('previous2')
-        $x.post('/SDproc/clearPart_cmeta', {id: selected}, function(){
-            $x('#sel1 > tbody > tr').each(function(){
-                if (!$x(this).hasClass('highlight')){
-                    return true;
-                }
-                localStorage.removeItem('previous2');
+    } else {
+        selected = localStorage.getItem('previous2');
+        $x.post('/SDproc/clearPart_cmeta', {id: selected}, function() {
+            $x('#sel1 > tbody > tr').each(function() {
                 var sel = parseInt(selected);
-                if (this.previousElementSibling !== null){
-                    var newSelected = this.previousSibling;
-                    $x(newSelected).addClass('highlight');
-                    $x(this).remove();
-                    var saved_files = JSON.parse(localStorage.getItem('use_files'));
-                    console.log(saved_files);
-                    var result = $x.grep(saved_files, function(n,i) {
-                        return (n != String(sel));
-                    });
-                    console.log(result);
-                    localStorage.setItem('use_files', JSON.stringify(result));
-                    $x(newSelected).trigger('click');
+                if ($x(this)[0].getAttribute("data-value") == sel) {
+                    localStorage.removeItem('previous2');
+                    if (this.previousElementSibling !== null) {
+                        var newSelected = this.previousSibling;
+                        $x(newSelected).addClass('highlight');
+                        $x(this).remove();
+                        var saved_files = JSON.parse(localStorage.getItem('use_files'));
+                        console.log(saved_files);
+                        var result = $x.grep(saved_files, function(n,i) {
+                            return (n != String(sel));
+                        });
+                        console.log(result);
+                        localStorage.setItem('use_files', JSON.stringify(result));
+                        $x(newSelected).trigger('click');
+                    } else if (this.nextElementSibling !== null) {
+                        var newSelected = this.nextSibling;
+                        $x(newSelected).addClass('highlight');
+                        $x(this).remove();
+                        var saved_files = JSON.parse(localStorage.getItem('use_files'));
+                        console.log(saved_files);
+                        var result = $x.grep(saved_files, function(n,i){
+                            return (n != String(sel));
+                        });
+                        console.log(result);
+                        localStorage.setItem('use_files', JSON.stringify(result));
+                        $x(newSelected).trigger("click");
+                    } else {
+                        $x('#comment').val('');
+                        $x(this).remove();
+                        var saved_files = JSON.parse(localStorage.getItem('use_files'));
+                        console.log(saved_files);
+                        var result = $x.grep(saved_files, function(n,i){
+                            return (n != String(sel));
+                        });
+                        console.log(result);
+                        localStorage.setItem('use_files', JSON.stringify(result));
+                    }
                 }
-                else if (this.nextElementSibling !== null){
-                    var newSelected = this.nextSibling;
-                    $x(newSelected).addClass('highlight');
-                    $x(this).remove();
-                    var saved_files = JSON.parse(localStorage.getItem('use_files'));
-                    console.log(saved_files);
-                    var result = $x.grep(saved_files, function(n,i){
-                        return (n != String(sel));
-                    });
-                    console.log(result);
-                    localStorage.setItem('use_files', JSON.stringify(result));
-                    $x(newSelected).trigger("click");
-                }
-                else{
-                    $x('#comment').val('');
-                    $x(this).remove();
-                    var saved_files = JSON.parse(localStorage.getItem('use_files'));
-                    console.log(saved_files);
-                    var result = $x.grep(saved_files, function(n,i){
-                        return (n != String(sel));
-                    });
-                    console.log(result);
-                    localStorage.setItem('use_files', JSON.stringify(result));
-                }
-            })
-        })
+            });
+        });
     }
 }
 
