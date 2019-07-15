@@ -204,7 +204,7 @@ class FileUtility:
             path = os.path.join(current_app.root_path, 'static/saved_files', "dat", filename)
         else:
             random_hex = secrets.token_hex(4)
-            filename = name + "_" + random_hex + ".dat"
+            filename = name[:-4] + "_" + random_hex + ".dat"
             path = os.path.join(current_app.root_path, 'static/saved_files', "dat", filename)
 
         f = open(path, 'w')

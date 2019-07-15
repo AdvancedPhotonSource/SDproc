@@ -45,7 +45,7 @@
 
 import os
 
-from flask import render_template, request, Blueprint, url_for, redirect, flash, send_from_directory, current_app
+from flask import render_template, request, Blueprint, url_for, redirect, flash, send_from_directory, current_app, send_file
 from flask_login import current_user, login_required
 from flask_app import app
 
@@ -550,21 +550,31 @@ def generateOutput():
         return datFName
 
     if datFName is not None:
-        # return redirect(url_for('file.sendOut', filename=filename, displayName=datFName))
-        sendOut(filename, datFName)
+        return sendOut(filename, datFName)
     else:
-        # return redirect(url_for('file.sendOut', filename=filename, displayName='None'))
-        sendOut(filename, 'None')
+        return download_file(filename)
 
 
-@hrmApp.route('/outData/<path:filename>/<displayName>', methods=['GET', 'POST'])
+@hrmApp.route('/download_file/<path:filename>', methods=['GET', 'POST'])
+@login_required
+def download_file(filename):
+    current_file = dataFile.query.filter_by(path=filename).first()
+    print current_file
+    path = os.path.join(current_app.root_path, 'static/saved_files/dat')
+    return send_from_directory(directory=path, filename=filename, attachment_filename="data file.txt",
+                               as_attachment=True)
+
+
+@hrmApp.route('/<path:filename>/<displayName>', methods=['GET', 'POST'])
 @login_required
 def sendOut(filename, displayName):
-    path = os.path.join(current_app.root_path, 'static/saved_files', "dat")
+    path = os.path.join(current_app.root_path, 'static/saved_files/dat')
     if displayName != 'None' and displayName is not None:
+        print "first if"
         return send_from_directory(directory=path, filename=filename, as_attachment=True,
                                    attachment_filename=displayName + '.dat')
     else:
+        print "second if"
         return send_from_directory(directory=path, filename=filename, as_attachment=True)
 
 
