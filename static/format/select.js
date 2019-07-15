@@ -234,7 +234,7 @@ function saveSes(){
     }
     $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
         var data = JSON.parse(data)
-        alert(data);
+        alert(data.status);
         if (data.status == null) {
             $('#myModal').modal(options);
             BootstrapDialog.show({
@@ -260,6 +260,31 @@ function saveSes(){
         }
         $x('#sesName').html(data.name);
     });
+}
+
+function newSave() {
+    var session = $x('#sesName').text();
+    var current_session = $x('#ssName').val();
+
+    if (session == current_session) {
+        $x("#OverwriteSessionModal").modal("show");
+    } else {
+        $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0});
+    }
+}
+
+function overwrite_session() {
+    $x.post('/SDproc/save_ses', {name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
+        var data = JSON.parse(data);
+        if (data.status == null) {
+            $x.post('/SDproc/delete',{ id: data, table: "Session"});
+            $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 1});
+        }
+    });
+}
+
+function cancel_overwrite() {
+    $x("#ssModal").modal("show");
 }
 
 function log(){

@@ -334,7 +334,32 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" onclick="saveSes()" class="btn btn-primary" data-dismiss="modal">Save</button>
+                    <button type="button" onclick="newSave()" class="btn btn-primary" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="OverwriteSessionModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Overwrite Session?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="content-section">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label>A session with this name already exists, would you like to overwrite it?</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cancel_overwrite()">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="overwrite_session()">Save</button>
                 </div>
             </div>
         </div>
