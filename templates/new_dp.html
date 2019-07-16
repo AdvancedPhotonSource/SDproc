@@ -5,7 +5,7 @@
 {% endblock static %}
 
 {% block content %}
-    <div class="content red">
+    <div class="content">
         <div class="row">
             <div class="col-md-4">
                 <div class="row">
@@ -101,10 +101,10 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <label for="binRad">Binning</label>
                         <label for="linearRad">Linear Interpolation</label>
                         <input type="radio" id='linearRad' name="methodRad" aria-label="...">
                         <div>
+                            <label for="binRad">Binning</label>
                             <span class="input-group-addon">
                                 <input type="radio" id="binRad" name="methodRad" aria-label="...">
                             </span>
@@ -114,6 +114,27 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" onclick="saveSettings()" class="btn btn-primary">Change</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="outputModal" class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5>Save Options:</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label>File Name:</label>
+                        <input type="text" id="DATname" class="form-control" placeholder="Name of DAT file">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" onclick="save_to_server()" class="btn btn-primary">Save to Server</button>
+                        <button type="button" onclick="save_locally()" class="btn btn-primary">Save Locally</button>
                     </div>
                 </div>
             </div>
