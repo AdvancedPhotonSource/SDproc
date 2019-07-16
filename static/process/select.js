@@ -291,19 +291,191 @@ function logout(){
     }
 }
 
-
-
-
 function advance(){
     window.location.href = ("modifyDAT");
+}
+
+function save_locally() {
+    if ($x('#binRad').is(':checked')) {
+        var binWidth = $x('#binWidth').val();
+        if ($x('#sel1').val().length == 1) {
+            id = localStorage.getItem('previous3');
+            $x.post('/SDproc/process', {idnext: id , output: 1, binWidth: binWidth}, function(data) {
+                $x('#idnum').val(id);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(2);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x('#output-form')[0].submit();
+                    $x("#outputModal").modal("hide");
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        } else {
+            var ids = []
+            $x('#sel1 > tbody > tr.highlight').each(function() {
+                ids.push($x(this).data('value'));
+            });
+            var jIds = JSON.stringify(ids);
+            $x.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth}, function(data) {
+                $x('#idnum').val(jIds);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(3);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x('#output-form')[0].submit();
+                    $x("#outputModal").modal("hide");
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        }
+    } else {
+        if ($x('#sel1').val().length == 1) {
+            id = localStorage.getItem('previous3');
+            $x.post('/SDproc/process', {idnext: id , output: 1}, function(data) {
+                $x('#idnum').val(id);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(2);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x('#output-form')[0].submit();
+                    $x("#outputModal").modal("hide");
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        } else {
+            var ids = []
+            $x('#sel1 > tbody > tr.highlight').each(function() {
+                ids.push($x(this).data('value'));
+            });
+            var jIds = JSON.stringify(ids);
+            $x.post('/SDproc/process', {idList: jIds, output: 1}, function(data) {
+                $x('#idnum').val(jIds);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(3);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x('#output-form')[0].submit();
+                    $x("#outputModal").modal("hide");
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        }
+    }
+}
+
+function save_to_server() {
+    if ($x('#binRad').is(':checked')) {
+        var binWidth = $x('#binWidth').val();
+        if ($x('#sel1').val().length == 1) {
+            id = localStorage.getItem('previous3');
+            $x.post('/SDproc/process', {idnext: id , output: 1, binWidth: binWidth}, function(data) {
+                $x('#idnum').val(id);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(4);
+                $x('#DBSave').val(1);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data) {
+                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function() {
+                            $x("#outputModal").modal("hide");
+                            alert('Saved');
+                        });
+                    });
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        } else {
+            var ids = []
+            $x('#sel1 > tbody > tr.highlight').each(function() {
+                ids.push($x(this).data('value'));
+            });
+            var jIds = JSON.stringify(ids);
+            $x.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth}, function(data) {
+                $x('#idnum').val(jIds);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(5);
+                $x('#DBSave').val(1);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data) {
+                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function() {
+                            $x("#outputModal").modal("hide");
+                            alert('Saved');
+                        });
+                    });
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        }
+    } else {
+        if ($x('#sel1').val().length == 1) {
+            id = localStorage.getItem('previous3');
+            $x.post('/SDproc/process', {idnext: id , output: 1}, function(data) {
+                $x('#idnum').val(id);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(4);
+                $x('#DBSave').val(1);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data) {
+                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function() {
+                            $x("#outputModal").modal("hide");
+                            alert('Saved');
+                        });
+                    });
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        } else {
+            var ids = []
+            $x('#sel1 > tbody > tr.highlight').each(function() {
+                ids.push($x(this).data('value'));
+            });
+            var jIds = JSON.stringify(ids);
+            $x.post('/SDproc/process', {idList: jIds, output: 1}, function(data) {
+                $x('#idnum').val(jIds);
+                $x('#cordData').val($x(data).find('#cordHolder').html());
+                $x('#outType').val(5);
+                $x('#DBSave').val(1);
+                $x('#output-form').attr('action', '/SDproc/generateOutput');
+                $x('#datFName').val($x('#DATname').val());
+                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0) {
+                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data) {
+                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function() {
+                            $x("#outputModal").modal("hide");
+                            alert('Saved');
+                        });
+                    });
+                } else {
+                    alert('Enter a name for the DAT file');
+                }
+            });
+        }
+    }
 }
 
 function outputFile(){
     if (localStorage.getItem('previous3') === null){
         alert('No file loaded');
     }
-    else{
-        BootstrapDialog.show({
+    else {
+        $x("#outputModal").modal("show");
+        /*BootstrapDialog.show({
             title: 'Save Options',
             message: function(dialog){
                 var $xcontent = $x('<input type="text" id="DATname" placeholder="Name of DAT file">')
@@ -312,194 +484,14 @@ function outputFile(){
             buttons: [{
                 label: 'Save to Server',
                 action: function(dialogItself){
-                    if ($x('#binRad').is(':checked')){
-                        var binWidth = $x('#binWidth').val();
-                        if ($x('#sel1').val().length == 1){
-                            id = localStorage.getItem('previous3');
-                            $x.post('/SDproc/process', {idnext: id , output: 1, binWidth: binWidth}, function(data){
-                                $x('#idnum').val(id);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(4);
-                                $x('#DBSave').val(1);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data){
-                                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function(){
-                                            dialogItself.close();
-                                            alert('Saved');
-                                        });
-                                    });
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            });
-                        }
-                        else{
-                            var ids = []
-                            $x('#sel1 > tbody > tr.highlight').each(function(){
-                                ids.push($x(this).data('value'));
-                            })
-                            var jIds = JSON.stringify(ids);
-                            $x.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth}, function(data){
-                                $x('#idnum').val(jIds);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(5);
-                                $x('#DBSave').val(1);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data){
-                                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function(){
-                                            dialogItself.close();
-                                            alert('Saved');
-                                        });
-                                    });
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            });
-                        }
-                    }
-                    else{
-                        if ($x('#sel1').val().length == 1){
-                            id = localStorage.getItem('previous3');
-                            $x.post('/SDproc/process', {idnext: id , output: 1}, function(data){
-                                $x('#idnum').val(id);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(4);
-                                $x('#DBSave').val(1);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data){
-                                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function(){
-                                            dialogItself.close();
-                                            alert('Saved');
-                                        });
-                                    });
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            });
-                        }
-                        else{
-                            var ids = []
-                            $x('#sel1 > tbody > tr.highlight').each(function(){
-                                ids.push($x(this).data('value'));
-                            })
-                            var jIds = JSON.stringify(ids);
-                            $x.post('/SDproc/process', {idList: jIds, output: 1}, function(data){
-                                $x('#idnum').val(jIds);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(5);
-                                $x('#DBSave').val(1);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x.post('/SDproc/generateOutput', $x('#output-form').serialize(), function(data){
-                                        $x.post('/SDproc/setDAT', {DAT: data, DName: $x('#DATname').val()}, function(){
-                                            dialogItself.close();
-                                            alert('Saved');
-                                        });
-                                    });
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            });
-                        }
-                    }
+
                 }
             }, {
                 label: 'Save Locally',
                 action: function(dialogItself){
-                    if ($x('#binRad').is(':checked')){
-                        var binWidth = $x('#binWidth').val();
-                        if ($x('#sel1').val().length == 1){
-                            id = localStorage.getItem('previous3');
-                            $x.post('/SDproc/process', {idnext: id , output: 1, binWidth: binWidth}, function(data){
-                                $x('#idnum').val(id);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(2);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x('#output-form')[0].submit();
-                                    dialogItself.close();
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            });
-                        }
-                        else{
-                            var ids = []
-                            $x('#sel1 > tbody > tr.highlight').each(function(){
-                                ids.push($x(this).data('value'));
-                            })
-                            var jIds = JSON.stringify(ids);
-                            $x.post('/SDproc/process', {idList: jIds, output: 1, binWidth: binWidth}, function(data){
-                                $x('#idnum').val(jIds);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(3);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x('#output-form')[0].submit();
-                                    dialogItself.close();
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            });
-                        }
-                    }
-                    else{
-                        if ($x('#sel1').val().length == 1){
-                            id = localStorage.getItem('previous3');
-                            $x.post('/SDproc/process', {idnext: id , output: 1}, function(data){
-                                $x('#idnum').val(id);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(2);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x('#output-form')[0].submit();
-                                    dialogItself.close();
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            });
-                        }
-                        else{
-                            var ids = []
-                            $x('#sel1 > tbody > tr.highlight').each(function(){
-                                ids.push($x(this).data('value'));
-                            })
-                            var jIds = JSON.stringify(ids);
-                            $x.post('/SDproc/process', {idList: jIds, output: 1}, function(data){
-                                $x('#idnum').val(jIds);
-                                $x('#cordData').val($x(data).find('#cordHolder').html());
-                                $x('#outType').val(3);
-                                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                                $x('#datFName').val($x('#DATname').val())
-                                if (jQuery.type($x('#DATname').val()) === "string" && $x('#DATname').val().length > 0){
-                                    $x('#output-form')[0].submit();
-                                    dialogItself.close();
-                                }
-                                else{
-                                    alert('Enter a name for the DAT file')
-                                }
-                            })
-                        }
-                    }
+
                 }
             }]
-        })
+        })*/
     }
 }

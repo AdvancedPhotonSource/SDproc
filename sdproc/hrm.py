@@ -354,6 +354,7 @@ def generateOutput():
     form = InputForm(request.form)
     id = request.form.get('idnum', type=str)
     outType = request.form.get('outType', type=int)
+    print outType
     cordData = request.form.get('cordData', type=str)
     sesID = request.form.get('session', type=int)
     datFName = request.form.get('datFName', type=str)
@@ -419,6 +420,7 @@ def generateOutput():
                             colNames.append(bools[i].label)
         filename = FileUtility.writeOutput(output, colNames, file_instance.name, '')
     elif outType == 2:
+        # same as outType == 3 but with one file (possibly)
         file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
         output = []
@@ -433,6 +435,7 @@ def generateOutput():
             filename = FileUtility.writeOutput(output, colNames, file_instance.name, '')
     elif outType == 3:
         # save sum (data file) locally
+        # this is for multiple files
         jidlist = json.loads(id)
         cords = json.loads(cordData)
         output = []
@@ -443,6 +446,7 @@ def generateOutput():
         colNames.append("Signal")
         filename = FileUtility.writeOutput(output, colNames, jidlist, datFName)
     elif outType == 4:
+        # same as outType == 5 but this is only with one file
         file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
         output = []
@@ -455,7 +459,7 @@ def generateOutput():
         if DBSave != 0:
             dfile = dataFile()
             dfile.name = datFName
-            dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
+            dfile.path = filename
             dfile.comment = ''
             dfile.authed = current_user.get_id()
             user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
@@ -472,12 +476,13 @@ def generateOutput():
             userFile.user_id = current_user.get_id()
             db.session.add(userFile)
             db.session.commit()
-        with open(app.config['UPLOAD_DIR'] + '/outData/' + filename, 'r') as DATfile:
+        path = os.path.join(current_app.root_path, 'static/saved_files', "dat", filename)
+        with open(path, 'r') as DATfile:
             data = DATfile.read()
         return data
     elif outType == 5:
-        # clicked the sum button on the Sum tab
-        # onclick shows the graph and saves a file
+        # clicked on the save to server button on the sum tab
+        # saves the file for the user to look at later
         jidlist = json.loads(id)
         cords = json.loads(cordData)
         output = []
@@ -490,7 +495,7 @@ def generateOutput():
         if DBSave != 0:
             dfile = dataFile()
             dfile.name = datFName
-            dfile.path = app.config['UPLOAD_DIR'] + '/outData/' + filename
+            dfile.path = filename
             dfile.comment = ''
             dfile.authed = current_user.get_id()
             user_instance = db.session.query(User).filter_by(id=current_user.get_id()).first()
