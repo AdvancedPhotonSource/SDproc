@@ -64,6 +64,20 @@
                             {% endif %}
                         </div>
                         <div class="form-group">
+                            {{ form.badge_number.label(class="form-control-label") }}
+
+                            {% if form.badge_number.errors %}
+                                {{ form.badge_number(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.badge_number.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.badge_number(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
                             {{ form.username.label(class="form-control-label") }}
 
                             {% if form.username.errors %}

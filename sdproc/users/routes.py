@@ -19,13 +19,18 @@ def toLogin2():
 @users.route("/register2", methods=['GET', 'POST'])
 def register2():
     if current_user.is_authenticated:
-        return redirect(url_for('sessions.index2'))
+        if current_user.badge_number is None:
+            flash('Please update your badge number in order to continue', 'info')
+            return redirect(url_for('users.profile2'))
+        else:
+            return redirect(url_for('sessions.index2'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
         user = User(username=form.username.data, email=form.email.data,
                     pwhash=hashed_password, fullName=form.full_name.data,
-                    institution=form.institution.data, reason=form.reason_for_account.data)
+                    institution=form.institution.data, reason=form.reason_for_account.data,
+                    badge_number=form.badge_number.data)
         user.approved = 0
         user.isAdmin = 0
         db.session.add(user)
@@ -54,7 +59,11 @@ def login2():
                 clear_rowa_wrapper()
                 current_user.current_session = 'None'
                 db.session.commit()
-                return redirect(url_for('sessions.index2'))
+                if current_user.badge_number is None:
+                    flash('Please update your badge number in order to continue', 'info')
+                    return redirect(url_for('users.profile2'))
+                else:
+                    return redirect(url_for('sessions.index2'))
             elif user.approved == 2:
                 flash("Your account has been frozen", 'danger')
                 return render_template('new_login.html', form=form, session=session)
@@ -84,6 +93,7 @@ def profile2():
         current_user.username = form.username.data
         current_user.email = form.email.data
         current_user.fullName = form.full_name.data
+        current_user.badge_number = form.badge_number.data
         current_user.institution = form.institution.data
         current_user.commentChar = form.comment_char.data
         # current_user.pwhash = form.password.data
@@ -94,6 +104,7 @@ def profile2():
         form.username.data = current_user.username
         form.email.data = current_user.email
         form.full_name.data = current_user.fullName
+        form.badge_number.data = current_user.badge_number
         form.institution.data = current_user.institution
         form.comment_char.data = current_user.commentChar
         # form.password.data = current_user.pwhash.decode('utf-8')

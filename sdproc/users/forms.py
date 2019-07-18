@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, IntegerField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange
 import re
 
 from db.db_model import User
@@ -10,6 +10,7 @@ from db.db_model import User
 class RegistrationForm(FlaskForm):
     username = StringField(label='Username', validators=[DataRequired(), Length(min=2, max=20)])
     full_name = StringField(label='Full Name', validators=[DataRequired()])
+    badge_number = IntegerField(label='Badge Number', validators=[DataRequired(), NumberRange(min=0, max=999999)])
     reason_for_account = StringField(label='Reason for Account Creation')
     password = PasswordField(label='Password', validators=[DataRequired(), Length(min=8)])
     confirm_password = PasswordField(label='Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -28,6 +29,12 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('That email is already taken. Please choose a different one.')
+
+    @staticmethod
+    def validate_badge_number(self, badge_number):
+        user = User.query.filter_by(badge_number=badge_number.data).first()
+        if user:
+            raise ValidationError('Please enter correct badge number.')
 
     @staticmethod
     def validate_password(self, password):
@@ -50,6 +57,7 @@ class LoginForm(FlaskForm):
 
 class UpdateProfileForm(FlaskForm):
     full_name = StringField(label='Full Name', validators=[DataRequired()])
+    badge_number = IntegerField(label='Badge Number', validators=[DataRequired(), NumberRange(min=0, max=999999)])
     username = StringField(label='Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField(label='Email', validators=[DataRequired(), Email()])
     institution = StringField(label='Institution', validators=[DataRequired()])
@@ -63,6 +71,12 @@ class UpdateProfileForm(FlaskForm):
             user = User.query.filter_by(username=username.data).first()
             if user:
                 raise ValidationError('That username is taken. Please choose a different one.')
+
+    @staticmethod
+    def validate_badge_number(self, badge_number):
+        user = User.query.filter_by(badge_number=badge_number.data).first()
+        if user:
+            raise ValidationError('Please enter correct badge number.')
 
     @staticmethod
     def validate_email(self,  email):

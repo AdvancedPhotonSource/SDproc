@@ -85,6 +85,9 @@ def save_session_comment():
 @sessions.route('/select2', methods=['GET', 'POST'])
 @login_required
 def index2():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
     """
     Template generator method for the select page.
 

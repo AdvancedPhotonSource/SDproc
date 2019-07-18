@@ -39,6 +39,9 @@ body {
 .site-header .navbar-nav .nav-link:active {
 
 }
+.div-size {
+    width: 65%;
+}
 .bg-steel {
     background-color: #222;
     border-color: #080808;
