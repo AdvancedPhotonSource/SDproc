@@ -43,7 +43,7 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 import matplotlib
 
 from utilities.file_utility import FileUtility
@@ -133,6 +133,9 @@ def add_entry():
 @logbookApp.route('/db')
 @login_required
 def sesData():
+	if current_user.badge_number is None:
+		flash('Please update your badge number in order to continue', 'info')
+		return redirect(url_for('users.profile2'))
 	'''
     Template generator for the logbook page.
 

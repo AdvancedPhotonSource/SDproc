@@ -56,6 +56,7 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True)
     pwhash = db.Column(db.String())
     email = db.Column(db.String(120), nullable=True)
+    badge_number = db.Column(db.Integer())
     fullName = db.Column(db.String())
     institution = db.Column(db.String())
     reason = db.Column(db.String())

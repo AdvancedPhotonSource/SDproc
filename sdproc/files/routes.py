@@ -4,7 +4,7 @@ import os
 from sqlalchemy import desc, and_
 from db.db_model import dataFile, db, userFiles, sessionFilesMeta, sessionMeta, currentMeta
 from sdproc.files.forms import FileUploadForm
-from flask import Blueprint, render_template, request, current_app
+from flask import Blueprint, render_template, request, current_app, flash, redirect, url_for
 from flask_login import login_required, current_user
 from sdproc.files.utils import save_files
 
@@ -15,6 +15,9 @@ files = Blueprint('files', __name__)
 @files.route('/upload_files', methods=['GET', 'POST'])
 @login_required
 def upload_files():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
     form = FileUploadForm()
     if form.validate_on_submit():
         files_uploaded = form.files.data

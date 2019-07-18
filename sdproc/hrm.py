@@ -142,6 +142,9 @@ def addHRM():
 @hrmApp.route('/data', methods=['GET', 'POST'])
 @login_required
 def dataFormat():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
     '''
 	Template generator for the data page.
 
@@ -586,6 +589,9 @@ def sendOut(filename, displayName):
 @hrmApp.route('/process', methods=['GET', 'POST'])
 @login_required
 def process():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
     '''
 	Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their currentMeta.
 
@@ -841,6 +847,9 @@ def peak_at_max():
 @hrmApp.route('/modifyDAT', methods=['GET', 'POST'])
 @login_required
 def modifyDAT():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
     '''
 	Template function for the modifyDAT page.
 

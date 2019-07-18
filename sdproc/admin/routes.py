@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, request
+from flask import Blueprint, redirect, render_template, url_for, request, flash
 from flask_login import login_required, current_user
 from db.db_model import db, sessionFiles, dataFile, User, HRM, notification as n
 from utilities.file_utility import FileUtility
@@ -11,6 +11,9 @@ admin = Blueprint('admin', __name__)
 @admin.route('/admin2', methods=['GET', 'POST'])
 @login_required
 def admin2():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
     form = UserInfoForm()
     users = User.query.filter(User.id != current_user.id).all()
     hrms = HRM.query.order_by('id').all()
