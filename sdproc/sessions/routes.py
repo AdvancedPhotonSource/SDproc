@@ -1,24 +1,18 @@
 import os
-import uuid
-
-import numpy
 import matplotlib
-import mpld3
-
-from sdproc.forms.input_form import InputForm
-from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
 
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+
 from flask import Blueprint, request, flash, json, redirect, url_for, render_template, current_app
 from flask_login import current_user, login_required
 from db.db_model import db, currentDAT, currentMeta, User, dataFile, userFiles, sessionFiles, sessionFilesMeta, \
     sessionMeta, HRM
 from utilities.graphing_utility import GraphingUtility
-from utilities.file_utility import FileUtility
 from sqlalchemy import and_, desc
 from sdproc.user import clear_rowa_wrapper
 from sdproc.files.utils import file_path
+from sdproc.utils.utils import get_comments, save_comments
+
 sessions = Blueprint('sessions', __name__)
 
 
@@ -50,36 +44,26 @@ def delete_session():
 
 @sessions.route('/get_session_comment', methods=['GET', 'POST'])
 def session_comment():
-    type = request.form.get("type")
-    id = request.form.get("id")
-    comments = ""
+    f_type = request.form.get("type")
+    file_id = request.form.get("id")
 
-    if type == 'session':
-        session = sessionFiles.query.filter_by(id=id).first()
-        comments = session.comment
-    elif type == 'dat':
-        data_file = dataFile.query.filter_by(id=id).first()
-        comments = data_file.comment
-
-    return comments
+    if f_type == 'session':
+        return get_comments(file_id, sessionFiles)
+    elif f_type == 'dat':
+        return get_comments(file_id, dataFile)
 
 
 @sessions.route('/save_session_comment', methods=['GET', 'POST'])
 def save_session_comment():
-    type = request.form.get("type")
-    id = request.form.get("id")
+    f_type = request.form.get("type")
+    file_id = request.form.get("id")
     comments = request.form.get("comment")
 
-    if type == 'session':
-        session = sessionFiles.query.filter_by(id=id).first()
-        session.comment = comments
-    elif type == 'dat':
-        data_file = dataFile.query.filter_by(id=id).first()
-        data_file.comment = comments
-
-    db.session.commit()
-
-    return ""
+    if f_type == 'session':
+        save_comments(file_id, sessionFiles, comments)
+    elif f_type == 'dat':
+        save_comments(file_id, dataFile, comments)
+    return "Saved"
 
 
 @sessions.route('/select2', methods=['GET', 'POST'])

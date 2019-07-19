@@ -7,6 +7,7 @@ from sdproc.files.forms import FileUploadForm
 from flask import Blueprint, render_template, request, current_app, flash, redirect, url_for
 from flask_login import login_required, current_user
 from sdproc.files.utils import save_files
+from sdproc.utils.utils import get_comments, save_comments
 
 
 files = Blueprint('files', __name__)
@@ -170,22 +171,20 @@ def recursive(parentID):
     return "done"
 
 
-@files.route("/show_NewComment", methods=["GET", "POST"])
+@files.route("/get_file_comments", methods=["GET", "POST"])
 def newC():
-    id = request.form.get("id")
-    node = dataFile.query.filter_by(id=id).first()
-    nodecomment = node.comment
-    return nodecomment
+    file_id = request.form.get("id")
+    return get_comments(file_id, dataFile)
 
 
-@files.route("/saveNC", methods=["GET", "POST"])
+@files.route("/save_file_comments", methods=["GET", "POST"])
 def sc():
-    id = request.form.get("id")
-    newcomment = request.form.get("comment")
-    node = dataFile.query.filter_by(id=id).first()
-    node.comment = newcomment
-    db.session.commit()
+    file_id = request.form.get("id")
+    comments = request.form.get("comment")
+    save_comments(file_id, dataFile, comments)
     return "done"
+
+
 '''The end of methods for file structure'''
 
 ''' methods for adding/removing files on current meta'''
