@@ -15,7 +15,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 align-btns">
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ssModal" onclick="populateName()" title="Save this session so that it can be accessed later">Save Session</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ssModal" onclick="populate_session()" title="Save this session so that it can be accessed later">Save Session</button>
                         <button type="button" class="btn btn-primary" onclick="advance()" title="Proceed with files to generate a DAT">Sum</button>
                     </div>
                 </div>
@@ -25,6 +25,11 @@
                     <div class="col-md-12 align-btns ">
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#fileModal">Add</button>
                         <button type="button" class="btn btn-primary" onclick="deleteCmeta()">Remove</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 center-btn">
+                        <button type="button" class="btn btn-primary" onclick="save_comments()">Save Comments</button>
                     </div>
                 </div>
             </div>
@@ -334,7 +339,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" onclick="newSave()" class="btn btn-primary" data-dismiss="modal">Save</button>
+                    <button type="button" onclick="save_session()" class="btn btn-primary" data-dismiss="modal">Save</button>
                 </div>
             </div>
         </div>

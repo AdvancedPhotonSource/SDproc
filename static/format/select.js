@@ -43,45 +43,36 @@
 -    POSSIBILITY OF SUCH DAMAGE.
 */
 $x(function (){
-    $x('#sel1').on('click', 'tr.file', function(e){
+    $x('#sel1').on('click', 'tr.file', function(e) {
         var rows = $x('tr.file');
         rows.removeClass('highlight');
         $x(this).addClass('highlight');
         var ses = localStorage.getItem('usingSes');
         $x('#fileName').text($x('td:first', $x(this)).text());
-        if (localStorage.getItem('previous2') === null)
-        {
+        if (localStorage.getItem('previous2') === null) {
             localStorage.setItem('previous2', $x(this).data('value'));
-            $x.post('/SDproc/data', { idnext: $x(this).data('value') , plot: 1},
-            function(data){
+            $x.post('/SDproc/data', { idnext: $x(this).data('value') , plot: 1}, function(data) {
                 $x('#metaForm_id').html( $x(data).find('#metaForm_id').html());
                 $x('#plot_spot').html( $x(data).find('#plot_spot').html());
                 $x('#currentAE').html( $x(data).find('#currentAE').html());
-                $x.post('/SDproc/show_comment', { idnext: localStorage.getItem('previous2'), format: 1, ses: ses},
-                function(data){
-                    $x('#comment').val(data)
+                $x.post('/SDproc/get_file_comments', { id: localStorage.getItem('previous2') }, function(data) {
+                    $x('#comment').val(data);
                     setPlotAgainst();
-                })
-            })
-        }
-        else
-        {
-            var nextID = $x(this).data('value')
+                });
+            });
+        } else {
+            var nextID = $x(this).data('value');
             previous = localStorage.getItem('previous2');
             $x('#idnum').val(previous);
             localStorage.setItem('previous2', $x(this).data('value'));
             $x('#meta-form').submit();
-            $x.post( "/SDproc/saveNC", { id: previous, comment: $x('#comment').val() },
-            function(){
-                $x.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
-                function(data){
-                    $x('#comment').val(data)
-                    setPlotAgainst();
-                })
-            })
+            $x.post('/SDproc/get_file_comments', { id: nextID }, function(data) {
+                $x('#comment').val(data);
+                setPlotAgainst();
+            });
         }
-    })
-})
+    });
+});
 
 
 
@@ -217,59 +208,32 @@ $x(function()
     })
 })
 
-function populateName(){
+
+/* session functions to save/overwrite session*/
+function populate_session(){
     if ($x('#sesName').text() != 'None'){
         $x('#ssName').val($x('#sesName').text());
     }
 }
 
-function saveSes(){
+function save_session() {
     if (localStorage.getItem('previous2') === null) {
         return;
     } else {
         previous = localStorage.getItem('previous2');
         $x('#idnum').val(previous);
-        $x.post( "/SDproc/saveNC", { id: previous, comment: $x('#comment').val() });
         $x.post('/SDproc/save_graph', $x('#meta-form').serialize());
     }
-    $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
-        var data = JSON.parse(data)
-        alert(data.status);
-        if (data.status == null) {
-            $('#myModal').modal(options);
-            BootstrapDialog.show({
-                title: 'Overwrite Session?',
-                message: 'A session with this name already exists, would you like to overwrite it?',
-                buttons: [{
-                    label: 'Yes',
-                    action: function(dialogItself){
-                        $x.post('/SDproc/delete',{ id: data, table: "Session"});
-                        $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 1}, function(data){
-                            $x('#sesName').html(data);
-                            dialogItself.close();
-                        });
-                        }
-                    }, {
-                    label: 'No',
-                    action: function(dialogItself){
-                        dialogItself.close();
-                        $x('#ssModal').modal('show');
-                    }
-                }]
-            });
-        }
-        $x('#sesName').html(data.name);
-    });
-}
 
-function newSave() {
     var session = $x('#sesName').text();
     var current_session = $x('#ssName').val();
 
     if (session == current_session) {
         $x("#OverwriteSessionModal").modal("show");
     } else {
-        $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0});
+        $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
+            $x('#sesName').html(data.name);
+        });
     }
 }
 
@@ -278,13 +242,21 @@ function overwrite_session() {
         var data = JSON.parse(data);
         if (data.status == null) {
             $x.post('/SDproc/delete',{ id: data, table: "Session"});
-            $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 1});
+            $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 1}, function(data) {
+                $x('#sesName').html(data.name);
+            });
         }
     });
 }
 
 function cancel_overwrite() {
     $x("#ssModal").modal("show");
+}
+
+function save_comments() {
+    previous = localStorage.getItem('previous2');
+    $x('#idnum').val(previous);
+    $x.post('/SDproc/save_file_comments', {id: previous, comment: $x('#comment').val() });
 }
 
 function log(){
@@ -404,13 +376,13 @@ $x(function(){
     })
 })
 
-$x(function(){
+/*$x(function(){
     $x('#comment').on('change', function(){
         previous = localStorage.getItem('previous2');
         $x('#idnum').val(previous);
-        $x.post('/SDproc/saveNC', {id: previous, comment: $x('#comment').val() });
+        $x.post('/SDproc/save_file_comments', {id: previous, comment: $x('#comment').val() });
     })
-})
+})*/
 
 function aroundMax(){
     $x('#fitType').text('Fit around max');
@@ -666,17 +638,6 @@ function headerFile(){
     });
 }
 
-function logout(){
-    if (localStorage.getItem('previous2') === null){
-        window.location.href = ("logout");
-    }
-//    else{
-//        previous = localStorage.getItem('previous2');
-//        $x.post("/SDproc/save_comment", { idprev: previous, comment: $x('#comment').val(), format: 1}, function(){
-//            window.location.href = ("logout")
-//        });
-//    }
-}
 
 function sortTable(table){
     tbody = table.find('tbody')

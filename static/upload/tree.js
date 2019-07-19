@@ -59,7 +59,7 @@ $y(document).ready(function(){
     })
     .on("select_node.jstree", function (e, data) {
         //alert(data.node.id);
-        $y.post('/SDproc/show_NewComment', { id: data.node.id },
+        $y.post('/SDproc/get_file_comments', { id: data.node.id },
                 function(data){
                     $y('#comment').val(data);
                 });
@@ -74,6 +74,6 @@ function saveNewComment() {
     } else {
         var nodeID = $y("#tree").jstree("get_selected")[0];
         var x = document.getElementById("comment").value;
-        $y.post("/SDproc/saveNC", { id : nodeID, comment : x });
+        $y.post("/SDproc/save_file_comments", { id : nodeID, comment : x });
     }
 }
