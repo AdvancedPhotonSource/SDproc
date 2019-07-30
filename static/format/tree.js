@@ -49,30 +49,24 @@ function graph(file_id, file_name) {
     $y('#fileName').text(file_name);
     if (localStorage.getItem('previous2') === null) {
         localStorage.setItem('previous2', file_id);
-        $y.post('/SDproc/data', { idnext: file_id , plot: 1},
-            function(data){
+        $y.post('/SDproc/data', { idnext: file_id , plot: 1}, function(data) {
             $y('#metaForm_id').html( $y(data).find('#metaForm_id').html());
             $y('#plot_spot').html( $y(data).find('#plot_spot').html());
             $y('#currentAE').html( $y(data).find('#currentAE').html());
-            $y.post('/SDproc/show_comment', { idnext: localStorage.getItem('previous2'), format: 1, ses: ses},
-            function(data){
-                $y('#comment').val(data)
+            $y.post('/SDproc/get_fsession_comment', { idnext: localStorage.getItem('previous2') }, function(data) {
+                $y('#comment').val(data);
                 setPlotAgainst();
-            })
-        })
+            });
+        });
     } else {
         var nextID = file_id
         previous = localStorage.getItem('previous2');
         $y('#idnum').val(previous);
         localStorage.setItem('previous2', file_id);
         $y('#meta-form').submit();
-        $y.post( "/SDproc/save_comment", { idprev: previous, comment: $y('#comment').val(), format: 1},
-        function() {
-            $y.post('/SDproc/show_comment', { idnext: nextID, format: 1, ses: ses},
-                function(data) {
-                    $y('#comment').val(data)
-                    setPlotAgainst();
-                })
+        $y.post('/SDproc/get_fsession_comment', { idnext: nextID}, function(data) {
+            $y('#comment').val(data)
+            setPlotAgainst();
         })
     }
 }

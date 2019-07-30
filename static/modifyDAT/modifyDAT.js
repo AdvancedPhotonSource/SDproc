@@ -153,53 +153,24 @@ $x(function (){
     })
 })
 
-function outputFile(){
-    BootstrapDialog.show({
-        title: 'Save Options',
-        message: function(dialog){
-            if (jQuery.trim($x('#sesName').text()) == 'None'){
-                var $xcontent = $x('<input type="text" id="DATname" placeholder="Name of DAT file">')
-            }
-            else{
-                var temp = jQuery.trim($x('#sesName').text())
-                var $xcontent = $x('<input type="text" id="DATname">')
-                $xcontent[0].value = temp
-            }
-            return $xcontent
-        },
-        buttons: [{
-            label: 'Save to Server',
-            action: function(dialogItself){
-                $x.post('/SDproc/generateOutput', {outType: 7, datFName: $x('#DATname').val()}, function(data){
-                    alert('Saved');
-                    $x('#sesName').html(data);
-                    dialogItself.close();
-                })
-            }
-        }, {
-            label: 'Save Locally',
-            action: function(dialogItself){
-                $x('#output-form').attr('action', '/SDproc/generateOutput')
-                $x('#outType').val(6);
-                $x('#datFName').val($x('#DATname').val())
-                $x('#output-form')[0].submit();
-                dialogItself.close();
-            }
-        }]
-    })
+function current_data_file() {
+    if ($x('#sesName').text() != 'None'){
+        $x('#DATname').val($x('#sesName').text());
+    }
 }
 
-// check this function again, might not be correct format
-function logout(){
-    if (localStorage.getItem('usingDAT') === null){
-        window.location.href = ("logout");
-    }
-    else{
-        previous = localStorage.getItem('usingDAT');
-        $x.post("/SDproc/save_comment", { idprev: previous, comment: $x('#comment').val(), format: 1}, function(){
-            window.location.href = ("logout")
-        });
-    }
+function save_to_server() {
+    $x.post('/SDproc/generateOutput', {outType: 7, datFName: $x('#DATname').val()}, function(data) {
+        alert('Saved');
+        $x('#sesName').html(data);
+    });
+}
+
+function save_locally() {
+    $x('#output-form').attr('action', '/SDproc/generateOutput');
+    $x('#outType').val(6);
+    $x('#datFName').val($x('#DATname').val())
+    $x('#output-form')[0].submit();
 }
 
 

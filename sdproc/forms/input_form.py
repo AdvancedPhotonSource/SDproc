@@ -45,6 +45,7 @@
 
 from wtforms import Form, validators, BooleanField, IntegerField
 
+
 class InputForm(Form):
     # Fields
     energy = IntegerField(label='Energy: ', default=1, validators=[validators.InputRequired()])
