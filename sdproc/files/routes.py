@@ -6,8 +6,9 @@ from db.db_model import dataFile, db, userFiles, sessionFilesMeta, sessionMeta, 
 from sdproc.files.forms import FileUploadForm
 from flask import Blueprint, render_template, request, current_app, flash, redirect, url_for
 from flask_login import login_required, current_user
-from sdproc.files.utils import save_files
+from sdproc.files.utils import save_files, file_path
 from sdproc.utils.utils import get_comments, save_comments
+from utilities.file_utility import FileUtility
 
 
 files = Blueprint('files', __name__)
@@ -201,4 +202,51 @@ def remove_current_meta():
 def add_file_current_meta():
     id = request.form.get("id")
     file = dataFile.query.filter_by(id=id).first()
+    return "done"
 
+
+@files.route("/get_file_name", methods=['GET', 'POST'])
+def get_file_name():
+    file_id = request.form.get('id', type=int)
+    file_ids = json.loads(request.form.get('ids', type=str))
+
+    if file_id:
+        current_meta = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                 currentMeta.file_id == file_id,
+                                                                 currentMeta.session == current_user.current_session)).\
+                                                                 first()
+        return json.dumps([current_meta.name, current_meta.checked])
+    else:
+        names = []
+        for f_id in file_ids:
+            current_meta = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                     currentMeta.file_id == f_id,
+                                                                     currentMeta.session == current_user.current_session
+                                                                     )).first()
+            names.append([current_meta.name, current_meta.checked, f_id])
+        return json.dumps(names)
+
+
+@files.route('/header_file', methods=['GET', 'POST'])
+@login_required
+def header_file():
+    idthis = request.form.get('id', type=int)
+    file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+    path = file_path("." + file_instance.type, file_instance.path)
+    header = FileUtility.getHeader(file_instance.name, path)
+    return json.dumps(header)
+
+
+@files.route('/updateSumCheck', methods=['GET', 'POST'])
+@login_required
+def updateSumCheck():
+    '''
+    Updates the current meta to keep track of the checkbox associated with adding the file to the sum.
+    :return:
+    '''
+    idthis = request.form.get('id', type=int)
+    checkVal = request.form.get('check').lower() == "true"
+    file = currentMeta.query.filter(and_(currentMeta.user_id==current_user.id,currentMeta.file_id == idthis)).first()
+    file.checked = checkVal
+    db.session.commit()
+    return 'Updated'

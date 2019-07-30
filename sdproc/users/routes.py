@@ -3,8 +3,7 @@ from datetime import datetime
 from flask import Blueprint, url_for, flash, render_template, redirect, session, request
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from sdproc.user import clear_rowa_wrapper
-from sdproc.sessions.routes import clear_cmeta
+from sdproc.sessions.routes import clear_cmeta, clear_rowa_wrapper
 from db.db_model import db, User, notification
 from sdproc.users.forms import RegistrationForm, LoginForm, UpdateProfileForm
 

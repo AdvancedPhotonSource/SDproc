@@ -6,14 +6,17 @@ matplotlib.use('Agg')
 from flask import Blueprint, request, flash, json, redirect, url_for, render_template, current_app
 from flask_login import current_user, login_required
 from db.db_model import db, currentDAT, currentMeta, User, dataFile, userFiles, sessionFiles, sessionFilesMeta, \
-    sessionMeta, HRM
+    sessionMeta
 from utilities.graphing_utility import GraphingUtility
+from utilities.file_utility import FileUtility
 from sqlalchemy import and_, desc
-from sdproc.user import clear_rowa_wrapper
 from sdproc.files.utils import file_path
 from sdproc.utils.utils import get_comments, save_comments
+from sdproc.sessions.utils import get_session_file_comments, save_session_file_comments
+from db.api.file_db_api import FileDbApi
 
 sessions = Blueprint('sessions', __name__)
+fileApi = FileDbApi()
 
 
 @sessions.route('/delete_session', methods=['GET', 'POST'])
@@ -66,6 +69,22 @@ def save_session_comment():
     return "Saved"
 
 
+@sessions.route('/get_fsession_comment', methods=['GET', 'POST'])
+def fsession_comment():
+    file_id = request.form.get('id')
+    session = current_user.current_session
+    return get_session_file_comments(file_id, session)
+
+
+@sessions.route('/save_fsession_comment', methods=['GET', 'POST'])
+def save_fsession_comment():
+    file_id = request.form.get('id')
+    session = current_user.current_session
+    comments = request.form.get('comment')
+    save_session_file_comments(file_id, session, comments)
+    return "Saved"
+
+
 @sessions.route('/select2', methods=['GET', 'POST'])
 @login_required
 def index2():
@@ -114,6 +133,32 @@ def clear_cmeta():
     for i in deleting:
         db.session.delete(i)
     db.session.commit()
+    return 'Cleared'
+
+
+@sessions.route('/clearPart_cmeta', methods=['GET', 'POST'])
+@login_required
+def clearPart_cmeta():
+    """
+        Function that deletes a single file from the current users currentMeta table.
+
+        This is called when removing a file on the format page.
+        :return:
+        """
+    idthis = request.form.get('id', type=int)
+    deleting = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                         currentMeta.file_id == idthis,
+                                                         currentMeta.session == current_user.current_session)).first()
+    db.session.delete(deleting)
+    db.session.commit()
+    return 'Cleared'
+
+
+@sessions.route('/clear_rowa', methods=['GET', 'POST'])
+@login_required
+def clear_rowa_wrapper():
+    '''Simple function to clear the run_once_with_args decorator for loading the base comments of files.'''
+    fileApi.setBaseComment(-1, current_user.get_id(), current_user.current_session)
     return 'Cleared'
 
 
@@ -255,6 +300,7 @@ def continue_session():
             form = GraphingUtility.populate_from_instance(file_meta) # populates the input form
             current_meta = currentMeta() # makes a currentMeta() object
             form.populate_obj(current_meta) # populates fields in the currentMeta object from the form
+            current_meta.name = data_file.name
             current_meta.path = file_path("." + data_file.type, data_file.path)
             current_meta.comment = file_meta.comment
             current_meta.checked = file_meta.checked
@@ -294,3 +340,67 @@ def continue_session():
         except Exception, e:
             print(str(e))
         return ""
+
+
+@sessions.route('/save_ses', methods=['GET', 'POST'])
+@login_required
+def saveSession():
+    '''
+    This saves the current session so that the user may resume from the select page whenever they want.
+
+    The currentMeta table is parsed and saved into the sessionFiles and sessionFilesMeta tables for more permanence.
+    A check is done to ensure that the user cannot save the session under a name that has already been created.
+    :return:
+    '''
+    checked = request.form.get("checked", type=int)
+    namechk = request.form.get("name", type=str)
+    if checked == 0:
+        instance = db.session.query(sessionFiles).filter(
+            and_(sessionFiles.user_id == current_user.get_id(), sessionFiles.name == namechk)).first()
+        if instance:
+            data = str(instance.id)
+            return data
+
+    session_file = sessionFiles()
+    session_file.user = current_user
+    session_file.user_id == current_user.get_id()
+    session_file.authed = current_user.get_id()
+    session_file.name = request.form.get("name", type=str)
+    session_file.comment = request.form.get("comment", type=str)
+    session_file.last_used = FileUtility.getTime()
+    db.session.add(session_file)
+    db.session.commit()
+
+    for instance in db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all():
+        form = GraphingUtility.populate_from_instance(instance)
+        session_instance = sessionMeta()
+        form.populate_obj(session_instance)
+
+        session_instance.file_id = instance.file_id
+        session_instance.path = instance.path
+        session_instance.comment = instance.comment
+        session_instance.checked = instance.checked
+        session_instance.against_E = instance.against_E
+        session_instance.fit_type = instance.fit_type
+        session_instance.fit_pos = instance.fit_pos
+        session_instance.fit_range = instance.fit_range
+        session_instance.hrm = instance.hrm
+        session_instance.session = session_file.name
+        db.session.add(session_instance)
+        db.session.commit()
+
+        session_file_instance = sessionFilesMeta()
+        session_file_instance.sessionFiles_id = session_file.id
+        session_file_instance.sessionMeta_id = session_instance.id
+
+        instance.session = session_file.name
+
+        db.session.add(session_file_instance)
+        db.session.commit()
+    current_user.current_session = session_file.name
+    db.session.commit()
+    if checked == 1:
+        return current_user.current_session
+    data = ({'status': 'Saved', 'name': current_user.current_session})
+    sending = json.dumps(data)
+    return sending

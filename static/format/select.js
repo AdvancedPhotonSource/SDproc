@@ -55,7 +55,7 @@ $x(function (){
                 $x('#metaForm_id').html( $x(data).find('#metaForm_id').html());
                 $x('#plot_spot').html( $x(data).find('#plot_spot').html());
                 $x('#currentAE').html( $x(data).find('#currentAE').html());
-                $x.post('/SDproc/get_file_comments', { id: localStorage.getItem('previous2') }, function(data) {
+                $x.post('/SDproc/get_fsession_comment', { id: localStorage.getItem('previous2') }, function(data) {
                     $x('#comment').val(data);
                     setPlotAgainst();
                 });
@@ -66,7 +66,7 @@ $x(function (){
             $x('#idnum').val(previous);
             localStorage.setItem('previous2', $x(this).data('value'));
             $x('#meta-form').submit();
-            $x.post('/SDproc/get_file_comments', { id: nextID }, function(data) {
+            $x.post('/SDproc/get_fsession_comment', { id: nextID }, function(data) {
                 $x('#comment').val(data);
                 setPlotAgainst();
             });
@@ -112,7 +112,7 @@ function asynchOnLoad(){
         return 1;
     });
     if (localStorage.getItem('use_files')){
-        $x.post("/SDproc/make_name", {ids: localStorage.getItem('use_files')},
+        $x.post("/SDproc/get_file_name", {ids: localStorage.getItem('use_files')},
         function(data){
             data = JSON.parse(data)
             for(i = 0; i < data.length; i++){
@@ -156,8 +156,7 @@ $x(window).on('unload', function(){
     }
 })
 
-$x(function()
-{
+$x(function() {
     var rows = $x('tr.item');
     rows.on('click', function(e)
     {
@@ -256,7 +255,7 @@ function cancel_overwrite() {
 function save_comments() {
     previous = localStorage.getItem('previous2');
     $x('#idnum').val(previous);
-    $x.post('/SDproc/save_file_comments', {id: previous, comment: $x('#comment').val() });
+    $x.post('/SDproc/save_fsession_comment', {id: previous, comment: $x('#comment').val() });
 }
 
 function log(){
@@ -376,13 +375,6 @@ $x(function(){
     })
 })
 
-/*$x(function(){
-    $x('#comment').on('change', function(){
-        previous = localStorage.getItem('previous2');
-        $x('#idnum').val(previous);
-        $x.post('/SDproc/save_file_comments', {id: previous, comment: $x('#comment').val() });
-    })
-})*/
 
 function aroundMax(){
     $x('#fitType').text('Fit around max');
@@ -631,7 +623,7 @@ function setPlotAgainst(){
 
 function headerFile(){
     previous = localStorage.getItem('previous2');
-    $x.post("/SDproc/headerFile", {id: previous}, function(data){
+    $x.post("/SDproc/header_file", {id: previous}, function(data){
         var header = $x('<div>').text(JSON.parse(data)).text();
         $x('#headerText').html(header.replace(/\n/g, '<br />'));
         $x('#headerModal').modal('show');

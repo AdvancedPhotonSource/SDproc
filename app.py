@@ -62,11 +62,8 @@ from flask_login import LoginManager
 from flask_app import app
 from db.api.user_db_api import UserDbApi
 
-from sdproc.user import userApp
 from sdproc.hrm import hrmApp
 from sdproc.logbook import logbookApp
-from sdproc.comment import commentApp
-from sdproc.file import fileApp
 from sdproc.sessions.routes import sessions
 from sdproc.files.routes import files
 from sdproc.users.routes import users
@@ -79,11 +76,8 @@ login_manager.init_app(app)
 
 userDbApi = UserDbApi()
 
-app.register_blueprint(userApp)
 app.register_blueprint(hrmApp)
 app.register_blueprint(logbookApp)
-app.register_blueprint(fileApp)
-app.register_blueprint(commentApp)
 app.register_blueprint(sessions)
 app.register_blueprint(files)
 app.register_blueprint(users)

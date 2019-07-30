@@ -129,7 +129,7 @@ function asynchOnLoad(){
         return 1;
     });
     if (localStorage.getItem('use_files')){
-        $x.post("/SDproc/make_name", {ids: localStorage.getItem('use_files')},
+        $x.post("/SDproc/get_file_name", {ids: localStorage.getItem('use_files')},
         function(data){
             data = JSON.parse(data)
             for(i = 0; i < data.length; i++){
