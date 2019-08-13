@@ -6,10 +6,10 @@ from sdproc.files.utils import file_path
 from forms import UserInfoForm
 from sqlalchemy import and_
 
-admin = Blueprint('admin', __name__)
+a = Blueprint('admin', __name__)
 
 
-@admin.route('/admin2', methods=['GET', 'POST'])
+@a.route('/admin2', methods=['GET', 'POST'])
 @login_required
 def admin2():
     if current_user.badge_number is None:
@@ -29,7 +29,7 @@ def admin2():
                            form=form, new_users=new_users)
 
 
-@admin.route('/admin', methods=['GET', 'POST'])
+@a.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
     '''
@@ -85,7 +85,7 @@ def admin():
                            names=names, notifications=notifData, hrms=hrms)
 
 
-@admin.route('/decline_user', methods=['GET', 'POST'])
+@a.route('/decline_user', methods=['GET', 'POST'])
 @login_required
 def decline_user():
     notification_id = request.form.get("notification_id")
@@ -97,7 +97,7 @@ def decline_user():
     return "deleted"
 
 
-@admin.route('/approve_user', methods=['GET', 'POST'])
+@a.route('/approve_user', methods=['GET', 'POST'])
 @login_required
 def approve_user():
     notification_id = request.form.get("notification_id")
@@ -109,7 +109,7 @@ def approve_user():
     return "approved"
 
 
-@admin.route('/freeze', methods=['GET', 'POST'])
+@a.route('/freeze', methods=['GET', 'POST'])
 @login_required
 def freeze():
     '''
@@ -133,7 +133,8 @@ def freeze():
 
 """ Methods from the old admin python file, may not be used """
 
-@admin.route('/notifInfo', methods=['GET', 'POST'])
+
+@a.route('/notifInfo', methods=['GET', 'POST'])
 @login_required
 def notifInfo():
     '''
@@ -153,7 +154,7 @@ def notifInfo():
     return render_template('admin.html', user=current_user, userProf=userData)
 
 
-@admin.route('/solveNotif', methods=['GET', 'POST'])
+@a.route('/solveNotif', methods=['GET', 'POST'])
 @login_required
 def solveNotif():
     '''
@@ -209,7 +210,7 @@ def solveNotif():
     return 'Solved'
 
 
-@admin.route('/getInfo', methods=['GET', 'POST'])
+@a.route('/getInfo', methods=['GET', 'POST'])
 @login_required
 def getInfo():
     '''
@@ -266,7 +267,7 @@ def getInfo():
                            userSessions=userSessions, sessionUsers=sessionUsers, freeze=freeze)
 
 
-@admin.route('/addThing', methods=['GET', 'POST'])
+@a.route('/addThing', methods=['GET', 'POST'])
 @login_required
 def addThing():
     '''
@@ -327,7 +328,7 @@ def addThing():
     return user
 
 
-@admin.route('/removeThing', methods=['GET', 'POST'])
+@a.route('/removeThing', methods=['GET', 'POST'])
 @login_required
 def removeThing():
     '''

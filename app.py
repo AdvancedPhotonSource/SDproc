@@ -67,7 +67,9 @@ from sdproc.logbook import logbookApp
 from sdproc.sessions.routes import sessions
 from sdproc.files.routes import files
 from sdproc.users.routes import users
-from sdproc.admin.routes import admin
+from sdproc.admin.routes import a
+from sdproc.hrms.routes import hrms
+from sdproc.globus.routes import globus
 
 login_manager = LoginManager()
 login_manager.login_view = 'users.login2'
@@ -81,7 +83,9 @@ app.register_blueprint(logbookApp)
 app.register_blueprint(sessions)
 app.register_blueprint(files)
 app.register_blueprint(users)
-app.register_blueprint(admin)
+app.register_blueprint(a)
+app.register_blueprint(hrms)
+app.register_blueprint(globus)
 
 """ REMOVE THIS ON SERVER """
 @app.before_request
@@ -92,9 +96,11 @@ def fixURL():
 		return redirect(fixedUrl, 307)
 	return
 
+
 @login_manager.user_loader
 def load_user(user_id):
 	return userDbApi.getUserById(user_id)
 
+
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=5001, debug=True)
+	app.run(host="0.0.0.0", port=5001, debug=True)

@@ -6,7 +6,7 @@ $y(document).ready(function(){
                 if (m && m.dnd && m.pos !== 'i') { return false; }
             },
             'data' : {
-               "url" : "jsonData",
+               "url" : "globus_tree",
                "dataType" : "json"
             }
         },
