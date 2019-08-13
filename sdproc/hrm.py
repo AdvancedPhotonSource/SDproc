@@ -73,10 +73,7 @@ from sqlalchemy import and_
 
 hrmApp = Blueprint('hrm', __name__)
 
-
-
-
-
+""" start of main routes for web pages """
 @hrmApp.route('/data', methods=['GET', 'POST'])
 @login_required
 def dataFormat():
@@ -278,6 +275,287 @@ def dataFormat():
     return render_template("new_df.html", user=user, code=code, form=form, againstE=againstE, data=fdata,
                            ses=thisSession,
                            hrm=hrmData, comments=comments)
+
+
+@hrmApp.route('/modifyDAT', methods=['GET', 'POST'])
+@login_required
+def modifyDAT():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
+    '''
+	Template function for the modifyDAT page.
+
+	Essentially just plotting the DAT information stored in the user's currentDAT.
+
+	Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
+	:return:
+	'''
+    try:
+        DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+    except Exception, e:
+        code = 'No DAT selected'
+        return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
+    if DAT == None:
+        code = 'No DAT selected'
+        return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
+    user = db.session.query(User).filter_by(username=current_user.username).first()
+    fig = plt.figure(figsize=(10, 7))
+    css = """
+	.legend-box{
+		cursor: pointer;
+	}
+	"""
+    xs = []
+    ys = []
+    labels = []
+    lines = []
+    nameID = str(uuid.uuid4())
+    fig, ax = plt.subplots()
+    data = json.loads(DAT.DAT)
+    xs = data[0]
+    ys = data[1]
+    line = ax.plot(xs, ys, alpha=0, label='Summed')
+    lines.append(line[0])
+    labels.append('Summed')
+    mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
+    mpld3.plugins.connect(fig, HideLegend(nameID))
+    code = mpld3.fig_to_html(fig)
+    plt.close('all')
+    return render_template("new_mdat.html", user=current_user, ses=DAT.DATname, code=code)
+
+
+@hrmApp.route('/process', methods=['GET', 'POST'])
+@login_required
+def process():
+    if current_user.badge_number is None:
+        flash('Please update your badge number in order to continue', 'info')
+        return redirect(url_for('users.profile2'))
+    '''
+	Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their currentMeta.
+
+	Summing can be done with a binning or interpolation method.  Maxes are extracted the same either way.
+	:return:
+	'''
+    user = current_user
+    idthis = request.form.get('idnext', type=int)
+    idlist = request.form.get('idList', type=str)
+    pltLeg = request.form.get('pltLeg', type=int)
+    binWidth = request.form.get('binWidth', type=float)
+    output = request.form.get('output', type=int)
+    endmax = 'No File Selected'
+    senddata = []
+    allFileNames = []
+    outputs = ''
+    if idthis is not None or idlist is not None:
+        if idlist is None:
+            file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+            try:
+                fid = file_instance.id
+            except AttributeError:
+                flash('Please select a file')
+                return redirect(url_for('waitProc'))
+            format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
+                                                                        currentMeta.file_id == file_instance.id,
+                                                                        currentMeta.session == current_user.current_session)).first()
+            againstE = format_instance.against_E
+            form = GraphingUtility.populate_from_instance(format_instance)
+            columns, bools = GraphingUtility.splitForm(form)
+            basedColumns = GraphingUtility.zeroBaseColumns(columns)
+            used = []
+            additional = []
+            legendNames = []
+            endmax = []
+            allFileNames = []
+            path = file_path("." + file_instance.type, file_instance.path)
+            if str(file_instance.type) == 'mda':
+                data, name, unusedpath = GraphingUtility.readMda(path)
+            else:
+                data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
+            fitType = format_instance.fit_type
+            if fitType == 'Unfit':
+                used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
+                legendNames.append(basedColumns[0].id)
+                used.append(GraphingUtility.unicode_to_int(basedColumns[8].data))
+                legendNames.append(basedColumns[8].id)
+            else:
+                if bools[1].data:
+                    energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
+                                                         GraphingUtility.unicode_to_int(basedColumns[4].data),
+                                                         format_instance.hrm)
+                    additional.append(energy)
+                    legendNames.append(basedColumns[1].id)
+                elif bools[2].data:
+                    energy = GraphingUtility.energy_xtal_temp(data,
+                                                              GraphingUtility.unicode_to_int(basedColumns[3].data),
+                                                              GraphingUtility.unicode_to_int(basedColumns[4].data),
+                                                              GraphingUtility.unicode_to_int(basedColumns[5].data),
+                                                              GraphingUtility.unicode_to_int(basedColumns[6].data),
+                                                              format_instance.hrm)
+                    additional.append(energy)
+                    legendNames.append(basedColumns[2].id)
+                else:
+                    used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
+                    legendNames.append(basedColumns[0].id)
+                if bools[9].data:
+                    signal = GraphingUtility.signal_normalized(data,
+                                                               GraphingUtility.unicode_to_int(basedColumns[8].data),
+                                                               GraphingUtility.unicode_to_int(basedColumns[10].data))
+                    additional.append(signal)
+                    legendNames.append(basedColumns[9].id)
+                else:
+                    used.append(GraphingUtility.unicode_to_int(basedColumns[8].data))
+                    legendNames.append(basedColumns[8].id)
+            max, xmax, ycords = GraphingUtility.convert_Numpy(used, data, additional)
+            inputCord = format_instance.fit_pos
+            fitRange = format_instance.fit_range
+            if fitType == 'AtMax' or fitType == 'Unfit':
+                temp = xmax[1]
+                xmax[1] = (ycords[0][xmax[1]] * 1000000)
+                npXcords = numpy.array(ycords[0])
+                npXcords = numpy.multiply(npXcords, 1000000)
+                center = GraphingUtility.atMax(ycords, npXcords, xmax, fitRange)
+                xmax[1] = temp
+                ycords[0] = numpy.multiply(ycords[0], 1000000)
+                GraphingUtility.moveXcords(ycords, center)
+                format_instance.fit_type = 'AtMax'
+                format_instance.fit_pos = center
+                format_instance.fit_range = fitRange
+                db.session.commit()
+            else:
+                ycords[0] = numpy.multiply(ycords[0], 1000000)
+                GraphingUtility.moveXcords(ycords, inputCord)
+            endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
+            allFileNames.append(file_instance.name)
+            if output == 1:
+                outputData = []
+                outputData.append(ycords[0].tolist())
+                outputData.append(ycords[1])
+                outputs = json.dumps(outputData)
+            code = GraphingUtility.simple_plot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
+        if idthis is None:
+            jidlist = json.loads(idlist)
+            alldata = []
+            allxmax = []
+            allycords = []
+            allagainstE = []
+            allLegendNames = []
+            allFileNames = []
+            endmax = []
+
+            for anID in jidlist:
+                file_instance = db.session.query(dataFile).filter_by(id=anID).first()
+                used = []
+                try:
+                    fid = file_instance.id
+                except AttributeError:
+                    flash('Unable to find file')
+                    return redirect(url_for('waitProc'))
+                format_instance = db.session.query(currentMeta).filter(
+                    and_(currentMeta.user_id == current_user.get_id(),
+                         currentMeta.file_id == file_instance.id,
+                         currentMeta.session == current_user.current_session)).first()
+                againstE = format_instance.against_E
+                form = GraphingUtility.populate_from_instance(format_instance)
+                columns, bools = GraphingUtility.splitForm(form)
+                basedColumns = GraphingUtility.zeroBaseColumns(columns)
+                path = file_path("." + file_instance.type, file_instance.path)
+                if str(file_instance.type) == 'mda':
+                    data, name, unusedpath = FileUtility.readMda(path)
+                else:
+                    data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
+                if bools[1].data:
+                    energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
+                                                         GraphingUtility.unicode_to_int(basedColumns[4].data),
+                                                         format_instance.hrm)
+                    used.append(energy)
+                elif bools[2].data:
+                    energy = GraphingUtility.energy_xtal_temp(data,
+                                                              GraphingUtility.unicode_to_int(basedColumns[3].data),
+                                                              GraphingUtility.unicode_to_int(basedColumns[4].data),
+                                                              GraphingUtility.unicode_to_int(basedColumns[5].data),
+                                                              GraphingUtility.unicode_to_int(basedColumns[6].data),
+                                                              format_instance.hrm)
+                    used.append(energy)
+                else:
+                    used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
+                if bools[9].data:
+                    signal = GraphingUtility.signal_normalized(data,
+                                                               GraphingUtility.unicode_to_int(basedColumns[8].data),
+                                                               GraphingUtility.unicode_to_int(basedColumns[10].data))
+                    used.append(signal)
+                    allLegendNames.append(basedColumns[9].id)
+                else:
+                    used.append(GraphingUtility.unicode_to_int(basedColumns[8].data))
+                    allLegendNames.append(basedColumns[8].id)
+                max, xmax, ycords = GraphingUtility.convert_Numpy(used, data, None)
+                fitType = format_instance.fit_type
+                inputCord = format_instance.fit_pos
+                fitRange = format_instance.fit_range
+                if fitType == 'AtMax' or fitType == 'Unfit':
+                    xmaxHold = xmax[1]
+                    xmax[1] = (ycords[0][xmax[1]] * 1000000)
+                    npXcords = numpy.array(ycords[0])
+                    npXcords = numpy.multiply(npXcords, 1000000)
+                    center = GraphingUtility.atMax(ycords, npXcords, xmax, fitRange)
+                    xmax[1] = xmaxHold
+                    ycords[0] = npXcords
+                    GraphingUtility.moveXcords(ycords, center)
+                    format_instance.fit_type = 'AtMax'
+                    format_instance.fit_pos = center
+                    format_instance.fit_range = fitRange
+                    db.session.commit()
+                else:
+                    npXcords = numpy.array(ycords[0])
+                    npXcords = numpy.multiply(npXcords, 1000000)
+                    ycords[0] = npXcords
+                    GraphingUtility.moveXcords(ycords, inputCord)
+                max[0] = ((max[0] * 1000000) - format_instance.fit_pos)
+                endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
+                alldata.append(data)
+                allxmax.append(xmax)
+                allycords.append(ycords)
+                allagainstE.append(againstE)
+                allFileNames.append(file_instance.name)
+            if binWidth == None:
+                code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergePlots(allycords, allxmax, allagainstE,
+                                                                                alldata,
+                                                                                allLegendNames,
+                                                                                allFileNames, pltLeg)
+                sumX = sumX.tolist()
+                sumY = sumY.tolist()
+            else:
+                code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergeBin(allycords, allxmax, allagainstE, alldata,
+                                                                              allLegendNames,
+                                                                              allFileNames,
+                                                                              pltLeg, binWidth)
+            if output == 1:
+                outputs = []
+                outputs.append(sumX)
+                outputs.append(sumY)
+                outputs = json.dumps(outputs)
+            endmax.append([format(sumxmax, '.6f'), format(sumymax, '.6f')])
+            allFileNames.append('Summed Files')
+    else:
+        fig = plt.figure(figsize=(7, 6))
+        code = mpld3.fig_to_html(fig)
+    procEntry = db.session.query(logBook).filter_by(name="Process Entry").first()
+    if procEntry != None:
+        procEntry.plot = code
+        db.session.commit()
+    else:
+        processEntry = logBook()
+        processEntry.name = "Process Entry"
+        processEntry.plot = code
+        processEntry.user = user
+        db.session.add(processEntry)
+        db.session.commit()
+    senddata.append({'max': endmax, 'filenames': allFileNames})
+    return render_template("new_dp.html", user=user, ses=current_user.current_session, code=code, data=senddata,
+                           outputs=outputs)
+
+
+""" end of main routes for web pages """
 
 
 @hrmApp.route('/generateOutput', methods=['GET', 'POST'])
@@ -526,236 +804,6 @@ def sendOut(filename, displayName):
         return send_from_directory(directory=path, filename=filename, as_attachment=True)
 
 
-@hrmApp.route('/process', methods=['GET', 'POST'])
-@login_required
-def process():
-    if current_user.badge_number is None:
-        flash('Please update your badge number in order to continue', 'info')
-        return redirect(url_for('users.profile2'))
-    '''
-	Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their currentMeta.
-
-	Summing can be done with a binning or interpolation method.  Maxes are extracted the same either way.
-	:return:
-	'''
-    user = current_user
-    idthis = request.form.get('idnext', type=int)
-    idlist = request.form.get('idList', type=str)
-    pltLeg = request.form.get('pltLeg', type=int)
-    binWidth = request.form.get('binWidth', type=float)
-    output = request.form.get('output', type=int)
-    endmax = 'No File Selected'
-    senddata = []
-    allFileNames = []
-    outputs = ''
-    if idthis is not None or idlist is not None:
-        if idlist is None:
-            file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-            try:
-                fid = file_instance.id
-            except AttributeError:
-                flash('Please select a file')
-                return redirect(url_for('waitProc'))
-            format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                        currentMeta.file_id == file_instance.id,
-                                                                        currentMeta.session == current_user.current_session)).first()
-            againstE = format_instance.against_E
-            form = GraphingUtility.populate_from_instance(format_instance)
-            columns, bools = GraphingUtility.splitForm(form)
-            basedColumns = GraphingUtility.zeroBaseColumns(columns)
-            used = []
-            additional = []
-            legendNames = []
-            endmax = []
-            allFileNames = []
-            path = file_path("." + file_instance.type, file_instance.path)
-            if str(file_instance.type) == 'mda':
-                data, name, unusedpath = GraphingUtility.readMda(path)
-            else:
-                data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
-            fitType = format_instance.fit_type
-            if fitType == 'Unfit':
-                used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
-                legendNames.append(basedColumns[0].id)
-                used.append(GraphingUtility.unicode_to_int(basedColumns[8].data))
-                legendNames.append(basedColumns[8].id)
-            else:
-                if bools[1].data:
-                    energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-                                                         GraphingUtility.unicode_to_int(basedColumns[4].data),
-                                                         format_instance.hrm)
-                    additional.append(energy)
-                    legendNames.append(basedColumns[1].id)
-                elif bools[2].data:
-                    energy = GraphingUtility.energy_xtal_temp(data,
-                                                              GraphingUtility.unicode_to_int(basedColumns[3].data),
-                                                              GraphingUtility.unicode_to_int(basedColumns[4].data),
-                                                              GraphingUtility.unicode_to_int(basedColumns[5].data),
-                                                              GraphingUtility.unicode_to_int(basedColumns[6].data),
-                                                              format_instance.hrm)
-                    additional.append(energy)
-                    legendNames.append(basedColumns[2].id)
-                else:
-                    used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
-                    legendNames.append(basedColumns[0].id)
-                if bools[9].data:
-                    signal = GraphingUtility.signal_normalized(data,
-                                                               GraphingUtility.unicode_to_int(basedColumns[8].data),
-                                                               GraphingUtility.unicode_to_int(basedColumns[10].data))
-                    additional.append(signal)
-                    legendNames.append(basedColumns[9].id)
-                else:
-                    used.append(GraphingUtility.unicode_to_int(basedColumns[8].data))
-                    legendNames.append(basedColumns[8].id)
-            max, xmax, ycords = GraphingUtility.convert_Numpy(used, data, additional)
-            inputCord = format_instance.fit_pos
-            fitRange = format_instance.fit_range
-            if fitType == 'AtMax' or fitType == 'Unfit':
-                temp = xmax[1]
-                xmax[1] = (ycords[0][xmax[1]] * 1000000)
-                npXcords = numpy.array(ycords[0])
-                npXcords = numpy.multiply(npXcords, 1000000)
-                center = GraphingUtility.atMax(ycords, npXcords, xmax, fitRange)
-                xmax[1] = temp
-                ycords[0] = numpy.multiply(ycords[0], 1000000)
-                GraphingUtility.moveXcords(ycords, center)
-                format_instance.fit_type = 'AtMax'
-                format_instance.fit_pos = center
-                format_instance.fit_range = fitRange
-                db.session.commit()
-            else:
-                ycords[0] = numpy.multiply(ycords[0], 1000000)
-                GraphingUtility.moveXcords(ycords, inputCord)
-            endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
-            allFileNames.append(file_instance.name)
-            if output == 1:
-                outputData = []
-                outputData.append(ycords[0].tolist())
-                outputData.append(ycords[1])
-                outputs = json.dumps(outputData)
-            code = GraphingUtility.simple_plot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
-        if idthis is None:
-            jidlist = json.loads(idlist)
-            alldata = []
-            allxmax = []
-            allycords = []
-            allagainstE = []
-            allLegendNames = []
-            allFileNames = []
-            endmax = []
-
-            for anID in jidlist:
-                file_instance = db.session.query(dataFile).filter_by(id=anID).first()
-                used = []
-                try:
-                    fid = file_instance.id
-                except AttributeError:
-                    flash('Unable to find file')
-                    return redirect(url_for('waitProc'))
-                format_instance = db.session.query(currentMeta).filter(
-                    and_(currentMeta.user_id == current_user.get_id(),
-                         currentMeta.file_id == file_instance.id,
-                         currentMeta.session == current_user.current_session)).first()
-                againstE = format_instance.against_E
-                form = GraphingUtility.populate_from_instance(format_instance)
-                columns, bools = GraphingUtility.splitForm(form)
-                basedColumns = GraphingUtility.zeroBaseColumns(columns)
-                path = file_path("." + file_instance.type, file_instance.path)
-                if str(file_instance.type) == 'mda':
-                    data, name, unusedpath = FileUtility.readMda(path)
-                else:
-                    data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
-                if bools[1].data:
-                    energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
-                                                         GraphingUtility.unicode_to_int(basedColumns[4].data),
-                                                         format_instance.hrm)
-                    used.append(energy)
-                elif bools[2].data:
-                    energy = GraphingUtility.energy_xtal_temp(data,
-                                                              GraphingUtility.unicode_to_int(basedColumns[3].data),
-                                                              GraphingUtility.unicode_to_int(basedColumns[4].data),
-                                                              GraphingUtility.unicode_to_int(basedColumns[5].data),
-                                                              GraphingUtility.unicode_to_int(basedColumns[6].data),
-                                                              format_instance.hrm)
-                    used.append(energy)
-                else:
-                    used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
-                if bools[9].data:
-                    signal = GraphingUtility.signal_normalized(data,
-                                                               GraphingUtility.unicode_to_int(basedColumns[8].data),
-                                                               GraphingUtility.unicode_to_int(basedColumns[10].data))
-                    used.append(signal)
-                    allLegendNames.append(basedColumns[9].id)
-                else:
-                    used.append(GraphingUtility.unicode_to_int(basedColumns[8].data))
-                    allLegendNames.append(basedColumns[8].id)
-                max, xmax, ycords = GraphingUtility.convert_Numpy(used, data, None)
-                fitType = format_instance.fit_type
-                inputCord = format_instance.fit_pos
-                fitRange = format_instance.fit_range
-                if fitType == 'AtMax' or fitType == 'Unfit':
-                    xmaxHold = xmax[1]
-                    xmax[1] = (ycords[0][xmax[1]] * 1000000)
-                    npXcords = numpy.array(ycords[0])
-                    npXcords = numpy.multiply(npXcords, 1000000)
-                    center = GraphingUtility.atMax(ycords, npXcords, xmax, fitRange)
-                    xmax[1] = xmaxHold
-                    ycords[0] = npXcords
-                    GraphingUtility.moveXcords(ycords, center)
-                    format_instance.fit_type = 'AtMax'
-                    format_instance.fit_pos = center
-                    format_instance.fit_range = fitRange
-                    db.session.commit()
-                else:
-                    npXcords = numpy.array(ycords[0])
-                    npXcords = numpy.multiply(npXcords, 1000000)
-                    ycords[0] = npXcords
-                    GraphingUtility.moveXcords(ycords, inputCord)
-                max[0] = ((max[0] * 1000000) - format_instance.fit_pos)
-                endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
-                alldata.append(data)
-                allxmax.append(xmax)
-                allycords.append(ycords)
-                allagainstE.append(againstE)
-                allFileNames.append(file_instance.name)
-            if binWidth == None:
-                code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergePlots(allycords, allxmax, allagainstE,
-                                                                                alldata,
-                                                                                allLegendNames,
-                                                                                allFileNames, pltLeg)
-                sumX = sumX.tolist()
-                sumY = sumY.tolist()
-            else:
-                code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergeBin(allycords, allxmax, allagainstE, alldata,
-                                                                              allLegendNames,
-                                                                              allFileNames,
-                                                                              pltLeg, binWidth)
-            if output == 1:
-                outputs = []
-                outputs.append(sumX)
-                outputs.append(sumY)
-                outputs = json.dumps(outputs)
-            endmax.append([format(sumxmax, '.6f'), format(sumymax, '.6f')])
-            allFileNames.append('Summed Files')
-    else:
-        fig = plt.figure(figsize=(7, 6))
-        code = mpld3.fig_to_html(fig)
-    procEntry = db.session.query(logBook).filter_by(name="Process Entry").first()
-    if procEntry != None:
-        procEntry.plot = code
-        db.session.commit()
-    else:
-        processEntry = logBook()
-        processEntry.name = "Process Entry"
-        processEntry.plot = code
-        processEntry.user = user
-        db.session.add(processEntry)
-        db.session.commit()
-    senddata.append({'max': endmax, 'filenames': allFileNames})
-    return render_template("new_dp.html", user=user, ses=current_user.current_session, code=code, data=senddata,
-                           outputs=outputs)
-
-
 @hrmApp.route('/peakFit', methods=['GET', 'POST'])
 @login_required
 def peak_at_max():
@@ -782,54 +830,6 @@ def peak_at_max():
     return render_template("new_df.html", user=current_user, ses=current_user.current_session, code=code,
                            form=form,
                            shiftVal=str(abs(ycords[0][0])))
-
-
-@hrmApp.route('/modifyDAT', methods=['GET', 'POST'])
-@login_required
-def modifyDAT():
-    if current_user.badge_number is None:
-        flash('Please update your badge number in order to continue', 'info')
-        return redirect(url_for('users.profile2'))
-    '''
-	Template function for the modifyDAT page.
-
-	Essentially just plotting the DAT information stored in the user's currentDAT.
-
-	Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
-	:return:
-	'''
-    try:
-        DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
-    except Exception, e:
-        code = 'No DAT selected'
-        return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
-    if DAT == None:
-        code = 'No DAT selected'
-        return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
-    user = db.session.query(User).filter_by(username=current_user.username).first()
-    fig = plt.figure(figsize=(10, 7))
-    css = """
-	.legend-box{
-		cursor: pointer;
-	}
-	"""
-    xs = []
-    ys = []
-    labels = []
-    lines = []
-    nameID = str(uuid.uuid4())
-    fig, ax = plt.subplots()
-    data = json.loads(DAT.DAT)
-    xs = data[0]
-    ys = data[1]
-    line = ax.plot(xs, ys, alpha=0, label='Summed')
-    lines.append(line[0])
-    labels.append('Summed')
-    mpld3.plugins.connect(fig, InteractiveLegend(lines, labels, 1, nameID, css))
-    mpld3.plugins.connect(fig, HideLegend(nameID))
-    code = mpld3.fig_to_html(fig)
-    plt.close('all')
-    return render_template("new_mdat.html", user=current_user, ses=DAT.DATname, code=code)
 
 
 @hrmApp.route('/setDAT', methods=['GET', 'POST'])
@@ -986,9 +986,6 @@ def resetDAT():
     DAT.DAT = DAT.originDAT
     db.session.commit()
     return redirect(url_for('hrm.modifyDAT'))
-
-
-
 
 
 @hrmApp.route('/close_plots', methods=['GET', 'POST'])
