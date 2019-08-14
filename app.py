@@ -43,20 +43,6 @@ __author__ = 'caschmitz'
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
-'''
-For debugging server use:
-    try:
-        *line you want to test*
-    except Exception,e:
-        print(str(e))
-'''
-
-# TODO: Ask Nicholas for information on xtrepid UUID and giving permissions to Michael
-# TODO: Subdirectories to file structure and make them searchable within the program
-# TODO: Split comments from fileComments and sessionComments on Scans Tab
-# TODO: Have fileComments searchable on manageFiles and sessionComments searchable on selectSession
-# TODO: Make script to restart server
-
 from flask import redirect,request
 from flask_login import LoginManager
 from flask_app import app
@@ -70,6 +56,20 @@ from sdproc.users.routes import users
 from sdproc.admin.routes import a
 from sdproc.hrms.routes import hrms
 from sdproc.globus.routes import globus
+
+'''
+For debugging server use:
+    try:
+        *line you want to test*
+    except Exception,e:
+        print(str(e))
+'''
+
+# TODO: Ask Nicholas for information on xtrepid UUID and giving permissions to Michael
+# TODO: Subdirectories to file structure and make them searchable within the program
+# TODO: Split comments from fileComments and sessionComments on Scans Tab
+# TODO: Have fileComments searchable on manageFiles and sessionComments searchable on selectSession
+# TODO: Make script to restart server
 
 login_manager = LoginManager()
 login_manager.login_view = 'users.login2'
@@ -87,20 +87,21 @@ app.register_blueprint(a)
 app.register_blueprint(hrms)
 app.register_blueprint(globus)
 
+
 """ REMOVE THIS ON SERVER """
 @app.before_request
 def fixURL():
-	url = request.path
-	if 'SDproc' in url:
-		fixedUrl = url[7:]
-		return redirect(fixedUrl, 307)
-	return
+    url = request.path
+    if 'SDproc' in url:
+        fixedUrl = url[7:]
+        return redirect(fixedUrl, 307)
+    return
 
 
 @login_manager.user_loader
 def load_user(user_id):
-	return userDbApi.getUserById(user_id)
+    return userDbApi.getUserById(user_id)
 
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
