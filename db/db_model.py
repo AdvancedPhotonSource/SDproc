@@ -164,6 +164,13 @@ class dataFile(db.Model):
     treeType = db.Column(db.String(), nullable=True)
 
 
+class GlobusTree(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String())
+    parent = db.Column(db.Integer)
+    type = db.Column(db.String())
+
+
 class currentMeta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
