@@ -72,6 +72,7 @@ def save_session_comment():
 @sessions.route('/get_fsession_comment', methods=['GET', 'POST'])
 def fsession_comment():
     file_id = request.form.get('id')
+    print file_id
     session = current_user.current_session
     return get_session_file_comments(file_id, session)
 

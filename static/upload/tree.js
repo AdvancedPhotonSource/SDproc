@@ -1,12 +1,12 @@
-$y(document).ready(function(){
+$y(document).ready(function() {
 
-     $y("#tree").jstree({
+     $y("#file_tree").jstree({
         'core' : {
             "check_callback" : function(o, n, p, i, m) {
                 if (m && m.dnd && m.pos !== 'i') { return false; }
             },
             'data' : {
-               "url" : "globus_tree",
+               "url" : "jsonData",
                "dataType" : "json"
             }
         },
@@ -25,8 +25,6 @@ $y(document).ready(function(){
         },
         'dnd' : {
             'is_draggable' : function(node) {
-
-
                 if(node[0].type == 'Root') {
                     alert("Sorry you cannot move the root directory.");
                     return false;
@@ -65,7 +63,25 @@ $y(document).ready(function(){
                 });
     });
 
-
+    $y("#globus_tree").jstree({
+        'core' : {
+            'data' : {
+               "url" : "globus_tree",
+               "dataType" : "json"
+            }
+        },
+        'types' : {
+            'Folder' : { "icon" : "/static/images/root.png" },
+            'File' : { "icon" : "jstree-icon jstree-file", "valid_children" : [] },
+            'Root' : { "icon" : "static/images/root.png" }
+        },
+        'plugins' : [ "wholerow", "types" ]
+    })
+    .on("select_node.jstree", function(e, data) {
+        var parents = data.node.parents;
+        var t = parents[1];
+        $y.post("/SDproc/globus_file", { p_id: t, id: data.node.id });
+    });
 });
 
 function saveNewComment() {

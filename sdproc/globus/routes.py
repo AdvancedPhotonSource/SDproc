@@ -1,8 +1,12 @@
 import json
+import secrets
+import os
 from dm import ExperimentDsApi, FileCatApi
-from flask import Blueprint
-from flask_login import login_required
-from db.db_model import db, GlobusTree
+from flask import Blueprint, request, current_app
+from flask_login import login_required, current_user
+from db.db_model import db, GlobusTree, dataFile
+from sqlalchemy import and_, or_
+from sdproc.files.utils import file_type, root_folder, save_user_file
 
 
 globus = Blueprint('globus', __name__)
@@ -15,90 +19,175 @@ fApi = FileCatApi(username='user3id', password='j7g$MAC;kG', url='https://s3iddm
 @globus.route('/globus_tree', methods=['GET', 'POST'])
 @login_required
 def globus_tree():
-    tree_data = [{"text": "3ID", "id": 0, "parent": "#", "type": "Root"}]
-    # folder_list = []
-    # # user_id = "d65218"
-    # experiments = exApi.getExperimentsByStation("3ID")
-    #
-    # # nodes = GlobusTree.query.all()
-    # # if nodes is not None:
-    # #     for n in nodes:
-    # #         db.session.delete(n)
-    # #     db.session.commit()
-    # #
-    # # print("done deleting db")
-    #
-    # """ Getting Experiments and finding their parent folders"""
-    # for e in experiments:
-    #     ex = exApi.getExperimentByName(e['name'])
-    #     try:
-    #         folder = e['rootPath']
-    #     except Exception, e:
-    #         folder = None
-    #     if folder is not None:
-    #         if folder not in folder_list:
-    #             folder_list.append(folder + "-new")
-    #
-    # # adding parent folders of experiments to the db
-    # for f in folder_list:
-    #     node = GlobusTree(name=f, parent=0, type="Folder")
-    #     db.session.add(node)
-    #     db.session.commit()
-    # print("added parent folders of experiments")
-    #
-    # # adding experiments to the db
-    # for e in experiments:
-    #     f_name = e['name'] + "-new"
-    #     try:
-    #         folder = e['rootPath'] + "-new"
-    #     except Exception, e:
-    #         folder = None
-    #     if folder is not None:
-    #         parent = GlobusTree.query.filter_by(name=folder).first()
-    #         node = GlobusTree(name=f_name, parent=parent.id, type="Folder")
-    #     else:
-    #         node = GlobusTree(name=f_name, parent=0, type="Folder")
-    #     db.session.add(node)
-    #     db.session.commit()
-    # print("added experiments to db")
-    #
-    # # adding files to db
-    # # parent = GlobusTree.query.filter_by(name="DeBeer-201812").first()
-    # # files = fApi.getExperimentFiles("DeBeer-201812")
-    # # for f in files:
-    # #     if f['fileName'][-3:] == 'dat' or f['fileName'][-3:] == 'mda':
-    # #         node = GlobusTree(name=f['fileName'], parent=parent.id, type="File")
-    # #         db.session.add(node)
-    # #         db.session.commit()
-    # for e in experiments:
-    #     name = e['name']
-    #     files = fApi.getExperimentFiles(name)
-    #     parent = GlobusTree.query.filter_by(name=(name + "-new")).first()
-    #     print parent
-    #     for f in files:
-    #         if f['fileName'][-3:] == 'dat' or f['fileName'][-3:] == 'mda':
-    #             node = GlobusTree(name=f['fileName'] + "-new", parent=parent.id, type="File")
-    #             db.session.add(node)
-    #             db.session.commit()
-    # print("added files to db")
+    user = 'd' + str(current_user.badge_number)
+    root_list = []
+    tree_data = [{"text": "3ID", "id": 0, "parent": "#", "type": "Root", "state": {"opened": "true", "disabled": "true"}}]
 
-    nodes = GlobusTree.query.all()
-    for n in nodes:
-        tree_data.append({"text": n.name, "id": n.id, "parent": n.parent, "type": n.type})
+    experiments = exApi.getExperimentsByStation("3ID")
+
+    for e in experiments:
+        e_name = e['name']
+        experiment = exApi.getExperimentByName(e_name)
+        if user in experiment['experimentUsernameList']:
+            roots(e_name, root_list)
+            ex = GlobusTree.query.filter_by(name=e_name).first()
+            tree_data.append({"text": ex.name, "id": ex.id, "parent": ex.parent, "type": ex.type})
+            get_files(ex.id, tree_data)
+    get_roots(root_list, tree_data)
     print("added nodes to list")
-
-    # with open('static/globus_tree.json', 'w') as outfile:
-    #     json.dump(tree_data, outfile)
 
     return json.dumps(tree_data)
 
 
-def add_experiment_files(experiment, tree_data, xid):
-    files = fApi.getExperimentFiles(experiment)
+@globus.route('/globus_file', methods=['GET', 'POST'])
+@login_required
+def globus_file():
+    parent = request.form.get("p_id")
+    f_id = request.form.get("id")
+    print parent
+    print f_id
+    f = GlobusTree.query.filter_by(id=f_id).first()
+    p = GlobusTree.query.filter_by(id=parent).first()
+    download = exApi.downloadFile(f.experiment_file_path, p.name, "./static/uploaded_files/mda/")
+    save_globus(download)
+    save_user_file()
 
-    x = 1
+    return "Done"
+
+
+def save_globus(download):
+    random_hex = secrets.token_hex(4)
+    f_name, f_ext = os.path.splitext(download['fileName'])
+    unique_name = f_name + "_" + random_hex + f_ext
+    f_path = file_path(unique_name)
+    os.rename(download['localFilePath'], f_path)
+    save_gfile(download, unique_name, f_ext)
+
+
+def file_path(unique_name):
+    path = os.path.join(current_app.root_path, 'static/uploaded_files/mda/', unique_name)
+    return path
+
+
+def save_gfile(download, unique_name, f_ext):
+    name = download['fileName']
+    path = unique_name
+    authed = str(current_user.id)
+    comChar = "#"
+    type = file_type(f_ext)
+    parentID = root_folder()
+    data_file = dataFile(name=name, path=path, comment="No comment(s)", authed=authed, comChar=comChar, type=type,
+                         parentID=parentID, treeType="File")
+    db.session.add(data_file)
+    db.session.commit()
+
+
+"""------------------------------------------------------------------------------------------------"""
+
+
+def get_roots(root_list, tree_data):
+    if root_list is not None:
+        for r in root_list:
+            root = GlobusTree.query.filter_by(name=r).first()
+            tree_data.append({"text": root.name, "id": root.id, "parent": root.parent, "type": root.type})
+
+
+def roots(experiment_name, root_list):
+    experiment = exApi.getExperimentByName(experiment_name)
+    try:
+        folder = experiment['rootPath']
+    except Exception, e:
+        folder = None
+
+    if folder is not None:
+        if folder not in root_list:
+            root_list.append(folder)
+
+
+def get_files(parent, tree_data):
+    scans = GlobusTree.query.filter(and_(GlobusTree.name == "Scans", GlobusTree.parent == parent)).first()
+    data = GlobusTree.query.filter(and_(GlobusTree.name == "Data", GlobusTree.parent == parent)).first()
+    files = GlobusTree.query.filter(or_(GlobusTree.parent == scans.id, GlobusTree.parent == data.id))
+
+    tree_data.append({"text": scans.name, "id": scans.id, "parent": scans.parent, "type": scans.type})
+    tree_data.append({"text": data.name, "id": data.id, "parent": data.parent, "type": data.type})
     for f in files:
-        tree_data.append({"text": f['fileName'], "id": x, "parent": xid, "type": "File"})
-        x += 1
+        tree_data.append({"text": f.name, "id": f.id, "parent": f.parent, "type": f.type})
 
     return tree_data
+
+
+@globus.route('/update_globus', methods=['GET', 'POST'])
+@login_required
+def update_globus():
+    folder_list = []
+    # user_id = "d65218"
+    experiments = exApi.getExperimentsByStation("3ID") # hard coded station
+
+    # clearing the database for update
+    GlobusTree.query.delete()
+    db.session.commit()
+    print("cleared db")
+
+    """ Getting Experiments and finding their parent folders"""
+    for e in experiments:
+        try:
+            folder = e['rootPath']
+        except Exception, e:
+            folder = None
+        if folder is not None:
+            if folder not in folder_list:
+                folder_list.append(folder)
+
+    # adding parent folders of experiments to the db
+    for f in folder_list:
+        node = GlobusTree(name=f, parent=0, type="Folder")
+        db.session.add(node)
+        db.session.commit()
+    print("added parent folders of experiments")
+
+    # adding experiments to the db
+    for e in experiments:
+        e_name = e['name']
+        try:
+            folder = e['rootPath']
+        except Exception, e:
+            folder = None
+        if folder is not None:
+            parent = GlobusTree.query.filter_by(name=folder).first()
+            node = GlobusTree(name=e_name, parent=parent.id, type="Folder")
+        else:
+            node = GlobusTree(name=e_name, parent=0, type="Folder")
+        db.session.add(node)
+        db.session.commit()
+    print("added experiments to db")
+
+    # adding scans/data folder to each experiment
+    for e in experiments:
+        e_name = e['name']
+        parent = GlobusTree.query.filter_by(name=e_name).first()
+        scans = GlobusTree(name="Scans", parent=parent.id, type="Folder")
+        data = GlobusTree(name="Data", parent=parent.id, type="Folder")
+        db.session.add(scans)
+        db.session.add(data)
+        db.session.commit()
+    print("added scans/data folders to all experiments")
+
+    # adding files to folders
+    for e in experiments:
+        e_name = e['name']
+        files = fApi.getExperimentFiles(e_name)
+        e_parent = GlobusTree.query.filter_by(name=e_name).first()
+        scans = GlobusTree.query.filter(and_(GlobusTree.name == "Scans", GlobusTree.parent == e_parent.id)).first()
+        data = GlobusTree.query.filter(and_(GlobusTree.name == "Data", GlobusTree.parent == e_parent.id)).first()
+        for f in files:
+            if f['fileName'][-3:] == 'dat':
+                node = GlobusTree(name=f['fileName'], parent=data.id, type="File", experiment_file_path=f["experimentFilePath"])
+                db.session.add(node)
+            elif f['fileName'][-3:] == 'mda':
+                node = GlobusTree(name=f['fileName'], parent=scans.id, type="File", experiment_file_path=f["experimentFilePath"])
+                db.session.add(node)
+            db.session.commit()
+    print("added files to db")
+
+    return "Updated"
