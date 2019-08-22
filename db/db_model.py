@@ -169,6 +169,7 @@ class GlobusTree(db.Model):
     name = db.Column(db.String())
     parent = db.Column(db.Integer)
     type = db.Column(db.String())
+    experiment_file_path = db.Column(db.String(), nullable=True)
 
 
 class currentMeta(db.Model):
