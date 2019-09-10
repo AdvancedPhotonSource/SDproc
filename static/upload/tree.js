@@ -19,7 +19,6 @@ $y(document).ready(function() {
                     delete tmp.rename;
                     delete tmp.remove;
                 }
-
                 return tmp;
             }
         },
@@ -37,26 +36,24 @@ $y(document).ready(function() {
             'File' : { "icon" : "jstree-icon jstree-file", "valid_children" : [] },
             'Root' : { "icon" : "static/images/root.png" }
         },
-        'plugins' : [ "dnd", "contextmenu", "wholerow", "unique", "types" ]
+        'plugins' : [ "dnd", "contextmenu", "wholerow", "sort", "types", "unique" ]
     })
     .on('rename_node.jstree', function (e, data) {
-        $y.post("/SDproc/renameN", { node: data.node.id, newName: data.text })
-        .done(function (d) {
-            $y('#tree').jstree(true).refresh();
-        })
+        $y.post("/SDproc/renameN", { node: data.node.id, newName: data.text });
     })
     .on('create_node.jstree', function (e, data) {
         $y.post("/SDproc/createNode", { parent: data.node.parent, title: data.node.text })
-        //$y('#tree').jstree(true).refresh();
+            .done(function (d) {
+                data.instance.set_id(data.node, Number(d));
+            });
     })
     .on('move_node.jstree', function (e, data) {
         $y.post("/SDproc/moveNode", { parent: data.parent, node: data.node.id });
     })
     .on('delete_node.jstree', function (e, data) {
-        $y.post("/SDproc/deleteNode", { node: data.node.id });
+        $y.post("/SDproc/deleteNode", { nodes: JSON.stringify(data.node.children_d), node: data.node.id });
     })
     .on("select_node.jstree", function (e, data) {
-        //alert(data.node.id);
         $y.post('/SDproc/get_file_comments', { id: data.node.id },
                 function(data){
                     $y('#comment').val(data);
@@ -76,13 +73,22 @@ $y(document).ready(function() {
             'Root' : { "icon" : "static/images/root.png" }
         },
         'plugins' : [ "wholerow", "types" ]
-    })
-    .on("select_node.jstree", function(e, data) {
-        var parents = data.node.parents;
-        var t = parents[1];
-        $y.post("/SDproc/globus_file", { p_id: t, id: data.node.id });
     });
 });
+
+function download() {
+    if ($y("#globus_tree").jstree("get_selected") == false) {
+        alert("Please select a file.")
+    } else {
+        var files = $y("#globus_tree").jstree("get_selected");
+        for(var x = 0; x < files.length; x++) {
+            $y.post("/SDproc/globus_file", { f_id: files[x] }).done(function (d) {
+                $y('#file_tree').jstree(true).refresh();
+            });
+        }
+        $x("#globusModal").modal("hide");
+    }
+}
 
 function saveNewComment() {
     if ($y("#tree").jstree("get_selected") == false) {

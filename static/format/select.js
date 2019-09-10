@@ -232,6 +232,8 @@ function save_session() {
     } else {
         $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
             $x('#sesName').html(data.name);
+        }).done(function (d) {
+            location.reload();
         });
     }
 }

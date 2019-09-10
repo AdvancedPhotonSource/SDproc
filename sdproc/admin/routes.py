@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, url_for, request, flash
 from flask_login import login_required, current_user
-from db.db_model import db, sessionFiles, dataFile, User, HRM, notification as n, sessionFilesMeta, sessionMeta, userFiles
+from db.db_model import db, SessionFiles, DataFile, User, HRM, Notification as n, SessionFilesMeta, SessionMeta, UserFiles
 from utilities.file_utility import FileUtility
 from sdproc.files.utils import file_path
 from forms import UserInfoForm
@@ -48,13 +48,13 @@ def admin():
     fileData = []
     notifData = []
     hrmData = []
-    sessions = sessionFiles.query.all()
+    sessions = SessionFiles.query.all()
     for instance in sessions:
         lastMod = instance.last_used
         sesData.insert(0, {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
                            'authed': instance.authed,
                            'modified': lastMod})
-    files = dataFile.query.filter_by(treeType="File").all()
+    files = DataFile.query.filter_by(treeType="File").all()
     for instance in files:
         path = file_path("." + instance.type, instance.path)
         fsize = FileUtility.size(path)
@@ -173,7 +173,7 @@ def solveNotif():
         user.approved = 1
         username = user.username
         id = user.id
-        rootnode = dataFile(name="/" + username + "/", path="", comment="This is the root node", authed=str(id),
+        rootnode = DataFile(name="/" + username + "/", path="", comment="This is the root node", authed=str(id),
                             comChar="", type="", parentID=0, treeType="Root")
         db.session.add(rootnode)
         db.session.delete(notif)
@@ -181,26 +181,26 @@ def solveNotif():
         db.session.delete(notif)
         user = db.session.query(User).filter_by(username=notif.originUser).first()
         db.session.delete(user)
-        sessions = db.session.query(sessionFiles).filter(sessionFiles.user == user).all()
+        sessions = db.session.query(SessionFiles).filter(SessionFiles.user == user).all()
         for session in sessions:
             auths = session.authed.split(',')
             auths.remove(str(user.id))
             if len(auths) == 0:
                 db.session.delete(session)
-                instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=session.id).all()
+                instances = db.session.query(SessionFilesMeta).filter_by(sessionFiles_id=session.id).all()
                 for instance in instances:
-                    meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                    meta = db.session.query(SessionMeta).filter_by(id=instance.sessionMeta_id).first()
                     db.session.delete(meta)
                     db.session.deleta(instance)
             else:
                 session.authed = ','.join(auths)
-        fileIDs = db.session.query(userFiles).filter(userFiles.user_id == user.id).all()
+        fileIDs = db.session.query(UserFiles).filter(UserFiles.user_id == user.id).all()
         for id in fileIDs:
-            file = db.session.query(dataFile).filter(dataFile.id == id.file_id).first()
+            file = db.session.query(DataFile).filter(DataFile.id == id.file_id).first()
             auths = file.authed.split(',')
             auths.remove(str(user.id))
-            userFile = db.session.query(userFiles).filter(
-                and_(userFiles.user_id == user.id, userFiles.file_id == file.id)).first()
+            userFile = db.session.query(UserFiles).filter(
+                and_(UserFiles.user_id == user.id, UserFiles.file_id == file.id)).first()
             db.session.delete(userFile)
             if len(auths) == 0:
                 db.session.delete(file)
@@ -225,12 +225,12 @@ def getInfo():
     id = request.form.get('id', type=int)
     user = request.form.get('user', type=str)
     fileUsers = []
-    userFiles = []
+    UserFiles = []
     userSessions = []
     sessionUsers = []
     freeze = 0
     if table == 'File':
-        file_instance = db.session.query(dataFile).filter_by(id=id).first()
+        file_instance = db.session.query(DataFile).filter_by(id=id).first()
         if file_instance != None:
             names = file_instance.authed.split(',')
             for name in names:
@@ -239,31 +239,31 @@ def getInfo():
     if table == 'User':
         user = db.session.query(User).filter_by(username=user).first()
         freeze = user.approved
-        files = dataFile.query.all()
+        files = DataFile.query.all()
         for instance in files:
             fsize = FileUtility.size(instance.path)
             lastMod = FileUtility.modified(instance.path)
             temp = lastMod.strftime("%d/%m/%Y %H:%M:%S")
             modname = [instance.name + temp]
-            userFiles.insert(0,
+            UserFiles.insert(0,
                              {'name': instance.name, 'path': instance.path, 'id': instance.id,
                               'comment': instance.comment,
                               'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
-        sessions = sessionFiles.query.all()
+        sessions = SessionFiles.query.all()
         for instance in sessions:
             lastMod = instance.last_used
             userSessions.insert(0,
                                 {'name': instance.name, 'id': instance.id, 'comment': instance.comment,
                                  'authed': instance.authed, 'modified': lastMod})
     if table == 'Session':
-        session_instance = db.session.query(sessionFiles).filter_by(id=id).first()
+        session_instance = db.session.query(SessionFiles).filter_by(id=id).first()
         if session_instance != None:
             names = session_instance.authed.split(',')
             for name in names:
                 user = db.session.query(User).filter_by(id=name).first()
                 sessionUsers.insert(0, {'sUser': user})
-    return render_template('admin.html', user=user, fileUsers=fileUsers, userFiles=userFiles,
+    return render_template('admin.html', user=user, fileUsers=fileUsers, UserFiles=UserFiles,
                            userSessions=userSessions, sessionUsers=sessionUsers, freeze=freeze)
 
 
@@ -284,19 +284,19 @@ def addThing():
         if thing != None:
             user = db.session.query(User).filter_by(username=location).first()
             if table == '#userFileTable':
-                instance = db.session.query(dataFile).filter_by(id=thing).first()
+                instance = db.session.query(DataFile).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
                 if user.id in auths:
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
-                    userFile = userFiles()
+                    userFile = UserFiles()
                     userFile.user_id = user.id
                     userFile.file_id = instance.id
                     db.session.add(userFile)
                     db.session.commit()
             if table == '#userSessionTable':
-                instance = db.session.query(sessionFiles).filter_by(id=thing).first()
+                instance = db.session.query(SessionFiles).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
                 if user.id in auths:
                     return 'Already Shared'
@@ -305,19 +305,19 @@ def addThing():
         else:
             user = db.session.query(User).filter_by(username=user).first()
             if table == '#fileNameTable':
-                instance = db.session.query(dataFile).filter_by(id=location).first()
+                instance = db.session.query(DataFile).filter_by(id=location).first()
                 auths = instance.authed.split(',')
                 if user.id in auths:
                     return 'Already Shared'
                 else:
                     instance.authed = instance.authed + ',' + str(user.id)
-                    userFile = userFiles()
+                    userFile = UserFiles()
                     userFile.user_id = user.id
                     userFile.file_id = instance.id
                     db.session.add(userFile)
                     db.session.commit()
             if table == '#sessionUserTable':
-                instance = db.session.query(sessionFiles).filter_by(id=location).first()
+                instance = db.session.query(SessionFiles).filter_by(id=location).first()
                 auths = instance.authed.split(',')
                 if user.id in auths:
                     return 'Already Shared'
@@ -346,11 +346,11 @@ def removeThing():
         if thing != None:
             user = db.session.query(User).filter_by(username=location).first()
             if table == '#userFileTable':
-                instance = db.session.query(dataFile).filter_by(id=thing).first()
+                instance = db.session.query(DataFile).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
                 auths.remove(str(user.id))
-                userFile = db.session.query(userFiles).filter(
-                    and_(userFiles.user_id == user.id, userFiles.file_id == instance.id)).first()
+                userFile = db.session.query(UserFiles).filter(
+                    and_(UserFiles.user_id == user.id, UserFiles.file_id == instance.id)).first()
                 db.session.delete(userFile)
                 db.session.commit()
                 if len(auths) == 0:
@@ -358,14 +358,14 @@ def removeThing():
                 else:
                     instance.authed = ','.join(auths)
             if table == '#userSessionTable':
-                instance = db.session.query(sessionFiles).filter_by(id=thing).first()
+                instance = db.session.query(SessionFiles).filter_by(id=thing).first()
                 auths = instance.authed.split(',')
                 auths.remove(str(user.id))
                 if len(auths) == 0:
                     db.session.delete(instance)
-                    instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=thing).all()
+                    instances = db.session.query(SessionFilesMeta).filter_by(sessionFiles_id=thing).all()
                     for instance in instances:
-                        meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                        meta = db.session.query(SessionMeta).filter_by(id=instance.sessionMeta_id).first()
                         db.session.delete(meta)
                         db.session.delete(instance)
                 else:
@@ -379,11 +379,11 @@ def removeThing():
         else:
             user = db.session.query(User).filter_by(username=user).first()
             if table == '#fileNameTable':
-                file_instance = db.session.query(dataFile).filter_by(id=location).first()
+                file_instance = db.session.query(DataFile).filter_by(id=location).first()
                 auths = file_instance.authed.split(',')
                 auths.remove(str(user.id))
-                userFile = db.session.query(userFiles).filter(
-                    and_(userFiles.user_id == user.id, userFiles.file_id == file_instance.id)).first()
+                userFile = db.session.query(UserFiles).filter(
+                    and_(UserFiles.user_id == user.id, UserFiles.file_id == file_instance.id)).first()
                 db.session.delete(userFile)
                 db.session.commit()
                 if len(auths) == 0:
@@ -391,14 +391,14 @@ def removeThing():
                 else:
                     file_instance.authed = ','.join(auths)
             if table == '#sessionUserTable':
-                session_instance = db.session.query(sessionFiles).filter_by(id=location).first()
+                session_instance = db.session.query(SessionFiles).filter_by(id=location).first()
                 auths = session_instance.authed.split(',')
                 auths.remove(str(user.id))
                 if len(auths) == 0:
                     db.session.delete(session_instance)
-                    instances = db.session.query(sessionFilesMeta).filter_by(sessionFiles_id=thing).all()
+                    instances = db.session.query(SessionFilesMeta).filter_by(sessionFiles_id=thing).all()
                     for instance in instances:
-                        meta = db.session.query(sessionMeta).filter_by(id=instance.sessionMeta_id).first()
+                        meta = db.session.query(SessionMeta).filter_by(id=instance.sessionMeta_id).first()
                         db.session.delete(meta)
                         db.session.delete(instance)
                 else:

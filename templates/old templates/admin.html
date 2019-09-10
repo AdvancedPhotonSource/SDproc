@@ -320,8 +320,8 @@ with context %}
                     <div class="userFileTable">
                         <table id="userFileTable">
                             <tbody>
-                                {% if userFiles %}
-                                    {% for post in userFiles %}
+                                {% if UserFiles %}
+                                    {% for post in UserFiles %}
                                         {% set auths = post.authed.split(',') %}
                                         {% for aID in auths %}
                                             {% if aID|int() == user.get_id()|int() %}

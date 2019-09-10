@@ -51,7 +51,7 @@ from utilities.graphing_utility import GraphingUtility
 
 matplotlib.use('Agg')
 from flask_login import current_user, login_required
-from db.db_model import db, logBook, dataFile, currentMeta
+from db.db_model import db, LogBook, DataFile, CurrentMeta
 import json
 from sqlalchemy import desc, and_
 
@@ -73,11 +73,11 @@ def delete_entry():
 	if request.method == 'POST':
 		idthis = request.form.get('id', type=int)
 		if idthis == -1:
-			userBook = db.session.query(logBook).filter_by(user=user)
+			userBook = db.session.query(LogBook).filter_by(user=user)
 			for instance in userBook:
 				db.session.delete(instance)
 		else:
-			instance = db.session.query(logBook).filter_by(id=idthis).first()
+			instance = db.session.query(LogBook).filter_by(id=idthis).first()
 			db.session.delete(instance)
 		db.session.commit()
 	return 'Deleted'
@@ -90,19 +90,19 @@ def add_entry():
     Adds an entry to the logbook.
 
     This function handles standard logging from the format page and the logs from the sum page.
-    Data is pulled from the user's currentMeta to log relevant information to the table.
+    Data is pulled from the user's CurrentMeta to log relevant information to the table.
     :return:
     '''
 	user = current_user
 	if request.method == 'POST':
 		process = request.form.get('process', type=int)
 		if process != None:
-			meta = logBook()
+			meta = LogBook()
 			meta.user = user
-			meta.plot = db.session.query(logBook).filter_by(name="Process Entry").first().plot
+			meta.plot = db.session.query(LogBook).filter_by(name="Process Entry").first().plot
 			files = []
-			for instance in db.session.query(currentMeta).filter(currentMeta.user == current_user).all():
-				fintance = db.session.query(dataFile).filter_by(id=instance.file_id).first()
+			for instance in db.session.query(CurrentMeta).filter(CurrentMeta.user == current_user).all():
+				fintance = db.session.query(DataFile).filter_by(id=instance.file_id).first()
 				files.append(fintance.name)
 			files = json.dumps(files)
 			meta.name = files
@@ -112,13 +112,13 @@ def add_entry():
 			db.session.commit()
 			return 'Added'
 		idthis = request.form.get('id', type=int)
-		file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-		format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-		                                                            currentMeta.file_id == file_instance.id,
-		                                                            currentMeta.session == current_user.current_session)).first()
+		file_instance = db.session.query(DataFile).filter_by(id=idthis).first()
+		format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
+		                                                            CurrentMeta.file_id == file_instance.id,
+		                                                            CurrentMeta.session == current_user.current_session)).first()
 		if format_instance != None:
 			form = GraphingUtility.populate_from_instance(format_instance)
-			meta = logBook()
+			meta = LogBook()
 			form.populate_obj(meta)
 			meta.user = user
 			meta.plot = format_instance.plot
@@ -145,7 +145,7 @@ def sesData():
 	data = []
 	user = current_user
 	if user.is_authenticated():
-		procEntry = db.session.query(logBook).filter_by(name="Process Entry").first()
+		procEntry = db.session.query(LogBook).filter_by(name="Process Entry").first()
 		if procEntry != None:
 			db.session.delete(procEntry)
 			db.session.commit()

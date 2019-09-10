@@ -50,7 +50,7 @@ from datetime import datetime
 from flask_login import current_user
 from flask import current_app
 
-from db.db_model import db, dataFile
+from db.db_model import db, DataFile
 from flask_app import app
 from utilities import mda, mdaAscii
 
@@ -213,7 +213,7 @@ class FileUtility:
             f.write('#Files Included:')
             f.write('\n')
             for id in name:
-                file = db.session.query(dataFile).filter_by(id=id).first()
+                file = db.session.query(DataFile).filter_by(id=id).first()
                 f.write('#' + file.name)
                 f.write('\n')
         else:
