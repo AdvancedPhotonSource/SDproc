@@ -5,7 +5,7 @@ from flask import current_app
 from flask_login import current_user
 from sqlalchemy import and_, desc
 
-from db.db_model import db, dataFile, userFiles
+from db.db_model import db, DataFile, UserFiles
 
 """
   definitions used to upload files. All of these definitions are used to handle file uploads.
@@ -18,8 +18,8 @@ def save_files(form_files):
         f_name, f_ext = os.path.splitext(file.filename)
         unique_name = f_name + "_" + random_hex + f_ext
         f_path = file_path(f_ext, unique_name)
-        save_data_file(f_name, unique_name, file, f_ext)
-        save_user_file()
+        f_id = save_data_file(f_name, unique_name, file, f_ext)
+        save_user_file(f_id)
         file.save(f_path)
 
 
@@ -29,25 +29,31 @@ def save_data_file(file_name, unique_name, file, f_ext):
     authed = str(current_user.id)
     comChar = comment_character(f_ext, file)
     type = file_type(f_ext)
-    parentID = root_folder()
-    data_file = dataFile(name=name, path=path, comment="No comment(s)", authed=authed, comChar=comChar, type=type,
-                         parentID=parentID, treeType="File")
+    root_id = root_folder()
+    data_file = DataFile(name=name, path=path, comment="No comment(s)", authed=authed, comChar=comChar, type=type,
+                         parentID=root_id, treeType="File")
     db.session.add(data_file)
+    db.session.commit()
+    return data_file.id
+
+
+def save_user_file(f_id):
+    user_file = UserFiles(user_id=current_user.id, file_id=f_id)
+    db.session.add(user_file)
     db.session.commit()
 
 
-def save_user_file():
-    data_file = dataFile.query.order_by(desc('id')).first()
-    user_file = userFiles(user_id=current_user.id, file_id=data_file.id)
-    db.session.add(user_file)
+def delete_user_file(f_id):
+    user_file = UserFiles.query.filter(and_(UserFiles.user_id == current_user.id, UserFiles.file_id == f_id)).first()
+    db.session.delete(user_file)
     db.session.commit()
 
 
 def root_folder():
     authed = str(current_user.id)
-    user_root = dataFile.query.filter(and_(dataFile.authed == authed, dataFile.treeType == "Root")).first()
-    parentID = user_root.id
-    return parentID
+    user_root = DataFile.query.filter(and_(DataFile.authed == authed, DataFile.treeType == "Root")).first()
+    root_id = user_root.id
+    return root_id
 
 
 def comment_character(f_ext, file):

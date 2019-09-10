@@ -64,7 +64,7 @@ import matplotlib.pyplot as plt
 from utilities.file_utility import FileUtility
 from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
 
-from db.db_model import db, User, logBook, currentMeta, currentDAT, userFiles, HRM, dataFile, sessionFiles
+from db.db_model import db, User, LogBook, CurrentMeta, CurrentDAT, UserFiles, HRM, DataFile, SessionFiles
 
 import json
 import numpy
@@ -90,7 +90,7 @@ def dataFormat():
     user = current_user
     thisSession = current_user.current_session
     if thisSession != 'None':
-        comments = sessionFiles.query.filter_by(name=thisSession).first().comment
+        comments = SessionFiles.query.filter_by(name=thisSession).first().comment
     else:
         comments = None
     findPlot = request.form.get('plot', type=int)
@@ -98,7 +98,7 @@ def dataFormat():
     fdata = []
     hrmData = []
     nameID = str(uuid.uuid4())
-    files = dataFile.query.filter_by(type="mda").all()
+    files = DataFile.query.filter_by(type="mda").all()
     for instance in files:
         path = file_path("." + instance.type, instance.path)
         fsize = FileUtility.size(path)
@@ -127,10 +127,10 @@ def dataFormat():
         againstE = 'Point #'
     else:
         idthis = request.form.get('idnext', type=int)
-        file_instance = db.session.query(dataFile).filter(dataFile.id == idthis).first()
-        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                    currentMeta.file_id == file_instance.id,
-                                                                    currentMeta.session == current_user.current_session)).first()
+        file_instance = db.session.query(DataFile).filter(DataFile.id == idthis).first()
+        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                                    CurrentMeta.file_id == file_instance.id,
+                                                                    CurrentMeta.session == current_user.current_session)).first()
         if format_instance is not None:
             againstE = format_instance.against_E
             form = GraphingUtility.populate_from_instance(format_instance)
@@ -230,9 +230,10 @@ def dataFormat():
             etype = data[1]
             used = []
             againstE = 'Point #'
-            format = currentMeta()
+            format = CurrentMeta()
             format.name = file_instance.name
             format.path = file_instance.path
+            format.comment = file_instance.comment
             # format.ebool = True
             format.sbool = True
             format.energy = 1
@@ -286,13 +287,13 @@ def modifyDAT():
     '''
 	Template function for the modifyDAT page.
 
-	Essentially just plotting the DAT information stored in the user's currentDAT.
+	Essentially just plotting the DAT information stored in the user's CurrentDAT.
 
 	Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
 	:return:
 	'''
     try:
-        DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+        DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
     except Exception, e:
         code = 'No DAT selected'
         return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
@@ -332,7 +333,7 @@ def process():
         flash('Please update your badge number in order to continue', 'info')
         return redirect(url_for('users.profile2'))
     '''
-	Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their currentMeta.
+	Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their CurrentMeta.
 
 	Summing can be done with a binning or interpolation method.  Maxes are extracted the same either way.
 	:return:
@@ -349,15 +350,15 @@ def process():
     outputs = ''
     if idthis is not None or idlist is not None:
         if idlist is None:
-            file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
+            file_instance = db.session.query(DataFile).filter_by(id=idthis).first()
             try:
                 fid = file_instance.id
             except AttributeError:
                 flash('Please select a file')
                 return redirect(url_for('waitProc'))
-            format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                        currentMeta.file_id == file_instance.id,
-                                                                        currentMeta.session == current_user.current_session)).first()
+            format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                                        CurrentMeta.file_id == file_instance.id,
+                                                                        CurrentMeta.session == current_user.current_session)).first()
             againstE = format_instance.against_E
             form = GraphingUtility.populate_from_instance(format_instance)
             columns, bools = GraphingUtility.splitForm(form)
@@ -444,17 +445,17 @@ def process():
             endmax = []
 
             for anID in jidlist:
-                file_instance = db.session.query(dataFile).filter_by(id=anID).first()
+                file_instance = db.session.query(DataFile).filter_by(id=anID).first()
                 used = []
                 try:
                     fid = file_instance.id
                 except AttributeError:
                     flash('Unable to find file')
                     return redirect(url_for('waitProc'))
-                format_instance = db.session.query(currentMeta).filter(
-                    and_(currentMeta.user_id == current_user.get_id(),
-                         currentMeta.file_id == file_instance.id,
-                         currentMeta.session == current_user.current_session)).first()
+                format_instance = db.session.query(CurrentMeta).filter(
+                    and_(CurrentMeta.user_id == current_user.get_id(),
+                         CurrentMeta.file_id == file_instance.id,
+                         CurrentMeta.session == current_user.current_session)).first()
                 againstE = format_instance.against_E
                 form = GraphingUtility.populate_from_instance(format_instance)
                 columns, bools = GraphingUtility.splitForm(form)
@@ -539,12 +540,12 @@ def process():
     else:
         fig = plt.figure(figsize=(7, 6))
         code = mpld3.fig_to_html(fig)
-    procEntry = db.session.query(logBook).filter_by(name="Process Entry").first()
+    procEntry = db.session.query(LogBook).filter_by(name="Process Entry").first()
     if procEntry != None:
         procEntry.plot = code
         db.session.commit()
     else:
-        processEntry = logBook()
+        processEntry = LogBook()
         processEntry.name = "Process Entry"
         processEntry.plot = code
         processEntry.user = user
@@ -582,10 +583,10 @@ def generateOutput():
     if outType == 1:
         # this means the user clicked the output button on the Scans tab
         # lets the user download the output of mda and save the file
-        file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
-        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                    currentMeta.file_id == int(id),
-                                                                    currentMeta.session == current_user.current_session)).first()
+        file_instance = db.session.query(DataFile).filter_by(id=int(id)).first()
+        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                                    CurrentMeta.file_id == int(id),
+                                                                    CurrentMeta.session == current_user.current_session)).first()
         if str(file_instance.type) == 'mda':
             path = file_path("." + file_instance.type, file_instance.path)
             data, name, unusedpath = FileUtility.readMda(path)
@@ -638,7 +639,7 @@ def generateOutput():
         filename = FileUtility.writeOutput(output, colNames, file_instance.name, '')
     elif outType == 2:
         # same as outType == 3 but with one file (possibly)
-        file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
+        file_instance = db.session.query(DataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
         output = []
         output.append(cords[0])
@@ -664,7 +665,7 @@ def generateOutput():
         filename = FileUtility.writeOutput(output, colNames, jidlist, datFName)
     elif outType == 4:
         # same as outType == 5 but this is only with one file
-        file_instance = db.session.query(dataFile).filter_by(id=int(id)).first()
+        file_instance = db.session.query(DataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
         output = []
         output.append(cords[0])
@@ -674,7 +675,7 @@ def generateOutput():
         colNames.append("Signal")
         filename = FileUtility.writeOutput(output, colNames, datFName, '')
         if DBSave != 0:
-            dfile = dataFile()
+            dfile = DataFile()
             dfile.name = datFName
             dfile.path = filename
             dfile.comment = ''
@@ -683,12 +684,12 @@ def generateOutput():
             dfile.comChar = user_instance.commentChar
             dfile.type = 'dat'
             currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
-            parentNode = db.session.query(dataFile).filter(
-                and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+            parentNode = db.session.query(DataFile).filter(
+                and_(DataFile.name == "/" + currUser + "/", DataFile.authed == str(current_user.get_id()))).first()
             dfile.parentID = parentNode.id
             dfile.treeType = "File"
             db.session.add(dfile)
-            userFile = userFiles()
+            userFile = UserFiles()
             userFile.file_id = dfile.id
             userFile.user_id = current_user.get_id()
             db.session.add(userFile)
@@ -710,7 +711,7 @@ def generateOutput():
         colNames.append("Signal")
         filename = FileUtility.writeOutput(output, colNames, jidlist, datFName)
         if DBSave != 0:
-            dfile = dataFile()
+            dfile = DataFile()
             dfile.name = datFName
             dfile.path = filename
             dfile.comment = ''
@@ -719,12 +720,12 @@ def generateOutput():
             dfile.comChar = user_instance.commentChar
             dfile.type = 'dat'
             currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
-            parentNode = db.session.query(dataFile).filter(
-                and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+            parentNode = db.session.query(DataFile).filter(
+                and_(DataFile.name == "/" + currUser + "/", DataFile.authed == str(current_user.get_id()))).first()
             dfile.parentID = parentNode.id
             dfile.treeType = "File"
             db.session.add(dfile)
-            userFile = userFiles()
+            userFile = UserFiles()
             userFile.file_id = dfile.id
             userFile.user_id = current_user.id
             db.session.add(userFile)
@@ -736,7 +737,7 @@ def generateOutput():
     elif outType == 6:
         # clicks the "save locally" button the Modify DAT Page
         # outputs the current data file to the user
-        DAT = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).first()
+        DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user_id == current_user.get_id()).first()
         output = []
         data = json.loads(DAT.DAT)
         output.append(data[0])
@@ -748,7 +749,7 @@ def generateOutput():
     elif outType == 7:
         # clicks the "save to server" button the Modify DAT Page
         # saves the current data file to the current user session table
-        DAT = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).first()
+        DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user_id == current_user.get_id()).first()
         output = []
         data = json.loads(DAT.DAT)
         output.append(data[0])
@@ -757,7 +758,7 @@ def generateOutput():
         colNames.append("Energy")
         colNames.append("Signal")
         filename = FileUtility.writeOutput(output, colNames, datFName, '')
-        dfile = dataFile()
+        dfile = DataFile()
         dfile.name = datFName + ".dat"
         dfile.path = filename
         dfile.comment = ''
@@ -766,8 +767,8 @@ def generateOutput():
         dfile.comChar = user_instance.commentChar
         dfile.type = 'dat'
         currUser = db.session.query(User).filter(User.id == current_user.get_id()).first().username
-        parentNode = db.session.query(dataFile).filter(
-            and_(dataFile.name == "/" + currUser + "/", dataFile.authed == str(current_user.get_id()))).first()
+        parentNode = db.session.query(DataFile).filter(
+            and_(DataFile.name == "/" + currUser + "/", DataFile.authed == str(current_user.get_id()))).first()
         dfile.parentID = parentNode.id
         dfile.treeType = "File"
         db.session.add(dfile)
@@ -784,7 +785,7 @@ def generateOutput():
 @hrmApp.route('/download_file/<path:filename>', methods=['GET', 'POST'])
 @login_required
 def download_file(filename):
-    current_file = dataFile.query.filter_by(path=filename).first()
+    current_file = DataFile.query.filter_by(path=filename).first()
     print current_file
     path = os.path.join(current_app.root_path, 'static/saved_files/dat')
     return send_from_directory(directory=path, filename=filename, attachment_filename="data file.txt",
@@ -840,18 +841,18 @@ def setDAT():
 
 	This is usually called from the /select page when choosing a DAT file.
 
-	Sets the user's currentDAT.
+	Sets the user's CurrentDAT.
 	:return:
 	'''
     DAT = request.form.get('DAT', type=str)
     DName = request.form.get('DName', type=str)
     meta = db.metadata
     for table in (meta.sorted_tables):
-        if table.name == 'currentDAT':
+        if table.name == 'CurrentDAT':
             db.session.execute(table.delete())
     db.session.commit()
 
-    cDAT = currentDAT()
+    cDAT = CurrentDAT()
     cDAT.user = current_user
     xs = []
     ys = []
@@ -884,17 +885,17 @@ def remBackDAT():
     '''
 	Removes the background data from a DAT file based on user specifications.
 
-	Either removes a flat value, a linear value, or a averaged linear value from the DAT data stored in currentDAT.
+	Either removes a flat value, a linear value, or a averaged linear value from the DAT data stored in CurrentDAT.
 
-	Updates currentDAT with the data for the new line.
+	Updates CurrentDAT with the data for the new line.
 	:return:
-	Calls /modifyDAT as that will plot the altered currentDAT.
+	Calls /modifyDAT as that will plot the altered CurrentDAT.
 	'''
     show = request.form.get('show', type=int)
     flatVal = request.form.get('flatVal', type=int)
     if flatVal != None:
         if show == 0:
-            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+            DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             for i in range(len(data[1])):
                 data[1][i] = data[1][i] - flatVal
@@ -902,7 +903,7 @@ def remBackDAT():
             db.session.commit()
             return redirect(url_for('hrm.modifyDAT'))
         else:
-            DAT = db.session.query(currentDAT).one()
+            DAT = db.session.query(CurrentDAT).one()
             data = json.loads(DAT.DAT)
             code = GraphingUtility.addLines(data, flatVal)
             return code
@@ -912,7 +913,7 @@ def remBackDAT():
     rightY = request.form.get('rightY', type=float)
     if leftX != None:
         if show == 0:
-            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+            DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             xs = numpy.array([leftX, rightX])
             ys = numpy.array([leftY, rightY])
@@ -931,7 +932,7 @@ def remBackDAT():
             db.session.commit()
             return redirect(url_for('modifyDAT'))
         else:
-            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+            DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             code = GraphingUtility.addLines(data, [leftX, rightX, leftY, rightY])
             return code
@@ -946,7 +947,7 @@ def remBackDAT():
                                                          numpy.array([cords[5], cords[3]]), 1)
             rightSlope, rightIntercept = numpy.polyfit(numpy.array([cords[2], cords[6]]),
                                                        numpy.array([cords[3], cords[7]]), 1)
-            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+            DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             tempX = []
             tempY = []
@@ -967,7 +968,7 @@ def remBackDAT():
             db.session.commit()
             return redirect(url_for('modifyDAT'))
         else:
-            DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+            DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
             cords = GraphingUtility.calcAverageBack(leftIn, rightIn)
             code = GraphingUtility.addLines(data, cords)
@@ -981,8 +982,8 @@ def remBackDAT():
 @hrmApp.route('/resetDAT', methods=['GET', 'POST'])
 @login_required
 def resetDAT():
-    '''Reverts the currentDAT back to how it was originally'''
-    DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+    '''Reverts the CurrentDAT back to how it was originally'''
+    DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
     DAT.DAT = DAT.originDAT
     db.session.commit()
     return redirect(url_for('hrm.modifyDAT'))
@@ -1009,17 +1010,17 @@ def save_graph():
 	Updates the current session with information that the user has supplied on the data page.
 
 	This session is stored temporarily for each file and is updated whenever a change is made on the data page.
-	The data is passed in the InputForm that is defined in forms.py and saved in the currentMeta database table.
+	The data is passed in the InputForm that is defined in forms.py and saved in the CurrentMeta database table.
 	:return:
 	'''
     form = InputForm(request.form)
     idthis = request.form.get("idnum", type=int)
     if idthis is not None:
         againstE = request.form.get("agaE", type=str)
-        file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                    currentMeta.file_id == file_instance.id,
-                                                                    currentMeta.session == current_user.current_session)).first()
+        file_instance = db.session.query(DataFile).filter_by(id=idthis).first()
+        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                                    CurrentMeta.file_id == file_instance.id,
+                                                                    CurrentMeta.session == current_user.current_session)).first()
 
         format_instance.energy = form.energy.data
         format_instance.xtal1A = form.xtal1A.data

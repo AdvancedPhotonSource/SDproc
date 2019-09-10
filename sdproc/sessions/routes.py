@@ -5,12 +5,12 @@ matplotlib.use('Agg')
 
 from flask import Blueprint, request, flash, json, redirect, url_for, render_template, current_app
 from flask_login import current_user, login_required
-from db.db_model import db, currentDAT, currentMeta, User, dataFile, userFiles, sessionFiles, sessionFilesMeta, \
-    sessionMeta
+from db.db_model import db, CurrentDAT, CurrentMeta, User, DataFile, UserFiles, SessionFiles, SessionFilesMeta, \
+    SessionMeta
 from utilities.graphing_utility import GraphingUtility
 from utilities.file_utility import FileUtility
 from sqlalchemy import and_, desc
-from sdproc.files.utils import file_path
+from sdproc.files.utils import file_path, delete_user_file
 from sdproc.utils.utils import get_comments, save_comments
 from sdproc.sessions.utils import get_session_file_comments, save_session_file_comments
 from db.api.file_db_api import FileDbApi
@@ -25,19 +25,20 @@ def delete_session():
     id = request.form.get("id")
 
     if type == 'session':
-        session = sessionFiles.query.filter_by(id=id).first()
-        session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
+        session = SessionFiles.query.filter_by(id=id).first()
+        session_files = SessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
 
         for file in session_files:
-            session_meta = sessionMeta.query.filter_by(id=file.sessionMeta_id).first()
+            session_meta = SessionMeta.query.filter_by(id=file.sessionMeta_id).first()
             db.session.delete(session_meta)
             db.session.delete(file)
 
         db.session.delete(session)
     elif type == 'dat':
-        data_file = dataFile.query.filter_by(id=id).first()
-        user_file = userFiles.query.filter_by(file_id=data_file.id).first()
-        db.session.delete(user_file)
+        data_file = DataFile.query.filter_by(id=id).first()
+        delete_user_file(data_file.id)
+        path = file_path("." + data_file.type, data_file.path)
+        os.remove(path)
         db.session.delete(data_file)
 
     db.session.commit()
@@ -51,9 +52,9 @@ def session_comment():
     file_id = request.form.get("id")
 
     if f_type == 'session':
-        return get_comments(file_id, sessionFiles)
+        return get_comments(file_id, SessionFiles)
     elif f_type == 'dat':
-        return get_comments(file_id, dataFile)
+        return get_comments(file_id, DataFile)
 
 
 @sessions.route('/save_session_comment', methods=['GET', 'POST'])
@@ -63,9 +64,9 @@ def save_session_comment():
     comments = request.form.get("comment")
 
     if f_type == 'session':
-        save_comments(file_id, sessionFiles, comments)
+        save_comments(file_id, SessionFiles, comments)
     elif f_type == 'dat':
-        save_comments(file_id, dataFile, comments)
+        save_comments(file_id, DataFile, comments)
     return "Saved"
 
 
@@ -74,6 +75,7 @@ def fsession_comment():
     file_id = request.form.get('id')
     print file_id
     session = current_user.current_session
+    print session
     return get_session_file_comments(file_id, session)
 
 
@@ -102,12 +104,13 @@ def index2():
     """
     users = User.query.filter(User.id != current_user.id).all()
     if current_user.id == 1:
-        user_sessions = sessionFiles.query.all()
-        user_data_files = dataFile.query.filter_by(type='dat')
+        user_sessions = SessionFiles.query.all()
+        user_data_files = DataFile.query.filter_by(type='dat')
     else:
         try:
-            user_sessions = sessionFiles.query.filter_by(user_id=current_user.id)
-            user_data_files = dataFile.query.filter(and_(dataFile.type=='dat', dataFile.authed==str(current_user.id)))
+            user_sessions = SessionFiles.query.filter_by(user_id=current_user.id)
+            user_data_files = DataFile.query.filter(and_(DataFile.type == 'dat', DataFile.authed ==
+                                                         str(current_user.id)))
         except Exception, e:
             print(str(e))
             user_sessions = None
@@ -121,16 +124,17 @@ def index2():
 @login_required
 def clear_cmeta():
     """
-    Function that clears the current user's currentMeta Table.
+    Function that clears the current user's CurrentMeta Table.
 
-    This is usually called when starting a new session or resuming an old one so that prexisting data does not cause conflicts.
+    This is usually called when starting a new session or resuming an old one so that prexisting data
+    does not cause conflicts.
     :return:
     """
     current_user.current_session = 'None'
-    deleting = db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all()
+    deleting = db.session.query(CurrentMeta).filter(CurrentMeta.user_id == current_user.get_id()).all()
     for i in deleting:
         db.session.delete(i)
-    deleting = db.session.query(currentDAT).filter(currentDAT.user_id == current_user.get_id()).all()
+    deleting = db.session.query(CurrentDAT).filter(CurrentDAT.user_id == current_user.get_id()).all()
     for i in deleting:
         db.session.delete(i)
     db.session.commit()
@@ -141,15 +145,15 @@ def clear_cmeta():
 @login_required
 def clearPart_cmeta():
     """
-        Function that deletes a single file from the current users currentMeta table.
+        Function that deletes a single file from the current users CurrentMeta table.
 
         This is called when removing a file on the format page.
         :return:
         """
     idthis = request.form.get('id', type=int)
-    deleting = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                         currentMeta.file_id == idthis,
-                                                         currentMeta.session == current_user.current_session)).first()
+    deleting = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                         CurrentMeta.file_id == idthis,
+                                                         CurrentMeta.session == current_user.current_session)).first()
     db.session.delete(deleting)
     db.session.commit()
     return 'Cleared'
@@ -171,21 +175,21 @@ def share_session():
     type = request.form.get("type")
     file_id = request.form.get("session_id")
 
-    root_folder = dataFile.query.filter(and_(dataFile.name == "/" + user.username + "/", dataFile.treeType == "Root")).first()
+    root_folder = DataFile.query.filter(and_(DataFile.name == "/" + user.username + "/", DataFile.treeType == "Root")).first()
 
     if type == 'session':
-        shared_session = sessionFiles.query.filter_by(id=file_id).first()
-        new_session = sessionFiles(name=shared_session.name, user_id=user.id, user=user, comment=shared_session.comment,
+        shared_session = SessionFiles.query.filter_by(id=file_id).first()
+        new_session = SessionFiles(name=shared_session.name, user_id=user.id, user=user, comment=shared_session.comment,
                                 authed=str(user.id), last_used=shared_session.last_used)
         db.session.add(new_session)
         db.session.commit()
-        session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=shared_session.id).all()
+        session_files = SessionFilesMeta.query.filter_by(sessionFiles_id=shared_session.id).all()
         add_session_metas(session_files)
         flash("You have shared your file.", "success")
         return ""
     elif type == 'dat':
-        shared_file = dataFile.query.filter_by(id=file_id).first()
-        new_file = dataFile(name=shared_file.name, path=shared_file.path, comment=shared_file.comment,
+        shared_file = DataFile.query.filter_by(id=file_id).first()
+        new_file = DataFile(name=shared_file.name, path=shared_file.path, comment=shared_file.comment,
                             authed=str(user.id), comChar=shared_file.comChar, type=shared_file.type,
                             parentID=root_folder.id, treeType=shared_file.treeType)
         db.session.add(new_file)
@@ -203,8 +207,8 @@ def add_session_metas(session_files):
     for x in session_files:
         counter += 1
         list.append(counter)
-        shared_meta = sessionMeta.query.filter_by(id=x.sessionMeta_id).first()
-        session_meta = sessionMeta()
+        shared_meta = SessionMeta.query.filter_by(id=x.sessionMeta_id).first()
+        session_meta = SessionMeta()
         session_meta.fileName = shared_meta.fileName
         session_meta.path = shared_meta.path
         session_meta.comment = shared_meta.comment
@@ -253,19 +257,19 @@ def add_session_metas(session_files):
 
 def add_user_file(user):
     user = user
-    new_file = dataFile.query.order_by(desc('id')).first()
+    new_file = DataFile.query.order_by(desc('id')).first()
 
-    new_user_file = userFiles(user_id=user.id,file_id=new_file.id)
+    new_user_file = UserFiles(user_id=user.id,file_id=new_file.id)
     db.session.add(new_user_file)
     db.session.commit()
 
 
 def add_session_files(list):
-    new_session = sessionFiles.query.order_by(desc('id')).first()
-    new_meta = sessionMeta.query.order_by(desc('id')).first()
+    new_session = SessionFiles.query.order_by(desc('id')).first()
+    new_meta = SessionMeta.query.order_by(desc('id')).first()
 
     for x in reversed(list):
-        new_session_file = sessionFilesMeta(sessionFiles_id=new_session.id, sessionMeta_id=(new_meta.id - x))
+        new_session_file = SessionFilesMeta(sessionFiles_id=new_session.id, sessionMeta_id=(new_meta.id - x))
         db.session.add(new_session_file)
 
     db.session.commit()
@@ -278,11 +282,6 @@ def new_session2():
     return ""
 
 
-def data_file_path(file_name):
-    file_path = os.path.join(current_app.root_path, 'static/saved_files/dat', file_name)
-    return file_path
-
-
 @sessions.route("/continue_session", methods=['GET', 'POST'])
 def continue_session():
     type = request.form.get("type")
@@ -293,14 +292,14 @@ def continue_session():
         clear_cmeta()
         clear_rowa_wrapper()
         data_files = []
-        session = sessionFiles.query.filter_by(id=id).first()
-        session_files = sessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
+        session = SessionFiles.query.filter_by(id=id).first()
+        session_files = SessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
         for file in session_files:
-            file_meta = sessionMeta.query.filter_by(id=file.sessionMeta_id).first()
-            data_file = dataFile.query.filter_by(id=file_meta.file_id).first()
+            file_meta = SessionMeta.query.filter_by(id=file.sessionMeta_id).first()
+            data_file = DataFile.query.filter_by(id=file_meta.file_id).first()
             form = GraphingUtility.populate_from_instance(file_meta) # populates the input form
-            current_meta = currentMeta() # makes a currentMeta() object
-            form.populate_obj(current_meta) # populates fields in the currentMeta object from the form
+            current_meta = CurrentMeta() # makes a CurrentMeta() object
+            form.populate_obj(current_meta) # populates fields in the CurrentMeta object from the form
             current_meta.name = data_file.name
             current_meta.path = file_path("." + data_file.type, data_file.path)
             current_meta.comment = file_meta.comment
@@ -322,8 +321,8 @@ def continue_session():
         return data
     elif type == "dat":
         try:
-            data_file = dataFile.query.filter_by(id=id).first()
-            path = data_file_path(data_file.path)
+            data_file = DataFile.query.filter_by(id=id).first()
+            path = file_path("." + data_file.type, data_file.path)
             x_values = []
             y_values = []
             with open(path, 'r') as current_file:
@@ -335,7 +334,7 @@ def continue_session():
                         y_values.append(float(line[1]))
             data = [x_values, y_values]
             data = json.dumps(data)
-            current_data = currentDAT(user_id=user.id, file_id=data_file.id, user=user, DATname=data_file.name, DAT=data, originDAT=data)
+            current_data = CurrentDAT(user_id=user.id, file_id=data_file.id, user=user, DATname=data_file.name, DAT=data, originDAT=data)
             db.session.add(current_data)
             db.session.commit()
         except Exception, e:
@@ -349,22 +348,22 @@ def saveSession():
     '''
     This saves the current session so that the user may resume from the select page whenever they want.
 
-    The currentMeta table is parsed and saved into the sessionFiles and sessionFilesMeta tables for more permanence.
+    The CurrentMeta table is parsed and saved into the SessionFiles and SessionFilesMeta tables for more permanence.
     A check is done to ensure that the user cannot save the session under a name that has already been created.
     :return:
     '''
     checked = request.form.get("checked", type=int)
     namechk = request.form.get("name", type=str)
     if checked == 0:
-        instance = db.session.query(sessionFiles).filter(
-            and_(sessionFiles.user_id == current_user.get_id(), sessionFiles.name == namechk)).first()
+        instance = db.session.query(SessionFiles).filter(
+            and_(SessionFiles.user_id == current_user.get_id(), SessionFiles.name == namechk)).first()
         if instance:
             data = str(instance.id)
             return data
 
-    session_file = sessionFiles()
+    session_file = SessionFiles()
     session_file.user = current_user
-    session_file.user_id == current_user.get_id()
+    session_file.user_id = current_user.get_id()
     session_file.authed = current_user.get_id()
     session_file.name = request.form.get("name", type=str)
     session_file.comment = request.form.get("comment", type=str)
@@ -372,9 +371,9 @@ def saveSession():
     db.session.add(session_file)
     db.session.commit()
 
-    for instance in db.session.query(currentMeta).filter(currentMeta.user_id == current_user.get_id()).all():
+    for instance in db.session.query(CurrentMeta).filter(CurrentMeta.user_id == current_user.get_id()).all():
         form = GraphingUtility.populate_from_instance(instance)
-        session_instance = sessionMeta()
+        session_instance = SessionMeta()
         form.populate_obj(session_instance)
 
         session_instance.file_id = instance.file_id
@@ -390,7 +389,7 @@ def saveSession():
         db.session.add(session_instance)
         db.session.commit()
 
-        session_file_instance = sessionFilesMeta()
+        session_file_instance = SessionFilesMeta()
         session_file_instance.sessionFiles_id = session_file.id
         session_file_instance.sessionMeta_id = session_instance.id
 

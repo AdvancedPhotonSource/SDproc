@@ -53,7 +53,7 @@ function graph(file_id, file_name) {
             $y('#metaForm_id').html( $y(data).find('#metaForm_id').html());
             $y('#plot_spot').html( $y(data).find('#plot_spot').html());
             $y('#currentAE').html( $y(data).find('#currentAE').html());
-            $y.post('/SDproc/get_fsession_comment', { idnext: localStorage.getItem('previous2') }, function(data) {
+            $y.post('/SDproc/get_fsession_comment', { id: localStorage.getItem('previous2') }, function(data) {
                 $y('#comment').val(data);
                 setPlotAgainst();
             });
@@ -64,7 +64,7 @@ function graph(file_id, file_name) {
         $y('#idnum').val(previous);
         localStorage.setItem('previous2', file_id);
         $y('#meta-form').submit();
-        $y.post('/SDproc/get_fsession_comment', { idnext: nextID}, function(data) {
+        $y.post('/SDproc/get_fsession_comment', { id: nextID}, function(data) {
             $y('#comment').val(data)
             setPlotAgainst();
         })

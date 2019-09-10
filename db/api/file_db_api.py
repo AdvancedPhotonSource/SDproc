@@ -46,7 +46,7 @@
 from sqlalchemy import and_
 
 from db.api.sd_proc_base_db_api import SdProcBaseDbApi
-from db.db_model import db, dataFile, currentMeta
+from db.db_model import db, DataFile, CurrentMeta
 
 
 class FileDbApi(SdProcBaseDbApi):
@@ -61,10 +61,10 @@ class FileDbApi(SdProcBaseDbApi):
 			if idnext not in self.usedArgs:
 				self.usedArgs.append(idnext)
 
-				file_instance = db.session.query(dataFile).filter_by(id=idnext).first()
-				format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user_id,
-				                                                            currentMeta.file_id == file_instance.id,
-				                                                            currentMeta.session == current_user_session)).first()
+				file_instance = db.session.query(DataFile).filter_by(id=idnext).first()
+				format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user_id,
+				                                                            CurrentMeta.file_id == file_instance.id,
+				                                                            CurrentMeta.session == current_user_session)).first()
 				if format_instance is not None:
 					format_instance.comment = file_instance.comment
 					db.session.commit()

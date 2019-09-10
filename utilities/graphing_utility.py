@@ -52,7 +52,7 @@ import mpld3
 from sdproc.forms.input_form import InputForm
 from utilities.file_utility import FileUtility
 from flask_login import current_user
-from db.db_model import db, currentDAT, dataFile, currentMeta
+from db.db_model import db, CurrentDAT, DataFile, CurrentMeta
 import json
 import math
 import numpy
@@ -555,7 +555,7 @@ class GraphingUtility():
 
     @staticmethod
     def calcAverageBack(leftIn, rightIn):
-        DAT = db.session.query(currentDAT).filter(currentDAT.user == current_user).first()
+        DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
         leftCords = [[] for _ in xrange(2)]
         rightCords = [[] for _ in xrange(2)]
         data = json.loads(DAT.DAT)
@@ -666,10 +666,10 @@ class GraphingUtility():
     def peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord, localRange):
         if fitType == 'Unfit':
             fitType = 'AtMax'
-        file_instance = db.session.query(dataFile).filter_by(id=idthis).first()
-        format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user.get_id(),
-                                                                    currentMeta.file_id == file_instance.id,
-                                                                    currentMeta.session == current_user.current_session)).first()
+        file_instance = db.session.query(DataFile).filter_by(id=idthis).first()
+        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                                    CurrentMeta.file_id == file_instance.id,
+                                                                    CurrentMeta.session == current_user.current_session)).first()
         if str(file_instance.type) == 'mda':
             data, name, unusedpath = FileUtility.readMda(file_instance.path)
         else:

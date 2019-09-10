@@ -4,9 +4,9 @@ import os
 from dm import ExperimentDsApi, FileCatApi
 from flask import Blueprint, request, current_app
 from flask_login import login_required, current_user
-from db.db_model import db, GlobusTree, dataFile
+from db.db_model import db, GlobusTree, DataFile
 from sqlalchemy import and_, or_
-from sdproc.files.utils import file_type, root_folder, save_user_file
+from sdproc.files.utils import file_type, root_folder, save_user_file, file_path
 
 
 globus = Blueprint('globus', __name__)
@@ -42,15 +42,12 @@ def globus_tree():
 @globus.route('/globus_file', methods=['GET', 'POST'])
 @login_required
 def globus_file():
-    parent = request.form.get("p_id")
-    f_id = request.form.get("id")
-    print parent
-    print f_id
+    f_id = request.form.get("f_id")
     f = GlobusTree.query.filter_by(id=f_id).first()
-    p = GlobusTree.query.filter_by(id=parent).first()
-    download = exApi.downloadFile(f.experiment_file_path, p.name, "./static/uploaded_files/mda/")
-    save_globus(download)
-    save_user_file()
+    if f.type == "File":
+        p = GlobusTree.query.filter_by(id=GlobusTree.query.filter_by(id=f.parent).first().parent).first()
+        download = exApi.downloadFile(f.experiment_file_path, p.name, "./static/uploaded_files/" + f.name[-3:] + "/")
+        save_globus(download)
 
     return "Done"
 
@@ -59,27 +56,25 @@ def save_globus(download):
     random_hex = secrets.token_hex(4)
     f_name, f_ext = os.path.splitext(download['fileName'])
     unique_name = f_name + "_" + random_hex + f_ext
-    f_path = file_path(unique_name)
+    f_path = file_path(f_ext, unique_name)
     os.rename(download['localFilePath'], f_path)
-    save_gfile(download, unique_name, f_ext)
+    f_id = add_file_db(download['fileName'], unique_name, f_ext)
+    save_user_file(f_id)
 
 
-def file_path(unique_name):
-    path = os.path.join(current_app.root_path, 'static/uploaded_files/mda/', unique_name)
-    return path
-
-
-def save_gfile(download, unique_name, f_ext):
-    name = download['fileName']
+def add_file_db(file_name, unique_name, f_ext):
+    name = file_name
     path = unique_name
     authed = str(current_user.id)
+    # default value give, can be changed later
     comChar = "#"
     type = file_type(f_ext)
-    parentID = root_folder()
-    data_file = dataFile(name=name, path=path, comment="No comment(s)", authed=authed, comChar=comChar, type=type,
-                         parentID=parentID, treeType="File")
+    root_id = root_folder()
+    data_file = DataFile(name=name, path=path, comment="No comment(s)", authed=authed, comChar=comChar, type=type,
+                         parentID=root_id, treeType="File")
     db.session.add(data_file)
     db.session.commit()
+    return data_file.id
 
 
 """------------------------------------------------------------------------------------------------"""

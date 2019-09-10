@@ -4,7 +4,7 @@ from flask import Blueprint, url_for, flash, render_template, redirect, session,
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from sdproc.sessions.routes import clear_cmeta, clear_rowa_wrapper
-from db.db_model import db, User, notification
+from db.db_model import db, User, Notification
 from sdproc.users.forms import RegistrationForm, LoginForm, UpdateProfileForm
 
 users = Blueprint('users', __name__)
@@ -33,7 +33,7 @@ def register2():
         user.approved = 0
         user.isAdmin = 0
         db.session.add(user)
-        notif = notification()
+        notif = Notification()
         notif.originUser = user.username
         notif.type = 'Create Account'
         notif.timestamp = datetime.now()
