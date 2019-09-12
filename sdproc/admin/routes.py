@@ -105,6 +105,8 @@ def approve_user():
     user = User.query.filter_by(username=notification.originUser).first()
     user.approved = 1
     db.session.delete(notification)
+    root = DataFile(name='/' + user.username + '/', authed=str(user.id), comChar='#', parentID=0, treeType="Root")
+    db.session.add(root)
     db.session.commit()
     return "approved"
 

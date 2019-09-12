@@ -144,7 +144,7 @@ def sesData():
     '''
 	data = []
 	user = current_user
-	if user.is_authenticated():
+	if current_user.is_authenticated:
 		procEntry = db.session.query(LogBook).filter_by(name="Process Entry").first()
 		if procEntry != None:
 			db.session.delete(procEntry)
