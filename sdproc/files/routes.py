@@ -45,12 +45,9 @@ def data():
         type = node.treeType
 
         if parent == 0:
-            data.append({ "text" : title, "id" : id, "parent" : "#", "type" : type, "state" : { "opened" : "true", "disabled" : "true" } })
+            data.append({ "text": title, "id": id, "parent": "#", "type": type, "state": {"opened": "true", "disabled": "true"}})
         else:
-            data.append({"text": title, "id": id, "parent": parent, "type" : type})
-
-    with open('static/someD4.json', 'w') as outfile:
-        json.dump(data, outfile)
+            data.append({"text": title, "id": id, "parent": parent, "type": type})
 
     return json.dumps(data)
 
@@ -72,16 +69,14 @@ def scans_data():
         type = node.treeType
         file_type = node.type
 
-        if file_type == "mda" or file_type == "txt" or file_type == "":
-            if parent == 0:
-                data.append({"text": title, "id": id, "parent": "#", "type": type, "state": {"opened": "true", "disabled": "true"}})
-            elif type == "Folder":
+        if parent == 0:
+            data.append({"text": title, "id": id, "parent": "#", "type": type,
+                         "state": {"opened": "true", "disabled": "true"}})
+        else:
+            if type == 'Folder':
                 data.append({"text": title, "id": id, "parent": parent, "type": type, "state": {"disabled": "true"}})
             else:
-                data.append({"text": title, "id": id, "parent": parent, "type" : type})
-
-    with open('static/scans_data.json', 'w') as outfile:
-        json.dump(data, outfile)
+                data.append({"text": title, "id": id, "parent": parent, "type": type})
 
     return json.dumps(data)
 
