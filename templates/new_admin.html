@@ -9,7 +9,7 @@
         <button class="btn btn-info" onclick="show_user()">User</button>
         <button class="btn btn-info" onclick="show_HRM()">HRM</button>
         <div class="row">
-            <div class="col-md-6" id="user">
+            <div class="col-md" id="user">
                 <div class="row">
                     <div class="col-md-12 text center">
                         <label for="searchUser" class="form-control-label">Search</label>
@@ -38,7 +38,7 @@
                 </div>
             </div>
 
-            <div class="col-md-6 hide" id="HRM">
+            <div class="col-md hide" id="HRM">
                 <div class="row">
                     <div class="col-md-12 text center">
                         <label for="searchHRM" class="form-control-label">Search</label>
@@ -67,20 +67,29 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="table text-center">
-                    <h3>Notifications:</h3>
-                    <table>
+            <div class="col-md">
+                <div class="table-responsive-sm">
+                    <table class="table table-hover text-center">
+                        <thead>
+                            <tr>
+                                <th scope="col">Action</th>
+                                <th scope="col">Username</th>
+                                <th scope="col"></th>
+                                <th scope="col">Date</th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {% if notifications %}
                                 {% for task in notifications %}
-                                    <tr class="click" id="{{ task.id }}">
-                                        <td>{{ task.type }}</td>
+                                    <tr id="{{ task.id }}">
+                                        <td scope="row">{{ task.type }}</td>
                                         <td>{{ task.originUser }}</td>
-                                        <td><button class="btn btn-info" data-toggle="modal" data-target="#{{ task.originUser }}">Info</button></td>
+                                        <td><button class="btn btn-info btn-sm" data-toggle="modal" data-target="#{{ task.originUser }}">Info</button></td>
                                         <td>{{ task.timestamp }}</td>
-                                        <td><button class="btn btn-success" onclick="approve({{ task.id }})">Approve</button></td>
-                                        <td><button class="btn btn-danger" onclick="decline({{ task.id }})">Decline</button></td>
+                                        <td><button class="btn btn-success btn-sm" onclick="approve({{ task.id }})">Approve</button></td>
+                                        <td><button class="btn btn-danger btn-sm" onclick="decline({{ task.id }})">Decline</button></td>
                                     </tr>
                                 {% endfor %}
                             {% else %}
@@ -105,7 +114,26 @@
                             </button>
                         </div>
                         <div class="modal-body" id="user-modal-body">
-
+                            <div class="content-section">
+                                <form method="POST" action="" enctype="multipart/form-data">
+                                    {{ form.hidden_tag() }}
+                                    <fieldset class="form-group">
+                                        <legend class="border-bottom mb-4">Profile Info</legend>
+                                        <div class="form-group">
+                                            {{ form.full_name.label(class="form-control-label") }}
+                                            {{ form.full_name(class="form-control form-control-xs", readonly="readonly", value=user.fullName) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.username.label(class="form-control-label") }}
+                                            {{ form.username(class="form-control form-control-xs", readonly="readonly", value=user.username) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.email.label(class="form-control-label") }}
+                                            {{ form.email(class="form-control form-control-xs", readonly="readonly", value=user.email) }}
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

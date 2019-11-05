@@ -55,7 +55,7 @@ from sdproc.files.routes import files
 from sdproc.users.routes import users
 from sdproc.admin.routes import a
 from sdproc.hrms.routes import hrms
-from sdproc.globus.routes import globus
+# from sdproc.globus.routes import globus
 
 '''
 For debugging server use:
@@ -85,7 +85,7 @@ app.register_blueprint(files)
 app.register_blueprint(users)
 app.register_blueprint(a)
 app.register_blueprint(hrms)
-app.register_blueprint(globus)
+# app.register_blueprint(globus)
 
 
 """ REMOVE THIS ON SERVER """
