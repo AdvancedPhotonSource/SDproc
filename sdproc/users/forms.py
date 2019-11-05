@@ -74,9 +74,10 @@ class UpdateProfileForm(FlaskForm):
 
     @staticmethod
     def validate_badge_number(self, badge_number):
-        user = User.query.filter_by(badge_number=badge_number.data).first()
-        if user:
-            raise ValidationError('Please enter correct badge number.')
+        if badge_number.data != current_user.badge_number:
+            user = User.query.filter_by(badge_number=badge_number.data).first()
+            if user:
+                raise ValidationError('Please enter correct badge number.')
 
     @staticmethod
     def validate_email(self,  email):

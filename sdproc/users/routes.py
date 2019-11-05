@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from flask import Blueprint, url_for, flash, render_template, redirect, session, request
 from flask_login import current_user, login_user, logout_user, login_required
@@ -36,7 +36,7 @@ def register2():
         notif = Notification()
         notif.originUser = user.username
         notif.type = 'Create Account'
-        notif.timestamp = datetime.now()
+        notif.timestamp = datetime.date.today()
         db.session.add(notif)
         db.session.commit()
         flash('Your account is pending approval from the admin.', 'success')
@@ -89,14 +89,17 @@ def logout2():
 def profile2():
     form = UpdateProfileForm()
     if form.validate_on_submit():
+        print 'inside validate'
         current_user.username = form.username.data
         current_user.email = form.email.data
         current_user.fullName = form.full_name.data
         current_user.badge_number = form.badge_number.data
         current_user.institution = form.institution.data
         current_user.commentChar = form.comment_char.data
+        print 'before commit'
         # current_user.pwhash = form.password.data
         db.session.commit()
+        print 'after commit before flash'
         flash('Your account has been updated', 'success')
         return redirect(url_for('users.profile2'))
     elif request.method == 'GET':
