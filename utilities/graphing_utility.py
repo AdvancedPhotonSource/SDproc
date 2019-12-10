@@ -44,10 +44,6 @@
 '''
 
 from operator import and_
-
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import mpld3
 from sdproc.forms.input_form import InputForm
 from utilities.file_utility import FileUtility
@@ -61,6 +57,9 @@ import copy
 from scipy import stats
 from utilities.sdproc_mpld3.hide_legend import HideLegend
 from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
 
 class GraphingUtility():

@@ -91,10 +91,10 @@ function download() {
 }
 
 function saveNewComment() {
-    if ($y("#tree").jstree("get_selected") == false) {
+    if ($y("#file_tree").jstree("get_selected") == false) {
         alert("Please select a file or folder to view comment(s) or save new comment(s).")
     } else {
-        var nodeID = $y("#tree").jstree("get_selected")[0];
+        var nodeID = $y("#file_tree").jstree("get_selected")[0];
         var x = document.getElementById("comment").value;
         $y.post("/SDproc/save_file_comments", { id : nodeID, comment : x });
     }

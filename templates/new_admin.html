@@ -108,7 +108,7 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="userModalTitle">{{ user.username }}</h5>
+                            <h5 class="modal-title" id="userModalTitle">Profile for {{ user.username }}</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -118,7 +118,7 @@
                                 <form method="POST" action="" enctype="multipart/form-data">
                                     {{ form.hidden_tag() }}
                                     <fieldset class="form-group">
-                                        <legend class="border-bottom mb-4">Profile Info</legend>
+                                        <legend class="border-bottom mb-4">Info</legend>
                                         <div class="form-group">
                                             {{ form.full_name.label(class="form-control-label") }}
                                             {{ form.full_name(class="form-control form-control-xs", readonly="readonly", value=user.fullName) }}
@@ -130,6 +130,10 @@
                                         <div class="form-group">
                                             {{ form.email.label(class="form-control-label") }}
                                             {{ form.email(class="form-control form-control-xs", readonly="readonly", value=user.email) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.institution.label(class="form-control-label") }}
+                                            {{ form.institution(class="form-control form-control-xs", readonly="readonly", value=user.institution) }}
                                         </div>
                                     </fieldset>
                                 </form>
@@ -156,7 +160,34 @@
                             </button>
                         </div>
                         <div class="modal-body" id="hrm-modal-body">
+                            <div class="content-section">
+                                <label class="form-control-label" for="hrm_name">HRM Name</label>
+                                <input class="form-control form-control-xs" id="hrm_name" name="hrm_name" readonly="readonly" type="text" value="{{ hrm.name }}">
 
+                                <label class="form-control-label" for="hrm_e0">hrm bragg1</label>
+                                <input class="form-control form-control-xs" id="hrm_e0" name="hrm_e0" readonly="readonly" type="text" value="{{ hrm.hrm_e0 }}">
+
+                                <label class="form-control-label" for="hrm_geo">hrm bragg1</label>
+                                <input class="form-control form-control-xs" id="hrm_geo" name="hrm_geo" readonly="readonly" type="text" value="{{ hrm.hrm_geo }}">
+
+                                <label class="form-control-label" for="hrm_bragg1">hrm bragg1</label>
+                                <input class="form-control form-control-xs" id="hrm_bragg1" name="hrm_bragg1" readonly="readonly" type="text" value="{{ hrm.hrm_bragg1 }}">
+
+                                <label class="form-control-label" for="hrm_bragg2">hrm bragg2</label>
+                                <input class="form-control form-control-xs" id="hrm_bragg2" name="hrm_bragg2" readonly="readonly" type="text" value="{{ hrm.hrm_bragg2 }}">
+
+                                <label class="form-control-label" for="hrm_alpha1">hrm alpha1</label>
+                                <input class="form-control form-control-xs" id="hrm_alpha1" name="hrm_alpha1" readonly="readonly" type="text" value="{{ hrm.hrm_alpha1 }}">
+
+                                <label class="form-control-label" for="hrm_alpha2">hrm alpha2</label>
+                                <input class="form-control form-control-xs" id="hrm_alpha2" name="hrm_alpha2" readonly="readonly" type="text" value="{{ hrm.hrm_alpha2 }}">
+
+                                <label class="form-control-label" for="hrm_theta1">hrm theta1 sign</label>
+                                <input class="form-control form-control-xs" id="hrm_theta1" name="hrm_theta1" readonly="readonly" type="text" value="{{ hrm.hrm_theta1_sign }}">
+
+                                <label class="form-control-label" for="hrm_theta2">hrm theta2 sign</label>
+                                <input class="form-control form-control-xs" id="hrm_theta2" name="hrm_theta2" readonly="readonly" type="text" value="{{ hrm.hrm_theta2_sign }}">
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

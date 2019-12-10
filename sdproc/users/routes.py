@@ -5,7 +5,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from sdproc.sessions.routes import clear_cmeta, clear_rowa_wrapper
 from db.db_model import db, User, Notification
-from sdproc.users.forms import RegistrationForm, LoginForm, UpdateProfileForm
+from sdproc.users.forms import RegistrationForm, LoginForm, UpdateProfileForm, UpdatePasswordForm
 
 users = Blueprint('users', __name__)
 
@@ -89,17 +89,13 @@ def logout2():
 def profile2():
     form = UpdateProfileForm()
     if form.validate_on_submit():
-        print 'inside validate'
         current_user.username = form.username.data
         current_user.email = form.email.data
         current_user.fullName = form.full_name.data
         current_user.badge_number = form.badge_number.data
         current_user.institution = form.institution.data
         current_user.commentChar = form.comment_char.data
-        print 'before commit'
-        # current_user.pwhash = form.password.data
         db.session.commit()
-        print 'after commit before flash'
         flash('Your account has been updated', 'success')
         return redirect(url_for('users.profile2'))
     elif request.method == 'GET':
@@ -109,5 +105,17 @@ def profile2():
         form.badge_number.data = current_user.badge_number
         form.institution.data = current_user.institution
         form.comment_char.data = current_user.commentChar
-        # form.password.data = current_user.pwhash.decode('utf-8')
     return render_template('new_profile.html', title='Profile', form=form)
+
+
+@users.route("/update_password", methods=['GET', 'POST'])
+@login_required
+def update_password():
+    form = UpdatePasswordForm()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data)
+        current_user.pwhash = hashed_password
+        db.session.commit()
+        flash('Your password has been updated', 'success')
+        return redirect(url_for('users.profile2'))
+    return render_template('update_password.html', title='Update Password', form=form)
