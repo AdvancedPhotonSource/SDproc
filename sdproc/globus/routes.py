@@ -112,7 +112,7 @@ def get_files(parent, tree_data):
     return tree_data
 
 
-@globus.route('/update_globus', methods=['GET', 'POST'])
+@globus.route('/-', methods=['GET', 'POST'])
 @login_required
 def update_globus():
     folder_list = []

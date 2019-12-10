@@ -135,8 +135,8 @@ def delete():
         os.remove(path)
     else:
         for f in nodes:
-            df = DataFile.query.filter_by(id=f).first()
-            db.session.delete(df)
+            child = DataFile.query.filter_by(id=f).first()
+            db.session.delete(child)
     db.session.delete(df)
     db.session.commit()
     return "done"
@@ -153,7 +153,8 @@ def sc():
     file_id = request.form.get("id")
     comments = request.form.get("comment")
     save_comments(file_id, DataFile, comments)
-    return "done"
+    flash("Comments Saved", "danger")
+    return redirect(url_for("files.upload_files"))
 
 
 '''The end of methods for file structure'''

@@ -85,3 +85,21 @@ class UpdateProfileForm(FlaskForm):
             user = User.query.filter_by(username=email.data).first()
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
+
+
+class UpdatePasswordForm(FlaskForm):
+    password = PasswordField(label='Password', validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField(label='Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Change Password')
+
+    @staticmethod
+    def validate_password(self, password):
+        password = password.data
+        if re.search(r"\d", password) is None:
+            raise ValidationError('Your password must have at least one digit.')
+        elif re.search(r"[A-Z]", password) is None:
+            raise ValidationError('Your password must have at least one uppercase letter.')
+        elif re.search(r"[a-z]", password) is None:
+            raise ValidationError('Your password must have at least one lowercase letter.')
+        elif re.search(r"\W", password) is None:
+            raise ValidationError('Your password must have at least one symbol.')
