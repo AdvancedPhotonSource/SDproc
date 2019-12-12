@@ -4,24 +4,25 @@ import os
 from dm import ExperimentDsApi, FileCatApi
 from flask import Blueprint, request, current_app
 from flask_login import login_required, current_user
-from db.db_model import db, GlobusTree, DataFile
+from db.db_model import db, GlobusTree, DataFile, DMUser
 from sqlalchemy import and_, or_
 from sdproc.files.utils import file_type, root_folder, save_user_file, file_path
 
 
-globus = Blueprint('globus', __name__)
+dm = Blueprint('dm', __name__)
 
 
 exApi = ExperimentDsApi(username='user3id', password='j7g$MAC;kG', url='https://xraydtn01.xray.aps.anl.gov:22236')
 fApi = FileCatApi(username='user3id', password='j7g$MAC;kG', url='https://s3iddm.xray.aps.anl.gov:44436')
 
 
-@globus.route('/globus_tree', methods=['GET', 'POST'])
+@dm.route('/globus_tree', methods=['GET', 'POST'])
 @login_required
 def globus_tree():
     user = 'd' + str(current_user.badge_number)
     root_list = []
-    tree_data = [{"text": "3ID", "id": 0, "parent": "#", "type": "Root", "state": {"opened": "true", "disabled": "true"}}]
+    tree_data = [{"text": "3ID", "id": 0, "parent": "#", "type": "Root",
+                  "state": {"opened": "true", "disabled": "true"}}]
 
     experiments = exApi.getExperimentsByStation("3ID")
 
@@ -39,7 +40,7 @@ def globus_tree():
     return json.dumps(tree_data)
 
 
-@globus.route('/globus_file', methods=['GET', 'POST'])
+@dm.route('/globus_file', methods=['GET', 'POST'])
 @login_required
 def globus_file():
     f_id = request.form.get("f_id")
@@ -112,12 +113,12 @@ def get_files(parent, tree_data):
     return tree_data
 
 
-@globus.route('/-', methods=['GET', 'POST'])
+@dm.route('/update_globus', methods=['GET', 'POST'])
 @login_required
 def update_globus():
     folder_list = []
-    # user_id = "d65218"
-    experiments = exApi.getExperimentsByStation("3ID") # hard coded station
+    dm_users = []
+    experiments = exApi.getExperimentsByStation("3ID")  # hard coded station
 
     # clearing the database for update
     GlobusTree.query.delete()
@@ -171,18 +172,31 @@ def update_globus():
     # adding files to folders
     for e in experiments:
         e_name = e['name']
+        experiment = exApi.getExperimentByName(e_name)
+        users = experiment['experimentUsernameList']
+        if users is not None:
+            for user in users:
+                if user not in dm_users:
+                    dm_users.append(user)
         files = fApi.getExperimentFiles(e_name)
         e_parent = GlobusTree.query.filter_by(name=e_name).first()
         scans = GlobusTree.query.filter(and_(GlobusTree.name == "Scans", GlobusTree.parent == e_parent.id)).first()
         data = GlobusTree.query.filter(and_(GlobusTree.name == "Data", GlobusTree.parent == e_parent.id)).first()
         for f in files:
             if f['fileName'][-3:] == 'dat':
-                node = GlobusTree(name=f['fileName'], parent=data.id, type="File", experiment_file_path=f["experimentFilePath"])
+                node = GlobusTree(name=f['fileName'], parent=data.id, type="File",
+                                  experiment_file_path=f["experimentFilePath"])
                 db.session.add(node)
             elif f['fileName'][-3:] == 'mda':
-                node = GlobusTree(name=f['fileName'], parent=scans.id, type="File", experiment_file_path=f["experimentFilePath"])
+                node = GlobusTree(name=f['fileName'], parent=scans.id, type="File",
+                                  experiment_file_path=f["experimentFilePath"])
                 db.session.add(node)
             db.session.commit()
     print("added files to db")
+
+    for user in dm_users:
+        newUser = DMUser(badgeNumber=user)
+        db.session.add(newUser)
+        db.session.commit()
 
     return "Updated"
