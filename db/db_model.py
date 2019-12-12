@@ -176,6 +176,11 @@ class GlobusTree(db.Model):
     experiment_file_path = db.Column(db.String(), nullable=True)
 
 
+class DMUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    badgeNumber = db.Column(db.String())
+
+
 class CurrentMeta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

@@ -72,7 +72,7 @@ $y(document).ready(function() {
             'File' : { "icon" : "jstree-icon jstree-file", "valid_children" : [] },
             'Root' : { "icon" : "static/images/root.png" }
         },
-        'plugins' : [ "wholerow", "types" ]
+        'plugins' : [ "wholerow", "types", "sort" ]
     });
 });
 
