@@ -60,11 +60,14 @@ $y(document).ready(function() {
                 });
     });
 
-    $y("#globus_tree").jstree({
+    $y("#dm_tree").jstree({
         'core' : {
             'data' : {
-               "url" : "globus_tree",
-               "dataType" : "json"
+               "url" : "dm_tree",
+               "data" : function (node) {
+                    return { "id" :  node.id };
+                },
+                "dataType" : "json"
             }
         },
         'types' : {
@@ -72,21 +75,26 @@ $y(document).ready(function() {
             'File' : { "icon" : "jstree-icon jstree-file", "valid_children" : [] },
             'Root' : { "icon" : "static/images/root.png" }
         },
-        'plugins' : [ "wholerow", "types", "sort" ]
+        'plugins' : [ "types", "sort" ]
     });
 });
 
 function download() {
-    if ($y("#globus_tree").jstree("get_selected") == false) {
+    if ($y("#dm_tree").jstree("get_selected") == false) {
         alert("Please select a file.")
     } else {
-        var files = $y("#globus_tree").jstree("get_selected");
+        var files = $y('#dm_tree').jstree("get_selected", true);
+
         for(var x = 0; x < files.length; x++) {
-            $y.post("/SDproc/globus_file", { f_id: files[x] }).done(function (d) {
-                $y('#file_tree').jstree(true).refresh();
-            });
+            var fileType = files[x].text.substr(files[x].text.length - 3);
+            if (files[x].type == 'File' && (fileType == 'mda' || fileType == 'dat' || fileType == 'txt')) {
+                $y.post('/SDproc/get_dm_file', { path: files[x].data.path, exp: files[x].data.expName, type: fileType })
+                .done(function (d) {
+                    $y('#file_tree').jstree(true).refresh();
+                });
+            }
         }
-        $x("#globusModal").modal("hide");
+        $x("#dmModal").modal("hide");
     }
 }
 
