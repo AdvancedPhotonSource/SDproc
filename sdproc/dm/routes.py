@@ -9,8 +9,10 @@ from sdproc.files.utils import file_type, root_folder, save_user_file, file_path
 
 
 dm = Blueprint('dm', __name__)
-exApi = ExperimentDsApi(username='user3id', password='j7g$MAC;kG', url='https://xraydtn01.xray.aps.anl.gov:22236')
-fApi = FileCatApi(username='user3id', password='j7g$MAC;kG', url='https://s3iddm.xray.aps.anl.gov:44436')
+
+
+exApi = ExperimentDsApi(username='username', password='password', url='url')
+fApi = FileCatApi(username='username', password='password', url='url')
 
 
 @dm.route('/get_dm_file', methods=['GET', 'POST'])
