@@ -89,10 +89,8 @@ def logout2():
 def profile2():
     form = UpdateProfileForm()
     if form.validate_on_submit():
-        current_user.username = form.username.data
         current_user.email = form.email.data
         current_user.fullName = form.full_name.data
-        current_user.badge_number = form.badge_number.data
         current_user.institution = form.institution.data
         current_user.commentChar = form.comment_char.data
         db.session.commit()
