@@ -168,19 +168,6 @@ class DataFile(db.Model):
     treeType = db.Column(db.String(), nullable=True)
 
 
-class GlobusTree(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String())
-    parent = db.Column(db.Integer)
-    type = db.Column(db.String())
-    experiment_file_path = db.Column(db.String(), nullable=True)
-
-
-class DMUser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    badgeNumber = db.Column(db.String())
-
-
 class CurrentMeta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

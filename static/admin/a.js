@@ -20,12 +20,6 @@ $x(document).ready(function(){
         $x(this).addClass('active').siblings().removeClass('active');
     });
 
-    $x(".click-user").click(function() {
-        $x(this).addClass('active').siblings().removeClass('active');
-        var modal = $x(this)[0].getAttribute('name');
-        $x('#userModal-' + modal).modal('show');
-    });
-
     $x(".click-hrm").click(function() {
         $x(this).addClass('active').siblings().removeClass('active');
         var modal = $x(this)[0].getAttribute('name');
@@ -57,18 +51,4 @@ function show_HRM() {
 
     user.style.display = "none";
     HRM.style.display = "block";
-}
-
-function decline(notification_id) {
-    $x.post("/SDproc/decline_user", { notification_id: notification_id })
-    .done(function (d) {
-        location.reload();
-    });
-}
-
-function approve(notification_id) {
-    $x.post("/SDproc/approve_user", { notification_id: notification_id })
-    .done(function (d) {
-        location.reload();
-    });
 }
