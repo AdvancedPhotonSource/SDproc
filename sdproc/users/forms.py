@@ -60,9 +60,8 @@ class UpdateProfileForm(FlaskForm):
     badge_number = IntegerField(label='Badge Number', validators=[DataRequired(), NumberRange(min=0, max=999999)])
     username = StringField(label='Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField(label='Email', validators=[DataRequired(), Email()])
-    institution = StringField(label='Institution', validators=[DataRequired()])
+    institution = StringField(label='Institution')
     comment_char = StringField(label='Comment Char')
-    # password = PasswordField(label="Password", validators=[DataRequired(), Length(min=2)])
     submit = SubmitField('Update Profile')
 
     @staticmethod
@@ -88,8 +87,8 @@ class UpdateProfileForm(FlaskForm):
 
 
 class UpdatePasswordForm(FlaskForm):
-    password = PasswordField(label='Password', validators=[DataRequired(), Length(min=8)])
-    confirm_password = PasswordField(label='Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    password = PasswordField(label='New Password', validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField(label='Confirm New Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Change Password')
 
     @staticmethod

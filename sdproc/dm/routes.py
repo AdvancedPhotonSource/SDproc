@@ -1,18 +1,14 @@
 import json
-import secrets
-import os
 from dm import ExperimentDsApi, FileCatApi
 from flask import Blueprint, request
 from flask_login import login_required, current_user
-from db.db_model import db, DataFile
-from sdproc.files.utils import file_type, root_folder, save_user_file, file_path
-
+from sdproc.dm.utils import save_file, do_fold
 
 dm = Blueprint('dm', __name__)
 
 
-exApi = ExperimentDsApi(username='username', password='password', url='url')
-fApi = FileCatApi(username='username', password='password', url='url')
+exApi = ExperimentDsApi(username='user3id', password='j7g$MAC;kG', url='https://xraydtn01.xray.aps.anl.gov:22236')
+fApi = FileCatApi(username='user3id', password='j7g$MAC;kG', url='https://s3iddm.xray.aps.anl.gov:44436')
 
 
 @dm.route('/get_dm_file', methods=['GET', 'POST'])
@@ -26,31 +22,6 @@ def dm_file():
     save_file(download)
 
     return "Done"
-
-
-def save_file(download):
-    random_hex = secrets.token_hex(4)
-    f_name, f_ext = os.path.splitext(download['fileName'])
-    unique_name = f_name + "_" + random_hex + f_ext
-    f_path = file_path(f_ext, unique_name)
-    os.rename(download['localFilePath'], f_path)
-    f_id = add_file_db(download['fileName'], unique_name, f_ext)
-    save_user_file(f_id)
-
-
-def add_file_db(file_name, unique_name, f_ext):
-    name = file_name
-    path = unique_name
-    authed = str(current_user.id)
-    # default value give, can be changed later
-    comChar = "#"
-    type = file_type(f_ext)
-    root_id = root_folder()
-    data_file = DataFile(name=name, path=path, comment="No comment(s)", authed=authed, comChar=comChar, type=type,
-                         parentID=root_id, treeType="File")
-    db.session.add(data_file)
-    db.session.commit()
-    return data_file.id
 
 
 @dm.route('/dm_tree', methods=['GET', 'POST'])
@@ -82,7 +53,7 @@ def dm_tree():
                 new_data.append({"text": exp, "id": exp, "parent": "3ID", "type": "Folder", "children": True})
     else:
         e = exApi.getExperimentByName(exp_nm)
-        if 'd' + str(current_user.badge_number) in e['experimentUsernameList']:
+        if 'd' + str(current_user.badge_number) in e['experimentUsernameList'] or current_user.badge_number == 300123:
             files = fApi.getExperimentFiles(exp_nm)
             for f in files:
                 filePath = f['experimentFilePath']
@@ -91,15 +62,3 @@ def dm_tree():
                 do_fold(folders, parent, new_data, fID, exp_nm, filePath)
 
     return json.dumps(new_data)
-
-
-def do_fold(folderList, parent, tree, fID, exp, path):
-    if len(folderList) == 1:
-        tree.append({"text": folderList[0], "id": fID, "parent": parent, "type": "File", "data": {"expName": exp,
-                                                                                                  "path": path}})
-    else:
-        newFolder = folderList[0]
-        if not any((obj['text'] == newFolder and obj['parent'] == parent) for obj in tree):
-            tree.append({"text": newFolder, "id": newFolder, "parent": parent, "type": "Folder"})
-        folderList.pop(0)
-        do_fold(folderList, newFolder, tree, fID, exp, path)

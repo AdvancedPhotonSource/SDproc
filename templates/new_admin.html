@@ -21,14 +21,16 @@
                         <table class="table table-bordered text-center">
                             <thead>
                                 <tr>
-                                    <th>User</th>
+                                    <th scope="col">User</th>
+                                    <th scope="col"></th>
                                 </tr>
                             </thead>
                             <tbody id="userTable">
                                 {% if users %}
                                     {% for user in users %}
-                                        <tr class="click-user" id="{{ user.id }}" name="{{ user.username }}">
+                                        <tr class="click-user" id="{{ user.id }}">
                                             <td>{{ user.username }}</td>
+                                            <td><a class="btn btn-info btn-sm" href="{{ url_for('admin.update_user_profile', username=user.username) }}">View Profile</a></td>
                                         </tr>
                                     {% endfor %}
                                 {% endif %}
@@ -68,85 +70,38 @@
             </div>
 
             <div class="col-md">
-                <div class="table-responsive-sm">
-                    <table class="table table-hover text-center">
-                        <thead>
-                            <tr>
-                                <th scope="col">Action</th>
-                                <th scope="col">Username</th>
-                                <th scope="col"></th>
-                                <th scope="col">Date</th>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if notifications %}
+                {% if notifications %}
+                    <div class="table-responsive-sm">
+                        <table class="table table-hover text-center">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Action</th>
+                                    <th scope="col">Username</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {% for task in notifications %}
                                     <tr id="{{ task.id }}">
                                         <td scope="row">{{ task.type }}</td>
                                         <td>{{ task.originUser }}</td>
-                                        <td><button class="btn btn-info btn-sm" data-toggle="modal" data-target="#{{ task.originUser }}">Info</button></td>
                                         <td>{{ task.timestamp }}</td>
-                                        <td><button class="btn btn-success btn-sm" onclick="approve({{ task.id }})">Approve</button></td>
-                                        <td><button class="btn btn-danger btn-sm" onclick="decline({{ task.id }})">Decline</button></td>
+                                        <td><a class="btn btn-success btn-sm" href="{{ url_for('admin.approve_user', id_value=task.id) }}">Approve</a></td>
+                                        <td><a class="btn btn-danger btn-sm" href="{{ url_for('admin.decline_user', id_value=task.id) }}">Decline</a></td>
                                     </tr>
                                 {% endfor %}
-                            {% else %}
-                                No Notifications
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <h3 class="text-center">No Notifications</h3>
+                {% endif %}
+
             </div>
         </div>
     </div>
-
-    {% if users %}
-        {% for user in users %}
-            <div class="modal fade" id="userModal-{{ user.username }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="userModalTitle">Profile for {{ user.username }}</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" id="user-modal-body">
-                            <div class="content-section">
-                                <form method="POST" action="" enctype="multipart/form-data">
-                                    {{ form.hidden_tag() }}
-                                    <fieldset class="form-group">
-                                        <legend class="border-bottom mb-4">Info</legend>
-                                        <div class="form-group">
-                                            {{ form.full_name.label(class="form-control-label") }}
-                                            {{ form.full_name(class="form-control form-control-xs", readonly="readonly", value=user.fullName) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.username.label(class="form-control-label") }}
-                                            {{ form.username(class="form-control form-control-xs", readonly="readonly", value=user.username) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.email.label(class="form-control-label") }}
-                                            {{ form.email(class="form-control form-control-xs", readonly="readonly", value=user.email) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.institution.label(class="form-control-label") }}
-                                            {{ form.institution(class="form-control form-control-xs", readonly="readonly", value=user.institution) }}
-                                        </div>
-                                    </fieldset>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
 
     {% if hrms %}
         {% for hrm in hrms %}
@@ -187,56 +142,6 @@
 
                                 <label class="form-control-label" for="hrm_theta2">hrm theta2 sign</label>
                                 <input class="form-control form-control-xs" id="hrm_theta2" name="hrm_theta2" readonly="readonly" type="text" value="{{ hrm.hrm_theta2_sign }}">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    {% if notifications %}
-        {% for n in new_users %}
-            <div class="modal fade" id="{{ n.username }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="infoModalTitle">{{ n.username }}</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" id="info-modal-body">
-                            <div class="content-section">
-                                <form method="POST" action="" enctype="multipart/form-data">
-                                    {{ form.hidden_tag() }}
-                                    <fieldset class="form-group">
-                                        <legend class="border-bottom mb-4">Profile Info</legend>
-                                        <div class="form-group">
-                                            {{ form.full_name.label(class="form-control-label") }}
-                                            {{ form.full_name(class="form-control form-control-lg", readonly="readonly", value=n.fullName) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.username.label(class="form-control-label") }}
-                                            {{ form.username(class="form-control form-control-lg", readonly="readonly", value=n.username) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.email.label(class="form-control-label") }}
-                                            {{ form.email(class="form-control form-control-lg", readonly="readonly", value=n.email) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.institution.label(class="form-control-label") }}
-                                            {{ form.institution(class="form-control form-control-lg", readonly="readonly", value=n.institution) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.reason.label(class="form-control-label") }}
-                                            {{ form.reason(class="form-control form-control-lg", readonly="readonly", value=n.reason) }}
-                                        </div>
-                                    </fieldset>
-                                </form>
                             </div>
                         </div>
                         <div class="modal-footer">

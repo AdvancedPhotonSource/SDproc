@@ -93,6 +93,9 @@ def profile2():
         current_user.fullName = form.full_name.data
         current_user.institution = form.institution.data
         current_user.commentChar = form.comment_char.data
+        if current_user.isAdmin == 1:
+            current_user.badge_number = form.badge_number.data
+            current_user.username = form.username.data
         db.session.commit()
         flash('Your account has been updated', 'success')
         return redirect(url_for('users.profile2'))
@@ -103,7 +106,7 @@ def profile2():
         form.badge_number.data = current_user.badge_number
         form.institution.data = current_user.institution
         form.comment_char.data = current_user.commentChar
-    return render_template('new_profile.html', title='Profile', form=form)
+    return render_template('new_profile.html', title='Profile', form=form, user=current_user)
 
 
 @users.route("/update_password", methods=['GET', 'POST'])
