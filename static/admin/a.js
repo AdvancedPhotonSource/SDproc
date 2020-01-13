@@ -15,16 +15,6 @@ $x(document).ready(function(){
             $x(this).toggle($x(this).text().toLowerCase().indexOf(value) > -1)
         });
     });
-
-    $x(".click").click(function() {
-        $x(this).addClass('active').siblings().removeClass('active');
-    });
-
-    $x(".click-hrm").click(function() {
-        $x(this).addClass('active').siblings().removeClass('active');
-        var modal = $x(this)[0].getAttribute('name');
-        $x('#' + modal).modal('show');
-    });
 });
 
 function show_user() {

@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 from db.db_model import db, DataFile, User, HRM, Notification as n, SessionFiles
 from sdproc.admin.forms import UpdateUserInfoForm
 from sdproc.users.forms import UpdatePasswordForm
-from forms import UserInfoForm
+from sdproc.hrms.forms import UpdateHRMForm, AddHRMForm
 
 a = Blueprint('admin', __name__)
 
@@ -15,7 +15,6 @@ def admin2():
     if current_user.badge_number is None:
         flash('Please update your badge number in order to continue', 'info')
         return redirect(url_for('users.profile2'))
-    form = UserInfoForm()
     users = User.query.filter(User.id != current_user.id).all()
     hrms = HRM.query.order_by('id').all()
     notifications = n.query.order_by('id').all()
@@ -26,7 +25,62 @@ def admin2():
                 new_users.append(i)
 
     return render_template('new_admin.html', title="Admin", users=users, hrms=hrms, notifications=notifications,
-                           form=form, new_users=new_users)
+                           new_users=new_users)
+
+
+@a.route('/view/hrm/<int:id_value>', methods=['GET', 'POST'])
+@login_required
+def view_hrm(id_value):
+    hrm = HRM.query.filter_by(id=id_value).first()
+    form = UpdateHRMForm()
+    if form.validate_on_submit():
+        hrm.name = form.hrm_name.data
+        hrm.hrm_e0 = form.hrm_e0.data
+        hrm.hrm_bragg1 = form.hrm_bragg1.data
+        hrm.hrm_bragg2 = form.hrm_bragg2.data
+        hrm.hrm_geo = form.hrm_geo.data
+        hrm.hrm_alpha1 = form.hrm_alpha1.data
+        hrm.hrm_alpha2 = form.hrm_alpha2.data
+        hrm.hrm_theta1_sign = form.hrm_theta1_sign.data
+        hrm.hrm_theta2_sign = form.hrm_theta2_sign.data
+        db.session.commit()
+        flash('The HRM has been updated.', 'success')
+        return redirect(url_for('admin.view_hrm', id_value=hrm.id))
+    elif request.method == 'GET':
+        form.hrm_name.data = hrm.name
+        form.hrm_e0.data = hrm.hrm_e0
+        form.hrm_bragg1.data = hrm.hrm_bragg1
+        form.hrm_bragg2.data = hrm.hrm_bragg2
+        form.hrm_geo.data = hrm.hrm_geo
+        form.hrm_alpha1.data = hrm.hrm_alpha1
+        form.hrm_alpha2.data = hrm.hrm_alpha2
+        form.hrm_theta1_sign.data = hrm.hrm_theta1_sign
+        form.hrm_theta2_sign.data = hrm.hrm_theta2_sign
+    return render_template('view_hrm.html', title='View HRM', hrm=hrm, form=form)
+
+
+@a.route('/add_hrm', methods=['GET', 'POST'])
+def add_hrm():
+    form = AddHRMForm()
+    if form.validate_on_submit():
+        hrm = HRM(name=form.hrm_name.data, hrm_e0=form.hrm_e0.data, hrm_bragg1=form.hrm_bragg1.data,
+                  hrm_bragg2=form.hrm_bragg2.data, hrm_geo=form.hrm_geo.data, hrm_alpha1=form.hrm_alpha1.data,
+                  hrm_alpha2=form.hrm_alpha2.data, hrm_theta1_sign=form.hrm_theta1_sign.data,
+                  hrm_theta2_sign=form.hrm_theta2_sign.data)
+        db.session.add(hrm)
+        db.session.commit()
+        flash('An HRM has been added.', 'success')
+        return redirect(url_for('admin.admin2'))
+    return render_template('add_hrm.html', title='Add HRM', form=form)
+
+
+@a.route('/delete_hrm/<int:id_value>', methods=['GET', 'POST'])
+def delete_hrm(id_value):
+    hrm = HRM.query.filter_by(id=id_value).first()
+    db.session.delete(hrm)
+    db.session.commit()
+    flash(hrm.name + ' has been deleted.', 'info')
+    return redirect(url_for('admin.admin2'))
 
 
 @a.route('/profile/<string:username>', methods=['GET', 'POST'])
