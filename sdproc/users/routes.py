@@ -17,12 +17,6 @@ def toLogin2():
 
 @users.route("/register2", methods=['GET', 'POST'])
 def register2():
-    if current_user.is_authenticated:
-        if current_user.badge_number is None:
-            flash('Please update your badge number in order to continue', 'info')
-            return redirect(url_for('users.profile2'))
-        else:
-            return redirect(url_for('sessions.index2'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)

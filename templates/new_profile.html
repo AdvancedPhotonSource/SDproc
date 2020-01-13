@@ -1,47 +1,9 @@
 {% extends "layout.html" %}
 
 {% block static %}
-    <!--<link href="/static/profile/profile.css" rel="stylesheet" type="text/css">
-    <script src="/static/profile/profile.js"></script>-->
 {% endblock static %}
 
 {% block content %}
-    <div id="notifModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title" id="notifTitle">Profile:</h4>
-                </div>
-                <div class="notifModalBody" id="notifID">
-                    <div class="notifTable text-center">
-                        <table id="notifTable">
-                            <tbody class="notifBod">
-                                {% if userProf %}
-                                    <tr>
-                                        <td><b class="pull-left">Username:</b>{{ userProf.username }}</td>
-                                        <td><b class="pull-left">Institution:</b>{{ userProf.institution }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b class="pull-left">Full Name:</b>{{ userProf.fullName }}</td>
-                                        <td><b class="pull-left">Reason:</b>{{ userProf.reason }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b class="pull-left">Email:</b>{{ userProf.email }}</td>
-                                        <td></td>
-                                    </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="text-center">
-                    <button type="button" class="btn btn-default closeBtn" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-md-6">
             <div class="content-section">

@@ -6,8 +6,8 @@
 
 {% block content %}
     <div class="content">
-        <button class="btn btn-info" onclick="show_user()">User</button>
-        <button class="btn btn-info" onclick="show_HRM()">HRM</button>
+        <button class="btn btn-primary" onclick="show_user()">User</button>
+        <button class="btn btn-primary" onclick="show_HRM()">HRM</button>
         <div class="row">
             <div class="col-md" id="user">
                 <div class="row">
@@ -17,25 +17,29 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12 scroll">
-                        <table class="table table-bordered text-center">
-                            <thead>
-                                <tr>
-                                    <th scope="col">User</th>
-                                    <th scope="col"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="userTable">
-                                {% if users %}
-                                    {% for user in users %}
-                                        <tr class="click-user" id="{{ user.id }}">
-                                            <td>{{ user.username }}</td>
-                                            <td><a class="btn btn-info btn-sm" href="{{ url_for('admin.update_user_profile', username=user.username) }}">View Profile</a></td>
+                    <div class="col-md-12">
+                        {% if users %}
+                            <div class="table-responsive-sm">
+                                <table class="table table-hover text-center">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">User</th>
+                                            <th scope="col"></th>
                                         </tr>
-                                    {% endfor %}
-                                {% endif %}
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in users %}
+                                            <tr>
+                                                <td scope="row">{{ user.username }}</td>
+                                                <td><a class="btn btn-primary btn-sm" href="{{ url_for('admin.update_user_profile', username=user.username) }}">View Profile</a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <h3 class="text-center">No Users</h3>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -48,23 +52,30 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12 scroll">
-                        <table class="table table-bordered text-center">
-                            <thead>
-                                <tr>
-                                    <th>HRM</th>
-                                </tr>
-                            </thead>
-                            <tbody id="hrmTable">
-                                {% if hrms %}
-                                    {% for hrm in hrms %}
-                                        <tr class="click-hrm" id="{{ hrm.id }}" name="{{ hrm.name }}">
-                                            <td>{{ hrm.name }}</td>
+                    <div class="col-md-12">
+                        {% if hrms %}
+                            <div class="table-responsive-sm">
+                                <table class="table table-hover text-center">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">HRM</th>
+                                            <th scope="col"></th>
                                         </tr>
-                                    {% endfor %}
-                                {% endif %}
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody>
+                                        {% for hrm in hrms %}
+                                            <tr>
+                                                <td scope="row">{{ hrm.name }}</td>
+                                                <td><a class="btn btn-primary btn-sm" href="{{ url_for('admin.view_hrm', id_value=hrm.id) }}">View HRM</a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <a class="btn btn-primary btn-sm" href="{{ url_for('admin.add_hrm') }}">Add HRM</a>
+                        {% else %}
+                            <h3 class="text-center">No HRMs</h3>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -84,7 +95,7 @@
                             </thead>
                             <tbody>
                                 {% for task in notifications %}
-                                    <tr id="{{ task.id }}">
+                                    <tr>
                                         <td scope="row">{{ task.type }}</td>
                                         <td>{{ task.originUser }}</td>
                                         <td>{{ task.timestamp }}</td>
@@ -98,61 +109,9 @@
                 {% else %}
                     <h3 class="text-center">No Notifications</h3>
                 {% endif %}
-
             </div>
         </div>
     </div>
-
-    {% if hrms %}
-        {% for hrm in hrms %}
-            <div class="modal fade" id="{{ hrm.name }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="hrmModalTitle">{{ hrm.name }}</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" id="hrm-modal-body">
-                            <div class="content-section">
-                                <label class="form-control-label" for="hrm_name">HRM Name</label>
-                                <input class="form-control form-control-xs" id="hrm_name" name="hrm_name" readonly="readonly" type="text" value="{{ hrm.name }}">
-
-                                <label class="form-control-label" for="hrm_e0">hrm bragg1</label>
-                                <input class="form-control form-control-xs" id="hrm_e0" name="hrm_e0" readonly="readonly" type="text" value="{{ hrm.hrm_e0 }}">
-
-                                <label class="form-control-label" for="hrm_geo">hrm bragg1</label>
-                                <input class="form-control form-control-xs" id="hrm_geo" name="hrm_geo" readonly="readonly" type="text" value="{{ hrm.hrm_geo }}">
-
-                                <label class="form-control-label" for="hrm_bragg1">hrm bragg1</label>
-                                <input class="form-control form-control-xs" id="hrm_bragg1" name="hrm_bragg1" readonly="readonly" type="text" value="{{ hrm.hrm_bragg1 }}">
-
-                                <label class="form-control-label" for="hrm_bragg2">hrm bragg2</label>
-                                <input class="form-control form-control-xs" id="hrm_bragg2" name="hrm_bragg2" readonly="readonly" type="text" value="{{ hrm.hrm_bragg2 }}">
-
-                                <label class="form-control-label" for="hrm_alpha1">hrm alpha1</label>
-                                <input class="form-control form-control-xs" id="hrm_alpha1" name="hrm_alpha1" readonly="readonly" type="text" value="{{ hrm.hrm_alpha1 }}">
-
-                                <label class="form-control-label" for="hrm_alpha2">hrm alpha2</label>
-                                <input class="form-control form-control-xs" id="hrm_alpha2" name="hrm_alpha2" readonly="readonly" type="text" value="{{ hrm.hrm_alpha2 }}">
-
-                                <label class="form-control-label" for="hrm_theta1">hrm theta1 sign</label>
-                                <input class="form-control form-control-xs" id="hrm_theta1" name="hrm_theta1" readonly="readonly" type="text" value="{{ hrm.hrm_theta1_sign }}">
-
-                                <label class="form-control-label" for="hrm_theta2">hrm theta2 sign</label>
-                                <input class="form-control form-control-xs" id="hrm_theta2" name="hrm_theta2" readonly="readonly" type="text" value="{{ hrm.hrm_theta2_sign }}">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
-
 {% endblock content %}
 
 {% block scripts %}

@@ -45,7 +45,8 @@ def data():
         type = node.treeType
 
         if parent == 0:
-            data.append({ "text": title, "id": id, "parent": "#", "type": type, "state": {"opened": "true", "disabled": "true"}})
+            data.append({"text": title, "id": id, "parent": "#", "type": type, "state": {"opened": "true",
+                                                                                         "disabled": "true"}})
         else:
             data.append({"text": title, "id": id, "parent": parent, "type": type})
 

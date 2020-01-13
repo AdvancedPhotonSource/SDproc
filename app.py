@@ -92,8 +92,10 @@ app.register_blueprint(dm)
 @app.before_request
 def fixURL():
     url = request.path
+    print url
     if 'SDproc' in url:
         fixedUrl = url[7:]
+        print fixedUrl
         return redirect(fixedUrl, 307)
     return
 

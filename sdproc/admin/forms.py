@@ -5,14 +5,6 @@ from wtforms.validators import DataRequired, Length, Email, ValidationError, Num
 from db.db_model import User
 
 
-class UserInfoForm(FlaskForm):
-    full_name = StringField(label='Full Name', validators=[DataRequired()])
-    username = StringField(label='Username', validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField(label='Email', validators=[DataRequired(), Email()])
-    institution = StringField(label='Institution', validators=[DataRequired()])
-    reason = StringField(label="Reason")
-
-
 class UpdateUserInfoForm(FlaskForm):
     full_name = StringField(label='Full Name', validators=[DataRequired()])
     badge_number = IntegerField(label='Badge Number', validators=[DataRequired(), NumberRange(min=0, max=999999)])
