@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
+from flask import session
 from wtforms import BooleanField, IntegerField, StringField, FloatField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, ValidationError
+from db.db_model import HRM
 
 
 class AddHRMForm(FlaskForm):
@@ -15,6 +17,12 @@ class AddHRMForm(FlaskForm):
     hrm_theta2_sign = IntegerField(label='HRM theta2 sign', validators=[DataRequired()])
     submit = SubmitField(label='Add HRM')
 
+    @staticmethod
+    def validate_hrm_name(self, hrm_name):
+        hrm = HRM.query.filter_by(name=hrm_name.data).first()
+        if hrm:
+            raise ValidationError('That hrm name is already taken. Please choose a different one.')
+
 
 class UpdateHRMForm(FlaskForm):
     hrm_name = StringField(label='HRM Name', validators=[DataRequired()])
@@ -27,6 +35,15 @@ class UpdateHRMForm(FlaskForm):
     hrm_theta1_sign = IntegerField(label='HRM theta1 sign', validators=[DataRequired()])
     hrm_theta2_sign = IntegerField(label='HRM theta2 sign', validators=[DataRequired()])
     submit = SubmitField(label='Update HRM')
+
+    @staticmethod
+    def validate_hrm_name(self, hrm_name):
+        if 'admin_hrm' in session:
+            currHrmName = session['admin_hrm']
+            if hrm_name.data != currHrmName:
+                hrm = HRM.query.filter_by(name=hrm_name.data).first()
+                if hrm:
+                    raise ValidationError('That hrm name is taken. Please choose a different one.')
 
 
 class InputForm(FlaskForm):
