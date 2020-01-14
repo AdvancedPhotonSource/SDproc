@@ -32,6 +32,7 @@ def admin2():
 @login_required
 def view_hrm(id_value):
     hrm = HRM.query.filter_by(id=id_value).first()
+    session['admin_hrm'] = hrm.name
     form = UpdateHRMForm()
     if form.validate_on_submit():
         hrm.name = form.hrm_name.data
@@ -44,6 +45,7 @@ def view_hrm(id_value):
         hrm.hrm_theta1_sign = form.hrm_theta1_sign.data
         hrm.hrm_theta2_sign = form.hrm_theta2_sign.data
         db.session.commit()
+        session.pop('admin_hrm', None)
         flash('The HRM has been updated.', 'success')
         return redirect(url_for('admin.view_hrm', id_value=hrm.id))
     elif request.method == 'GET':

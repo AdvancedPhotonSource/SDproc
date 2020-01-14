@@ -13,10 +13,6 @@ $x(document).ready(function() {
             $x('#comment').val(data);
         });
     });
-
-    $x(".click-user").click(function() {
-        $x(this).addClass('active').siblings().removeClass('active');
-    });
 });
 
 

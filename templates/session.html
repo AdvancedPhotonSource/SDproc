@@ -24,32 +24,34 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 scroll">
-                        <table class="table table-bordered text-center">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Last Modified</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sessionTable">
+                        <div class="table-responsive-sm">
+                            <table class="table table-hover text-center" id="sessionTable">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Session</th>
+                                        <th scope="col">Last Modified</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                 {% if sessions %}
                                     {% for session in sessions %}
                                         <tr class="click-able" id="{{ session.id }}" type="session" name="{{ session.name }}">
-                                            <td>{{ session.name }}</td>
+                                            <td scope="row">{{ session.name }}</td>
                                             <td>{{ session.last_used }}</td>
                                         </tr>
                                     {% endfor %}
                                 {% endif %}
                                 {% if data_files %}
-                                    {% for data_file in data_files %}
-                                        <tr class="click-able" id="{{ data_file.id }}" type="{{ data_file.type }}" name="{{ data_file.name }}">
-                                            <td>{{ data_file.name }}</td>
+                                    {% for file in data_files %}
+                                        <tr class="click-able" id="{{ file.id }}" type="{{ file.type }}" name="{{ file.name }}">
+                                            <td scope="row">{{ file.name }}</td>
                                             <td> - </td>
                                         </tr>
                                     {% endfor %}
                                 {% endif %}
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
