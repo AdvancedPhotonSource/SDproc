@@ -1,4 +1,5 @@
-aps-dm-api==3.0.1
+# to install DM use the following command:
+# conda install aps-dm-api -c aps-anl-tag
 asn1crypto==0.24.0
 backports-abc==0.5
 backports.functools-lru-cache==1.5
