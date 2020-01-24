@@ -46,12 +46,9 @@
 import os
 import secrets
 from datetime import datetime
-
 from flask_login import current_user
 from flask import current_app
-
 from db.db_model import db, DataFile
-from flask_app import app
 from utilities import mda, mdaAscii
 
 ALLOWED_EXTENSIONS = {'txt', 'mda', 'dat'}
@@ -66,8 +63,6 @@ class FileUtility:
     def modified(path):
         """Returns modified time of this."""
         return datetime.now().strftime("%d/%m/%Y")
-
-    # return datetime.fromtimestamp(os.path.getmtime(path))
 
     @staticmethod
     def getTime():

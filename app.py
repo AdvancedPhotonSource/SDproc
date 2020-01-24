@@ -43,7 +43,7 @@ __author__ = 'caschmitz'
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
-from flask import redirect,request
+from flask import redirect, request
 from flask_login import LoginManager
 from flask_app import app
 from db.api.user_db_api import UserDbApi
@@ -92,10 +92,8 @@ app.register_blueprint(dm)
 @app.before_request
 def fixURL():
     url = request.path
-    print url
     if 'SDproc' in url:
         fixedUrl = url[7:]
-        print fixedUrl
         return redirect(fixedUrl, 307)
     return
 

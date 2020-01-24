@@ -80,7 +80,7 @@
                         <a class="nav-item nav-link" href="{{ url_for('hrm.modifyDAT') }}">Modify DAT</a>
                         {% if current_user.is_authenticated %}
                             {% if current_user.isAdmin == 1 %}
-                                <a class="nav-item nav-link" href="{{ url_for('admin.admin2') }}">Admin</a>
+                                <a class="nav-item nav-link" href="{{ url_for('admin.admin') }}">Admin</a>
                             {% endif %}
                         {% endif %}
                     </div>
