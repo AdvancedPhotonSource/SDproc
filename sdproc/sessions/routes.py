@@ -131,9 +131,9 @@ def clear_cmeta():
     :return:
     """
     current_user.current_session = 'None'
-    deleting = db.session.query(CurrentMeta).filter(CurrentMeta.user_id == current_user.get_id()).all()
-    for i in deleting:
-        db.session.delete(i)
+    metaData = CurrentMeta.query.filter_by(user_id=current_user.id).all()
+    for data in metaData:
+        db.session.delete(data)
     deleting = db.session.query(CurrentDAT).filter(CurrentDAT.user_id == current_user.get_id()).all()
     for i in deleting:
         db.session.delete(i)
@@ -290,16 +290,16 @@ def continue_session():
 
     if type == "session":
         clear_cmeta()
-        clear_rowa_wrapper()
+        # clear_rowa_wrapper()
         data_files = []
         session = SessionFiles.query.filter_by(id=id).first()
         session_files = SessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
         for file in session_files:
             file_meta = SessionMeta.query.filter_by(id=file.sessionMeta_id).first()
             data_file = DataFile.query.filter_by(id=file_meta.file_id).first()
-            form = GraphingUtility.populate_from_instance(file_meta) # populates the input form
-            current_meta = CurrentMeta() # makes a CurrentMeta() object
-            form.populate_obj(current_meta) # populates fields in the CurrentMeta object from the form
+            form = GraphingUtility.populate_from_instance(file_meta)
+            current_meta = CurrentMeta()  # makes a CurrentMeta() object
+            form.populate_obj(current_meta)  # populates fields in the CurrentMeta object from the form
             current_meta.name = data_file.name
             current_meta.path = file_path("." + data_file.type, data_file.path)
             current_meta.comment = file_meta.comment

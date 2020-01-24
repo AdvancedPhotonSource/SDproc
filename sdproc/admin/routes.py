@@ -11,7 +11,7 @@ a = Blueprint('admin', __name__)
 
 @a.route('/admin', methods=['GET', 'POST'])
 @login_required
-def admin2():
+def admin():
     if current_user.badge_number is None:
         flash('Please update your badge number in order to continue', 'info')
         return redirect(url_for('users.profile2'))
