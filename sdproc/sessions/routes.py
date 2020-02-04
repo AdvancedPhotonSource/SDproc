@@ -275,11 +275,11 @@ def add_session_files(list):
     db.session.commit()
 
 
-@sessions.route('/new_session2', methods=['POST'])
+@sessions.route('/new_session2', methods=['GET', 'POST'])
 def new_session2():
     clear_cmeta()
     clear_rowa_wrapper()
-    return ""
+    return redirect(url_for('hrm.dataFormat'))
 
 
 @sessions.route("/continue_session", methods=['GET', 'POST'])
