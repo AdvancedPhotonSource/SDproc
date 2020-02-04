@@ -74,19 +74,17 @@ from sqlalchemy import and_
 hrmApp = Blueprint('hrm', __name__)
 
 """ start of main routes for web pages """
+
+
 @hrmApp.route('/data', methods=['GET', 'POST'])
 @login_required
 def dataFormat():
-    if current_user.badge_number is None:
-        flash('Please update your badge number in order to continue', 'info')
-        return redirect(url_for('users.profile2'))
-    '''
-	Template generator for the data page.
-	Has a multitude of options that allow the user to display file information in the form of a plot.
-	Options are saved to a live-updated session for each respective file that persists through temporarily leaving the page.
-	Defaults are assigned to all files within this method.
-	:return:
-	'''
+    """
+    Template generator for the data page. Has a multitude of options that allow the user to display file information
+    in the form of a plot. Options are saved to a live-updated session for each respective file that persists through
+    temporarily leaving the page. Defaults are assigned to all files within this method.
+    :return:
+    """
     user = current_user
     thisSession = current_user.current_session
     if thisSession != 'None':

@@ -81,128 +81,128 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-5">
-                <form id="meta-form" method="post">
-                    <input type="hidden" name="idnum" id="idnum">
-                    <input type="hidden" name="agaE" id="agaE" value="{{ againstE }}">
-                    <input type="hidden" name="unit" id="unit">
-                    <input type="hidden" name="outType" id="outType">
-                    <input type="hidden" name="cordData" id="cordData">
-                    <input type="hidden" name="session" id="session">
-                    <div id="metaForm_id">
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.ebool }}</div>
-                            {{ form.energy.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.energy }}</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.ecbool }}</div>
-                            {{ form.energyCalc.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">From xtal angles</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.etcbool }}</div>
-                            {{ form.energyTempCalc.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">From xtal angles & temps</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.a1bool }}</div>
-                            {{ form.xtal1A.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.xtal1A }}</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.a2bool }}</div>
-                            {{ form.xtal2A.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.xtal2A }}</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.t1bool }}</div>
-                            {{ form.xtal1T.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.xtal1T }}</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.t2bool }}</div>
-                            {{ form.xtal2T.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.xtal2T }}</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.tcbool }}</div>
-                            {{ form.tempCorr.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">To energy scale</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.sbool }}</div>
-                            {{ form.signal.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.signal }}</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.snbool }}</div>
-                            {{ form.signalNorm.label(class="col-sm-10 col-form-label") }}
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.nbool }}</div>
-                            {{ form.norm.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.norm }}</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.nfbool }}</div>
-                            {{ form.normFac.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">At each data point</div>
-                        </div>
-                        <div class="form-group row text-center">
-                            <div class="col-sm-2">{{ form.xbool }}</div>
-                            {{ form.extra.label(class="col-sm-4 col-form-label") }}
-                            <div class="col-sm-6">{{ form.extra }}</div>
+        <div class="col-sm-4">
+            <form id="meta-form" method="post">
+                <input type="hidden" name="idnum" id="idnum">
+                <input type="hidden" name="agaE" id="agaE" value="{{ againstE }}">
+                <input type="hidden" name="unit" id="unit">
+                <input type="hidden" name="outType" id="outType">
+                <input type="hidden" name="cordData" id="cordData">
+                <input type="hidden" name="session" id="session">
+                <div id="metaForm_id" class="text-center">
+                    <div class="form-group row">
+                        <div class="col-2">{{ form.ebool }}</div>
+                        {{ form.energy.label(class="col form-control-label") }}
+                        <div class="col">{{ form.energy(class="form-control") }}</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-2">{{ form.ecbool }}</div>
+                        {{ form.energyCalc.label(class="col form-control-label") }}
+                        <div class="col">From xtal angles</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-2">{{ form.etcbool }}</div>
+                        {{ form.energyTempCalc.label(class="col form-control-label") }}
+                        <div class="col">From xtal angles & temps</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-2">{{ form.a1bool }}</div>
+                        {{ form.xtal1A.label(class="col form-control-label") }}
+                        <div class="col">{{ form.xtal1A(class="form-control") }}</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-2">{{ form.a2bool }}</div>
+                        {{ form.xtal2A.label(class="col form-control-label") }}
+                        <div class="col">{{ form.xtal2A(class="form-control") }}</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-2">{{ form.t1bool }}</div>
+                        {{ form.xtal1T.label(class="col form-control-label") }}
+                        <div class="col">{{ form.xtal1T(class="form-control") }}</div>
+                    </div>
+                    <div class="form-group row ">
+                        <div class="col-2">{{ form.t2bool }}</div>
+                        {{ form.xtal2T.label(class="col form-control-label") }}
+                        <div class="col">{{ form.xtal2T(class="form-control") }}</div>
+                    </div>
+                    <div class="form-group row ">
+                        <div class="col-2">{{ form.tcbool }}</div>
+                        {{ form.tempCorr.label(class="col form-control-label") }}
+                        <div class="col">To energy scale</div>
+                    </div>
+                    <div class="form-group row ">
+                        <div class="col-2">{{ form.sbool }}</div>
+                        {{ form.signal.label(class="col form-control-label") }}
+                        <div class="col">{{ form.signal(class="form-control") }}</div>
+                    </div>
+                    <div class="form-group row ">
+                        <div class="col-2">{{ form.snbool }}</div>
+                        {{ form.signalNorm.label(class="col-sm-10 form-control-label") }}
+                    </div>
+                    <div class="form-group row ">
+                        <div class="col-2">{{ form.nbool }}</div>
+                        {{ form.norm.label(class="col form-control-label") }}
+                        <div class="col">{{ form.norm(class="form-control") }}</div>
+                    </div>
+                    <div class="form-group row ">
+                        <div class="col-2">{{ form.nfbool }}</div>
+                        {{ form.normFac.label(class="col form-control-label") }}
+                        <div class="col">At each data point</div>
+                    </div>
+                    <div class="form-group row ">
+                        <div class="col-2">{{ form.xbool }}</div>
+                        {{ form.extra.label(class="col form-control-label") }}
+                        <div class="col">{{ form.extra(class="form-control") }}</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-8">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="" id="plot_spot">
+                        <div id="plot">
+                            {{code|safe}}
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
-            <div class="col-md-7">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="" id="plot_spot">
-                            <div id="plot">
-                                {{code|safe}}
-                            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div id="currentAE" style="display: none;">{{ againstE }}</div>
+                    <label for="againstE">X-Selection</label>
+                    <div class="btn-group">
+                        <button class="btn btn-primary dropdown-toggle" id="againstE" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Point #
+                        </button>
+                        <div class="dropdown-menu aeDrop">
+                            <a class="dropdown-item" onclick="setAE(event)">Point #</a>
+                            <a class="dropdown-item" onclick="setAE(event)">Energy</a>
+                            <a class="dropdown-item" onclick="setAE(event)">Energy xtal</a>
+                            <a class="dropdown-item" onclick="setAE(event)">Energy xtal w/T</a>
+                            <a class="dropdown-item" onclick="setAE(event)">Energy Fitted</a>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <div id="currentAE" style="display: none;">{{ againstE }}</div>
-                        <label for="againstE">X-Selection</label>
-                        <div class="btn-group">
-                            <button class="btn btn-primary dropdown-toggle" id="againstE" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Point #
-                            </button>
-                            <div class="dropdown-menu aeDrop">
-                                <a class="dropdown-item" onclick="setAE(event)">Point #</a>
-                                <a class="dropdown-item" onclick="setAE(event)">Energy</a>
-                                <a class="dropdown-item" onclick="setAE(event)">Energy xtal</a>
-                                <a class="dropdown-item" onclick="setAE(event)">Energy xtal w/T</a>
-                                <a class="dropdown-item" onclick="setAE(event)">Energy Fitted</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <div class="btn-group">
-                            <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id="HRM" aria-haspopup="true" aria-expanded="false">
-                                Fe-inline-1meV
-                            </button>
-                            <div class="dropdown-menu" id="HRMdd">
-                                {% if hrm %}
-                                    {% for post in hrm %}
-                                        <a class="dropdown-item">{{ post.name}}</a>
-                                    {% endfor %}
-                                {% endif %}
-                            </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div class="btn-group">
+                        <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id="HRM" aria-haspopup="true" aria-expanded="false">
+                            Fe-inline-1meV
+                        </button>
+                        <div class="dropdown-menu" id="HRMdd">
+                            {% if hrms %}
+                                {% for hrm in hrms %}
+                                    <a class="dropdown-item">{{ hrm.name}}</a>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
         <div class="row">
             <div class="col-md-7 fitGroup">
                 <div class="row" id="peakGroup">
@@ -340,31 +340,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" onclick="save_session()" class="btn btn-primary" data-dismiss="modal">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="OverwriteSessionModal" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Overwrite Session?</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="content-section">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <label>A session with this name already exists, would you like to overwrite it?</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cancel_overwrite()">Close</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="overwrite_session()">Save</button>
                 </div>
             </div>
         </div>
