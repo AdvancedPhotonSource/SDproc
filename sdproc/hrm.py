@@ -327,15 +327,11 @@ def modifyDAT():
 @hrmApp.route('/process', methods=['GET', 'POST'])
 @login_required
 def process():
-    if current_user.badge_number is None:
-        flash('Please update your badge number in order to continue', 'info')
-        return redirect(url_for('users.profile2'))
-    '''
-	Large function that uses the peakfit settings saved to each file to peak fit and sum all of the files the user has in their CurrentMeta.
-
-	Summing can be done with a binning or interpolation method.  Maxes are extracted the same either way.
-	:return:
-	'''
+    """
+    Large function that uses the peakfit setting saved to each file to peak fit and sum all of the files the user has in their CurrentMeta.
+    Summing can be done with a binning or interpolation method. Maxes are extracted the same either way.
+    :return:
+    """
     user = current_user
     idthis = request.form.get('idnext', type=int)
     idlist = request.form.get('idList', type=str)
