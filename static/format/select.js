@@ -53,6 +53,11 @@ $x(document).ready( function() {
     localStorage.setItem('justPeakFit', 0);
 });
 
+/*
+    This function is listening on the whole document for a key press, it checks if the <enter> key has been pressed.
+    If the <enter> key is pressed, then prevent it from doing its normal function. Then, check if there is an active
+    element on the page, and if there is, then lose its focus. (i.e. it is not highlighted)
+*/
 $x(document).keypress( function(event) {
      if (event.which == '13') {
         event.preventDefault();

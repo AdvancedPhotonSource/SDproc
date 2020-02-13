@@ -70,6 +70,7 @@ import json
 import numpy
 import uuid
 from sqlalchemy import and_
+from sessions.forms import SessionForm
 
 hrmApp = Blueprint('hrm', __name__)
 
@@ -85,8 +86,19 @@ def dataFormat():
     temporarily leaving the page. Defaults are assigned to all files within this method.
     :return:
     """
+    saveSessionForm = SessionForm()
+    if saveSessionForm.submit.data and saveSessionForm.validate_on_submit():
+        session = SessionFiles(name=saveSessionForm.session_name.data, user_id=current_user.id, user=current_user)
+        db.session.add(session)
+        db.session.commit()
+        current_user.current_session = session.name
+        print current_user.current_session
+        return redirect(url_for("hrm.dataFormat"))
+        # return redirect(url_for("sessions.continue_session", type="session", sessionID=session.id))
     user = current_user
+    print user.current_session
     thisSession = current_user.current_session
+    print thisSession
     if thisSession != 'None':
         comments = SessionFiles.query.filter_by(name=thisSession).first().comment
     else:
@@ -272,7 +284,7 @@ def dataFormat():
             code = format.plot
             form = GraphingUtility.populate_from_instance(format)
     return render_template("new_df.html", user=user, code=code, form=form, againstE=againstE, data=fdata,
-                           ses=thisSession,
+                           ses=thisSession, saveSessionForm=saveSessionForm,
                            hrm=hrmData, comments=comments)
 
 
@@ -328,8 +340,9 @@ def modifyDAT():
 @login_required
 def process():
     """
-    Large function that uses the peakfit setting saved to each file to peak fit and sum all of the files the user has in their CurrentMeta.
-    Summing can be done with a binning or interpolation method. Maxes are extracted the same either way.
+    Large function that uses the peakfit setting saved to each file to peak fit and sum all of the files the user has in
+    their CurrentMeta. Summing can be done with a binning or interpolation method. Maxes are extracted the same either
+    way.
     :return:
     """
     user = current_user

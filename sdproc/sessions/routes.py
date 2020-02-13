@@ -126,7 +126,7 @@ def clear_cmeta():
     """
     Function that clears the current user's CurrentMeta Table.
 
-    This is usually called when starting a new session or resuming an old one so that prexisting data
+    This is usually called when starting a new session or resuming an old one so that preexisting data
     does not cause conflicts.
     :return:
     """
@@ -134,29 +134,27 @@ def clear_cmeta():
     metaData = CurrentMeta.query.filter_by(user_id=current_user.id).all()
     for data in metaData:
         db.session.delete(data)
-    deleting = db.session.query(CurrentDAT).filter(CurrentDAT.user_id == current_user.get_id()).all()
+    deleting = CurrentDAT.query.filter_by(user_id=current_user.id).all()
     for i in deleting:
         db.session.delete(i)
     db.session.commit()
-    return 'Cleared'
+    return 'Session Cleared'
 
 
 @sessions.route('/clearPart_cmeta', methods=['GET', 'POST'])
 @login_required
 def clearPart_cmeta():
     """
-        Function that deletes a single file from the current users CurrentMeta table.
-
-        This is called when removing a file on the format page.
-        :return:
-        """
-    idthis = request.form.get('id', type=int)
-    deleting = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
-                                                         CurrentMeta.file_id == idthis,
-                                                         CurrentMeta.session == current_user.current_session)).first()
-    db.session.delete(deleting)
+    Function that deletes a single file from the current users CurrentMeta table.
+    This is called when removing a file on the format page.
+    :return:
+    """
+    fileID = request.form.get('id', type=int)
+    file = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.id, CurrentMeta.file_id == fileID,
+                                         CurrentMeta.session == current_user.current_session)).first()
+    db.session.delete(file)
     db.session.commit()
-    return 'Cleared'
+    return 'File Removed'
 
 
 @sessions.route('/clear_rowa', methods=['GET', 'POST'])
@@ -278,14 +276,19 @@ def add_session_files(list):
 @sessions.route('/new_session2', methods=['GET', 'POST'])
 def new_session2():
     clear_cmeta()
-    clear_rowa_wrapper()
+    # clear_rowa_wrapper()
     return redirect(url_for('hrm.dataFormat'))
 
 
+@sessions.route("/continue_session/<string:type>/<int:sessionID>", methods=['GET', 'POST'])
 @sessions.route("/continue_session", methods=['GET', 'POST'])
-def continue_session():
-    type = request.form.get("type")
-    id = request.form.get("id")
+def continue_session(type=None, sessionID=None):
+    if type and sessionID:
+        type = type
+        id = sessionID
+    else:
+        type = request.form.get("type")
+        id = request.form.get("id")
     user = current_user
 
     if type == "session":
