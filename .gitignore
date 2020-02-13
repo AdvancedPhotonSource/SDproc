@@ -1,3 +1,5 @@
+sdproc.wsgi
+test.py
 data/*
 .idea
 *.pyc
