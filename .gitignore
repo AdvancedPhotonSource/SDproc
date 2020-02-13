@@ -3,6 +3,6 @@
 .DS_Store
 data/test.db
 static/uploaded_files/*
-static/saved_files/dat/*
+static/saved_files/*
 static/globus_data/*
 static/dataFiles/*
