@@ -1,9 +1,8 @@
 .idea
 *.pyc
 .DS_Store
-data/test.db
+data/*
 static/uploaded_files/*
 static/saved_files/*
 static/globus_data/*
 static/dataFiles/*
-data/*
