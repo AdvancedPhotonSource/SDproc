@@ -2,7 +2,7 @@
 *.pyc
 .DS_Store
 data/test.db
-static/uploaded_file*
+static/uploaded_files/*
 static/saved_files/dat/*
 static/globus_data/*
 static/dataFiles/*
