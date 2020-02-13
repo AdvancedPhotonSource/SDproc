@@ -4,3 +4,6 @@
 data/test.db
 static/uploaded_files/dat/*
 static/uploaded_files/mda/*
+static/saved_files/dat/*
+static/globus_data/*
+static/dataFiles/*
