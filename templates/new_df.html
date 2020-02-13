@@ -322,7 +322,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="content-section">
+                    <!--<div class="content-section">
                         <div class="row">
                             <div class="col-sm-12">
                                 <label for="ssName" class="">Session Name:</label>
@@ -335,8 +335,44 @@
                                 <textarea class="form-control" rows="5" id="ssComment">{% if comments %}{{comments}}{% endif %}</textarea>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
+                    <form method="POST" action="">
+                        {{ saveSessionForm.hidden_tag() }}
+                        <fieldset class="form-group">
+                            <legend class="border-bottom mb-4">Log In</legend>
+                            <div class="form-group">
+                                {{ saveSessionForm.session_name.label(class="form-control-label") }}
 
+                                {% if saveSessionForm.session_name.errors %}
+                                    {{ saveSessionForm.session_name(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in saveSessionForm.session_name.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ saveSessionForm.session_name(class="form-control form-control-lg") }}
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                {{ saveSessionForm.comments.label(class="form-control-label") }}
+
+                                {% if saveSessionForm.comments.errors %}
+                                    {{ saveSessionForm.comments(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in saveSessionForm.comments.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ saveSessionForm.comments(class="form-control form-control-lg") }}
+                                {% endif %}
+                            </div>
+                        </fieldset>
+                        <div class="form-group">
+                            {{ saveSessionForm.submit(class="btn btn-info") }}
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
