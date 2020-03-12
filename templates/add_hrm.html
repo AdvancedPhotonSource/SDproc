@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block static %}
+{% endblock static %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Add HRM</legend>
+                <div class="form-group">
+                    {{ form.hrm_name.label(class="form-control-label") }}
+
+                    {% if form.hrm_name.errors %}
+                        {{ form.hrm_name(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_name(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_e0.label(class="form-control-label") }}
+
+                    {% if form.hrm_e0.errors %}
+                        {{ form.hrm_e0(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_e0.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_e0(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_bragg1.label(class="form-control-label") }}
+
+                    {% if form.hrm_bragg1.errors %}
+                        {{ form.hrm_bragg1(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_bragg1.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_bragg1(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_bragg2.label(class="form-control-label") }}
+
+                    {% if form.hrm_bragg2.errors %}
+                        {{ form.hrm_bragg2(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_bragg2.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_bragg2(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_geo.label(class="form-control-label") }}
+
+                    {% if form.hrm_geo.errors %}
+                        {{ form.hrm_geo(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_geo.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_geo(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_alpha1.label(class="form-control-label") }}
+
+                    {% if form.hrm_alpha1.errors %}
+                        {{ form.hrm_alpha1(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_alpha1.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_alpha1(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_alpha2.label(class="form-control-label") }}
+
+                    {% if form.hrm_alpha2.errors %}
+                        {{ form.hrm_alpha2(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_alpha2.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_alpha2(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_theta1_sign.label(class="form-control-label") }}
+
+                    {% if form.hrm_theta1_sign.errors %}
+                        {{ form.hrm_theta1_sign(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_theta1_sign.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_theta1_sign(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.hrm_theta2_sign.label(class="form-control-label") }}
+
+                    {% if form.hrm_theta2_sign.errors %}
+                        {{ form.hrm_theta2_sign(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.hrm_theta2_sign.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.hrm_theta2_sign(class="form-control form-control-sm") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+                <a role="button" class="btn btn-outline-primary btn-md" href="{{ url_for('admin.admin2') }}"><< Go Back</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+
+{% block scripts %}{% endblock scripts %}
