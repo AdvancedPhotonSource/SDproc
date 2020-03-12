@@ -1,10 +1,5 @@
 sdproc.wsgi
 test.py
-data/*
 .idea
 *.pyc
 .DS_Store
-static/uploaded_files/*
-static/saved_files/*
-static/globus_data/*
-static/dataFiles/*
