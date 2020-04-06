@@ -348,13 +348,13 @@ def continue_session(type=None, sessionID=None):
 @sessions.route('/save_ses', methods=['GET', 'POST'])
 @login_required
 def saveSession():
-    '''
+    """
     This saves the current session so that the user may resume from the select page whenever they want.
 
     The CurrentMeta table is parsed and saved into the SessionFiles and SessionFilesMeta tables for more permanence.
     A check is done to ensure that the user cannot save the session under a name that has already been created.
     :return:
-    '''
+    """
     checked = request.form.get("checked", type=int)
     namechk = request.form.get("name", type=str)
     if checked == 0:

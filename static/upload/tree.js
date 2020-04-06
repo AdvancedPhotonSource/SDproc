@@ -25,7 +25,6 @@ $y(document).ready(function() {
         'dnd' : {
             'is_draggable' : function(node) {
                 if(node[0].type == 'Root') {
-                    alert("Sorry you cannot move the root directory.");
                     return false;
                 }
                 return true;
