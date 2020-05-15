@@ -73,10 +73,15 @@ def save_session_comment():
 @sessions.route('/get_fsession_comment', methods=['GET', 'POST'])
 def fsession_comment():
     file_id = request.form.get('id')
-    print file_id
     session = current_user.current_session
-    print session
-    return get_session_file_comments(file_id, session)
+    f = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.id,
+                                      CurrentMeta.file_id == file_id,
+                                      CurrentMeta.session == session)).first()
+    try:
+        comments = f.comment
+    except AttributeError:
+        comments = ""
+    return comments
 
 
 @sessions.route('/save_fsession_comment', methods=['GET', 'POST'])
@@ -357,12 +362,23 @@ def saveSession():
     """
     checked = request.form.get("checked", type=int)
     namechk = request.form.get("name", type=str)
+
     if checked == 0:
         instance = db.session.query(SessionFiles).filter(
             and_(SessionFiles.user_id == current_user.get_id(), SessionFiles.name == namechk)).first()
         if instance:
             data = str(instance.id)
             return data
+        else:
+            session = SessionFiles.query.filter(and_(SessionFiles.user_id == current_user.get_id(),
+                                                     SessionFiles.name == current_user.current_session)).first()
+            session_files = SessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
+
+            for file in session_files:
+                session_meta = SessionMeta.query.filter_by(id=file.sessionMeta_id).first()
+                db.session.delete(session_meta)
+                db.session.delete(file)
+            db.session.delete(session)
 
     session_file = SessionFiles()
     session_file.user = current_user

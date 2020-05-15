@@ -96,9 +96,7 @@ def dataFormat():
         return redirect(url_for("hrm.dataFormat"))
         # return redirect(url_for("sessions.continue_session", type="session", sessionID=session.id))
     user = current_user
-    print user.current_session
     thisSession = current_user.current_session
-    print thisSession
     if thisSession != 'None':
         comments = SessionFiles.query.filter_by(name=thisSession).first().comment
     else:

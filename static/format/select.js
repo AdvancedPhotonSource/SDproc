@@ -200,15 +200,21 @@ function save_session() {
     }
 }
 
+/* if the user did not change the session name, then the function only return the ID of the session */
 function overwrite_session() {
     $x.post('/SDproc/save_ses', {name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
-        var data = JSON.parse(data);
+        var data = JSON.parse(data); // this is the session ID
+        /* status is null because user did not change the session name */
         if (data.status == null) {
-            $x.post('/SDproc/delete',{ id: data, table: "Session"});
+            // deletes the current session with the ID we received from first save
+            $x.post('/SDproc/delete_session',{ id: data, type: "session"});
+            // calls the save function again to save the new updated session with the same name
             $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 1}, function(data) {
+                // sets the session name on screen
                 $x('#sesName').html(data.name);
             });
         }
+        $x('#sesName').html(data.name);
     });
 }
 
