@@ -213,8 +213,13 @@ function overwrite_session() {
                 // sets the session name on screen
                 $x('#sesName').html(data.name);
             });
+        } else {
+            // calls the save session function again, returns the ID and deletes session with that ID
+            $x.post('/SDproc/save_ses',{name: $x('#sesName').text(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
+                $x.post('/SDproc/delete_session',{ id: data, type: "session"});
+            });
+            $x('#sesName').html(data.name);
         }
-        $x('#sesName').html(data.name);
     });
 }
 

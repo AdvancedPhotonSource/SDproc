@@ -15,6 +15,9 @@ $x(document).ready(function() {
     });
 });
 
+function clear_files() {
+    localStorage.removeItem("use_files");
+}
 
 function get_selected() {
     var table = document.getElementById('sessionTable');

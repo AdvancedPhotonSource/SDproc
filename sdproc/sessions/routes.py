@@ -369,16 +369,6 @@ def saveSession():
         if instance:
             data = str(instance.id)
             return data
-        else:
-            session = SessionFiles.query.filter(and_(SessionFiles.user_id == current_user.get_id(),
-                                                     SessionFiles.name == current_user.current_session)).first()
-            session_files = SessionFilesMeta.query.filter_by(sessionFiles_id=session.id).all()
-
-            for file in session_files:
-                session_meta = SessionMeta.query.filter_by(id=file.sessionMeta_id).first()
-                db.session.delete(session_meta)
-                db.session.delete(file)
-            db.session.delete(session)
 
     session_file = SessionFiles()
     session_file.user = current_user

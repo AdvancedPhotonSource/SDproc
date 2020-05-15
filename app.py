@@ -89,6 +89,8 @@ app.register_blueprint(dm)
 
 
 """ REMOVE THIS ON SERVER """
+
+
 @app.before_request
 def fixURL():
     url = request.path
