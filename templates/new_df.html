@@ -332,7 +332,9 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <label for="ssComment">Comment:</label>
-                                <textarea class="form-control" rows="5" id="ssComment">{% if comments %}{{comments}}{% endif %}</textarea>
+                                <textarea class="form-control" rows="5" id="ssComment">
+                                    {% if comments %}{{comments}}{% endif %}
+                                </textarea>
                             </div>
                         </div>
                     </div>
@@ -340,9 +342,11 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     {% if ses == "None" %}
-                        <button type="button" onclick="save_session()" class="btn btn-primary" data-dismiss="modal">Save</button>
+                        <button type="button" onclick="save_session()" class="btn btn-primary" data-dismiss="modal">
+                            Save</button>
                     {% else %}
-                        <button type="button" onclick="overwrite_session()" class="btn btn-primary" data-dismiss="modal">Overwrite Session</button>
+                        <button type="button" onclick="overwrite_session()" class="btn btn-primary"
+                                data-dismiss="modal">Save</button>
                     {% endif %}
                 </div>
             </div>
