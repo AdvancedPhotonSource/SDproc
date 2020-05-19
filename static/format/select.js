@@ -227,11 +227,11 @@ function cancel_overwrite() {
     $x("#ssModal").modal("show");
 }
 
-function save_comments() {
-    previous = localStorage.getItem('previous2');
-    $x('#idnum').val(previous);
-    $x.post('/SDproc/save_fsession_comment', {id: previous, comment: $x('#comment').val() });
-}
+//function save_comments() {
+//    previous = localStorage.getItem('previous2');
+//    $x('#idnum').val(previous);
+//    $x.post('/SDproc/save_fsession_comment', {id: previous, comment: $x('#comment').val() });
+//}
 
 function log(){
     previous = localStorage.getItem('previous2');
