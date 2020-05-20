@@ -58,14 +58,14 @@ $x(document).ready( function() {
     If the <enter> key is pressed, then prevent it from doing its normal function. Then, check if there is an active
     element on the page, and if there is, then lose its focus. (i.e. it is not highlighted)
 */
-$x(document).keypress( function(event) {
-     if (event.which == '13') {
-        event.preventDefault();
-        if ("activeElement" in document) {
-            document.activeElement.blur();
-        }
-      }
-});
+//$x(document).keypress( function(event) {
+//     if (event.which == '13') {
+//        event.preventDefault();
+//        if ("activeElement" in document) {
+//            document.activeElement.blur();
+//        }
+//      }
+//});
 
 function asynchOnLoad(){
     var deferred = new $x.Deferred(), completed = deferred.then(function(){
@@ -186,22 +186,27 @@ function save_session() {
         $x.post('/SDproc/save_graph', $x('#meta-form').serialize());
     }
 
-    var session = $x('#sesName').text();
-    var current_session = $x('#ssName').val();
-
-    if (session == current_session) {
-        $x("#OverwriteSessionModal").modal("show");
-    } else {
-        $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
-            $x('#sesName').html(data.name);
-        }).done(function (d) {
-            location.reload();
-        });
-    }
+    $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
+        $x('#sesName').html(data.name);
+    }).done(function (d) {
+        location.reload();
+    });
 }
 
 /* if the user did not change the session name, then the function only return the ID of the session */
 function overwrite_session() {
+    $x.post('/SDproc/save_ses', {name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
+        var data = JSON.parse(data); // this is the session ID
+        /* status is null because user did not change the session name */
+        if (data.status == null) {
+            $x('#confirmModal').modal('show')
+        } else {
+            $x('#sesName').html(data.name);
+        }
+    });
+}
+
+function confirm_overwrite() {
     $x.post('/SDproc/save_ses', {name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
         var data = JSON.parse(data); // this is the session ID
         /* status is null because user did not change the session name */
@@ -213,12 +218,6 @@ function overwrite_session() {
                 // sets the session name on screen
                 $x('#sesName').html(data.name);
             });
-        } else {
-            // calls the save session function again, returns the ID and deletes session with that ID
-            $x.post('/SDproc/save_ses',{name: $x('#sesName').text(), comment: $x('#ssComment').val(), checked: 0}, function(data) {
-                $x.post('/SDproc/delete_session',{ id: data, type: "session"});
-            });
-            $x('#sesName').html(data.name);
         }
     });
 }
