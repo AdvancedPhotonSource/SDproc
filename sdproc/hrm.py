@@ -86,15 +86,6 @@ def dataFormat():
     temporarily leaving the page. Defaults are assigned to all files within this method.
     :return:
     """
-    saveSessionForm = SessionForm()
-    if saveSessionForm.submit.data and saveSessionForm.validate_on_submit():
-        session = SessionFiles(name=saveSessionForm.session_name.data, user_id=current_user.id, user=current_user)
-        db.session.add(session)
-        db.session.commit()
-        current_user.current_session = session.name
-        print current_user.current_session
-        return redirect(url_for("hrm.dataFormat"))
-        # return redirect(url_for("sessions.continue_session", type="session", sessionID=session.id))
     user = current_user
     thisSession = current_user.current_session
     if thisSession != 'None':
@@ -103,27 +94,9 @@ def dataFormat():
         comments = None
     findPlot = request.form.get('plot', type=int)
     unit = request.form.get('unit', type=str)
-    fdata = []
-    hrmData = []
     nameID = str(uuid.uuid4())
-    files = DataFile.query.filter_by(type="mda").all()
-    for instance in files:
-        path = file_path("." + instance.type, instance.path)
-        fsize = FileUtility.size(path)
-        lastMod = FileUtility.modified(path)
-        temp = lastMod
-        modname = [instance.name + temp]
-        if instance.type != 'dat':
-            fdata.insert(0,
-                         {'name': instance.name, 'path': path, 'id': instance.id, 'comment': instance.comment,
-                          'authed': instance.authed, 'size': fsize, 'modified': lastMod, 'modname': modname})
 
-    hrms = HRM.query.order_by('id')
-    for instance in hrms:
-        hrmData.insert(0, {'name': instance.name, 'hrm_e0': instance.hrm_e0, 'hrm_bragg1': instance.hrm_bragg1,
-                           'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
-                           'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
-                           'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
+    user_sessions = SessionFiles.query.filter_by(user_id=user.id).all()
 
     if findPlot != 1:
         form = InputForm(request.form)
@@ -281,9 +254,8 @@ def dataFormat():
 
             code = format.plot
             form = GraphingUtility.populate_from_instance(format)
-    return render_template("new_df.html", user=user, code=code, form=form, againstE=againstE, data=fdata,
-                           ses=thisSession, saveSessionForm=saveSessionForm,
-                           hrm=hrmData, comments=comments)
+    return render_template("new_df.html", user=user, code=code, form=form, againstE=againstE,
+                           ses=thisSession, comments=comments, user_sessions=user_sessions)
 
 
 @hrmApp.route('/modifyDAT', methods=['GET', 'POST'])

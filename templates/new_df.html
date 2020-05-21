@@ -15,7 +15,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 align-btns">
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ssModal" onclick="populate_session()" title="Save this session so that it can be accessed later">Save Session</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ssModal" title="Save this session so that it can be accessed later">Save Session</button>
                         <a role="button" class="btn btn-primary" href="{{ url_for('hrm.process') }}"
                            title="Proceed with files to generate a DAT">Sum</a>
                     </div>
@@ -321,7 +321,14 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <label for="ssName" class="">Session Name:</label>
-                                <input type="text" class="form-control" id="ssName">
+                                <input type="text" class="form-control" id="ssName" list="sessions">
+                                {% if user_sessions %}
+                                    <datalist id="sessions">
+                                    {% for session in user_sessions %}
+                                        <option>{{ session.name }}</option>
+                                    {% endfor %}
+                                    </datalist>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="row">
@@ -345,7 +352,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div id="confirmModal" class="modal fade" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">

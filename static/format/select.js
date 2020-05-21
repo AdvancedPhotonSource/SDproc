@@ -171,11 +171,11 @@ $x(function() {
 
 
 /* session functions to save/overwrite session*/
-function populate_session(){
-    if ($x('#sesName').text() != 'None'){
-        $x('#ssName').val($x('#sesName').text());
-    }
-}
+//function populate_session(){
+//    if ($x('#sesName').text() != 'None'){
+//        $x('#ssName').val("HEllo");
+//    }
+//}
 
 function save_session() {
     if (localStorage.getItem('previous2') === null) {
@@ -216,14 +216,10 @@ function confirm_overwrite() {
             // calls the save function again to save the new updated session with the same name
             $x.post('/SDproc/save_ses',{name: $x('#ssName').val(), comment: $x('#ssComment').val(), checked: 1}, function(data) {
                 // sets the session name on screen
-                $x('#sesName').html(data.name);
+                $x('#sesName').html(data);
             });
         }
     });
-}
-
-function cancel_overwrite() {
-    $x("#ssModal").modal("show");
 }
 
 //function save_comments() {
