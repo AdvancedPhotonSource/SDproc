@@ -70,7 +70,6 @@ import json
 import numpy
 import uuid
 from sqlalchemy import and_
-from sessions.forms import SessionForm
 
 hrmApp = Blueprint('hrm', __name__)
 
