@@ -72,7 +72,7 @@ def add_hrm():
         db.session.add(hrm)
         db.session.commit()
         flash('An HRM has been added.', 'success')
-        return redirect(url_for('admin.admin2'))
+        return redirect(url_for('admin.admin'))
     return render_template('add_hrm.html', title='Add HRM', form=form)
 
 
@@ -82,7 +82,7 @@ def delete_hrm(id_value):
     db.session.delete(hrm)
     db.session.commit()
     flash(hrm.name + ' has been deleted.', 'info')
-    return redirect(url_for('admin.admin2'))
+    return redirect(url_for('admin.admin'))
 
 
 @a.route('/profile/<string:username>', methods=['GET', 'POST'])
@@ -138,7 +138,7 @@ def decline_user(id_value):
     db.session.delete(user)
     db.session.delete(notification)
     db.session.commit()
-    return redirect(url_for('admin.admin2'))
+    return redirect(url_for('admin.admin'))
 
 
 @a.route('/approve_user/<int:id_value>', methods=['GET', 'POST'])
@@ -151,7 +151,7 @@ def approve_user(id_value):
     root = DataFile(name='/' + user.username + '/', authed=str(user.id), comChar='#', parentID=0, treeType="Root")
     db.session.add(root)
     db.session.commit()
-    return redirect(url_for('admin.admin2'))
+    return redirect(url_for('admin.admin'))
 
 
 @a.route('/delete_user/<string:username>', methods=['GET', 'POST'])
@@ -167,7 +167,7 @@ def delete_user(username):
     db.session.delete(user)
     db.session.commit()
     flash(user.username + ' has been deleted.', 'info')
-    return redirect(url_for('admin.admin2'))
+    return redirect(url_for('admin.admin'))
 
 
 @a.route('/freeze_user/<string:username>', methods=['GET', 'POST'])

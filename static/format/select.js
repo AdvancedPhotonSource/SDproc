@@ -17,15 +17,21 @@ $x(function (){
                     setPlotAgainst();
                 });
             });
+            $x.post('/SDproc/get_hrm', { fileID: $x(this).data('value') }, function(hrmName) {
+                $x('#HRM').text(hrmName);
+            });
         } else {
             var nextID = $x(this).data('value');
             previous = localStorage.getItem('previous2');
             $x('#idnum').val(previous);
-            localStorage.setItem('previous2', $x(this).data('value'));
+            localStorage.setItem('previous2', nextID);
             $x('#meta-form').submit();
             $x.post('/SDproc/get_fsession_comment', { id: nextID }, function(data) {
                 $x('#comment').val(data);
                 setPlotAgainst();
+            });
+            $x.post('/SDproc/get_hrm', { fileID: $x(this).data('value') }, function(hrmName) {
+                $x('#HRM').text(hrmName);
             });
         }
     });
@@ -469,16 +475,16 @@ function fitPeak(sendOut){
 }
 
 $x(function (){
-    $x('#HRMdd li a').on('click', function(event){
+    $x('#HRMdd a').on('click', function(event){
         var hrm = event.target.text;
         previous = localStorage.getItem('previous2');
         $x.post('/SDproc/updateHRM', {idnum: previous, hrm: hrm}, function(data){
-            $x('#HRM').text(data)
+            $x('#HRM').text(data);
             $x('#HRM').append("<span class='caret'></span>");
             $x('#meta-form').trigger('change');
-        })
-    })
-})
+        });
+    });
+});
 
 function outputFile(){
     waitPeak = $x.Deferred();

@@ -4,8 +4,8 @@ from flask_login import current_user, login_required
 from db.db_model import db, HRM, CurrentMeta
 from sqlalchemy import and_
 
-
 hrms = Blueprint('hrms', __name__)
+
 
 @hrms.route('/hrmInfo', methods=['GET', 'POST'])
 @login_required
@@ -73,18 +73,18 @@ def addHRM():
 @hrms.route('/updateHRM', methods=['GET', 'POST'])
 @login_required
 def updateHRM():
-    '''
-	Sets the HRM to one of the static parameter sets in the HRM database
+    """
+    Sets the HRM to one of the static parameter sets in the HRM database
 
-	HRM is used primarily with energy_xtal, energy_xtal_temp, and temp_corr on the /format page.
-	:return:
-	'''
+    HRM is used primarily with energy_xtal, energy_xtal_temp, and temp_corr on the /format page.
+    :return:
+    """
     idthis = request.form.get('idnum', type=int)
     hrm = request.form.get('hrm', type=str)
-    format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
-                                                                CurrentMeta.file_id == idthis,
-                                                                CurrentMeta.session == current_user.current_session)).first()
-    hrmInstance = db.session.query(HRM).filter_by(name=hrm).first()
+    format_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                    CurrentMeta.file_id == idthis,
+                                                    CurrentMeta.session == current_user.current_session)).first()
+    hrmInstance = HRM.query.filter_by(name=hrm).first()
     hrm = {'name': hrmInstance.name, 'hrm_e0': hrmInstance.hrm_e0, 'hrm_bragg1': hrmInstance.hrm_bragg1,
            'hrm_bragg2': hrmInstance.hrm_bragg2, 'hrm_geo': hrmInstance.hrm_geo, 'hrm_alpha1': hrmInstance.hrm_alpha1,
            'hrm_alpha2': hrmInstance.hrm_alpha2, 'hrm_theta1_sign': hrmInstance.hrm_theta1_sign,
@@ -93,3 +93,15 @@ def updateHRM():
     format_instance.hrm = hrm
     db.session.commit()
     return hrmInstance.name
+
+
+@hrms.route('/get_hrm', methods=['GET', 'POST'])
+@login_required
+def get_hrm():
+    file_id = request.form.get("fileID", type=str)
+    f_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.id,
+                                               CurrentMeta.session == current_user.current_session,
+                                               CurrentMeta.file_id == file_id)).first()
+
+    hrm = json.loads(f_instance.hrm)
+    return hrm["name"]

@@ -97,6 +97,16 @@ def dataFormat():
 
     user_sessions = SessionFiles.query.filter_by(user_id=user.id).all()
 
+    hrmData = []
+    hrms = HRM.query.order_by('id').all()
+    x = 0
+    for instance in hrms:
+        hrmData.insert(x, {'name': instance.name, 'hrm_e0': instance.hrm_e0, 'hrm_bragg1': instance.hrm_bragg1,
+                           'hrm_bragg2': instance.hrm_bragg2, 'hrm_geo': instance.hrm_geo,
+                           'hrm_alpha1': instance.hrm_alpha1, 'hrm_alpha2': instance.hrm_alpha2,
+                           'hrm_theta1_sign': instance.hrm_theta1_sign, 'hrm_theta2_sign': instance.hrm_theta2_sign})
+        x += 1
+
     if findPlot != 1:
         form = InputForm(request.form)
         plt.figure(figsize=(10, 7))
@@ -254,7 +264,7 @@ def dataFormat():
             code = format.plot
             form = GraphingUtility.populate_from_instance(format)
     return render_template("new_df.html", user=user, code=code, form=form, againstE=againstE,
-                           ses=thisSession, comments=comments, user_sessions=user_sessions)
+                           ses=thisSession, comments=comments, user_sessions=user_sessions, hrms=hrmData)
 
 
 @hrmApp.route('/modifyDAT', methods=['GET', 'POST'])
