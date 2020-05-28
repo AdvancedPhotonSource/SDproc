@@ -98,6 +98,9 @@ def updateHRM():
 @hrms.route('/get_hrm', methods=['GET', 'POST'])
 @login_required
 def get_hrm():
+    """
+    This function is used to display the current HRM for a file selected during the Scans tab
+    """
     file_id = request.form.get("fileID", type=str)
     f_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.id,
                                                CurrentMeta.session == current_user.current_session,
