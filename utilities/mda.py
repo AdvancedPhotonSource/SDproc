@@ -497,6 +497,7 @@ def EPICS_types(n):
 	else:
 		return ("Unexpected type %d" % n)
 
+
 def readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=None, readQuick=False):
 	"""usage readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=None, readQuick=False)"""
 	global use_numpy
@@ -507,7 +508,7 @@ def readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=
 	use_numpy = useNumpy
 
 	dim = []
-	if (fname == None):
+	if fname is None:
 		if have_Tkinter:
 			fname = tkFileDialog.Open().show()
 		elif have_wx:
@@ -523,14 +524,14 @@ def readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=
 		else:
 			print "No file specified, and no file dialog could be opened"
 			return None
-	if (not os.path.isfile(fname)):
-		if (not fname.endswith('.mda')):
+	if not os.path.isfile(fname):
+		if not fname.endswith('.mda'):
 			fname = fname + '.mda'
-		if (not os.path.isfile(fname)):
+		if not os.path.isfile(fname):
 			print fname, "not found"
 			return None
 
-	if (outFile == None):
+	if outFile == None:
 		out = sys.stdout
 	else:
 		out = open(outFile, 'w')

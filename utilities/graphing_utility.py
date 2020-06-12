@@ -1,4 +1,4 @@
-'''
+"""
 -    Copyright (c) UChicago Argonne, LLC. All rights reserved.
 -
 -    Copyright UChicago Argonne, LLC. This software was produced
@@ -41,10 +41,12 @@
 -    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
-'''
+"""
 
-from operator import and_
+from sqlalchemy import and_
 import mpld3
+import os
+from flask import current_app
 from sdproc.forms.input_form import InputForm
 from utilities.file_utility import FileUtility
 from flask_login import current_user
@@ -59,10 +61,14 @@ from utilities.sdproc_mpld3.hide_legend import HideLegend
 from utilities.sdproc_mpld3.interactive_legend import InteractiveLegend
 import matplotlib.pyplot as plt
 import matplotlib
+
 matplotlib.use('Agg')
 
 
-class GraphingUtility():
+class GraphingUtility:
+
+    def __init__(self):
+        pass
 
     @staticmethod
     def simple_plot(data, xmax, filename, linenames, legend, sized):
@@ -98,14 +104,14 @@ class GraphingUtility():
 
     @staticmethod
     def mergePlots(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNames, pltLeg):
-        '''Merges a list of plots using linear interpolation then plots the result'''
+        """Merges a list of plots using linear interpolation then plots the result"""
         plt.close('all')
         fig = plt.figure(figsize=(10, 7))
         css = """
-	    .legend-box{
-	        cursor: pointer;
-	    }
-	    """
+        .legend-box {
+            cursor: pointer;
+        }
+        """
         count1 = 0
         count2 = 0
         labels = []
@@ -279,14 +285,14 @@ class GraphingUtility():
 
     @staticmethod
     def mergeBin(allycords, allxmax, allagainstE, alldata, allLegendNames, allFileNames, pltLeg, binWidth):
-        '''Merges a list of plots with binning and plots the result'''
+        """Merges a list of plots with binning and plots the result"""
         plt.close('all')
         fig = plt.figure(figsize=(10, 7))
         css = """
-	    .legend-box{
-	        cursor: pointer;
-	    }
-	    """
+        .legend-box {
+            cursor: pointer;
+        }
+        """
         count1 = 0
         count2 = 0
         labels = []
@@ -296,8 +302,8 @@ class GraphingUtility():
             for plot in alldata:
                 xs = range(1, len(plot) + 1)
                 ys = plot
-                if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' or allagainstE[
-                    count1] == 'Energy xtal w/T':
+                if allagainstE[count1] == 'Energy' or allagainstE[count1] == 'Energy xtal' \
+                        or allagainstE[count1] == 'Energy xtal w/T':
                     xs = alldata[count1][1]
                 plt.plot(xs, ys)
                 # plt.plot(xs[allxmax[count1][count2]], ys[allxmax[count2]], '-bD')
@@ -356,15 +362,15 @@ class GraphingUtility():
                 for j in range(len(endX)):
                     for k in range(len(endX[j])):
                         if endX[j][k][1] == binIdx:
-                            if sumXvals[binIdx - 1] == None:
+                            if sumXvals[binIdx - 1] is None:
                                 sumXvals[binIdx - 1] = endX[j][k][0]
                                 sumYvals[binIdx - 1] = endY[j][k][0]
                             else:
                                 sumXvals[binIdx - 1] = (sumXvals[binIdx - 1] + endX[j][k][0]) / 2
                                 sumYvals[binIdx - 1] = sumYvals[binIdx - 1] + endY[j][k][0]
                 binIdx += 1
-            sumXvals = [value for value in sumXvals if value != None]
-            sumYvals = [value for value in sumYvals if value != None]
+            sumXvals = [value for value in sumXvals if value is not None]
+            sumYvals = [value for value in sumYvals if value is not None]
             line = ax.plot(sumXvals, sumYvals, color='k', alpha=0, label='Sum of selected')
             lines.append(line[0])
 
@@ -386,10 +392,10 @@ class GraphingUtility():
         plt.close('all')
         fig = plt.figure(figsize=(10, 7))
         css = """
-	    .legend-box{
-	        cursor: pointer;
-	    }
-	    """
+        .legend-box{
+            cursor: pointer;
+        }
+        """
         xs = []
         ys = []
         labels = []
@@ -459,7 +465,7 @@ class GraphingUtility():
 
         for idx, column in enumerate(data):
             for i in used:
-                if (idx) == i:
+                if idx == i:
                     dat = [float(j) for j in data[i]]
                     toNumpy.append(dat)
         npData = numpy.array(toNumpy)
@@ -628,10 +634,10 @@ class GraphingUtility():
     def addLines(line1, line2):
         fig = plt.figure(figsize=(10, 7))
         css = """
-	            .legend-box{
-	                cursor: pointer;
-	            }
-	            """
+        .legend-box {
+            cursor: pointer;
+        }
+        """
         labels = []
         lines = []
         nameID = str(uuid.uuid4())
@@ -665,14 +671,18 @@ class GraphingUtility():
     def peakFit(idthis, energyType, signalType, unit, fitType, fitRange, inputCord, localRange):
         if fitType == 'Unfit':
             fitType = 'AtMax'
-        file_instance = db.session.query(DataFile).filter_by(id=idthis).first()
-        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
-                                                                    CurrentMeta.file_id == file_instance.id,
-                                                                    CurrentMeta.session == current_user.current_session)).first()
+        file_instance = DataFile.query.filter_by(id=idthis).first()
+
+        format_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.id,
+                                                        CurrentMeta.file_id == file_instance.id,
+                                                        CurrentMeta.session == current_user.current_session)).first()
+
         if str(file_instance.type) == 'mda':
-            data, name, unusedpath = FileUtility.readMda(file_instance.path)
+            path = os.path.join(current_app.root_path, 'static/uploaded_files', 'mda', file_instance.path)
+            data, name, unusedpath = FileUtility.readMda(path)
         else:
-            data, name, unusedpath = FileUtility.readAscii(file_instance.path, file_instance.comChar)
+            path = os.path.join(current_app.root_path, 'static/uploaded_files', 'mda', file_instance.path)
+            data, name, unusedpath = FileUtility.readAscii(path, file_instance.comChar)
         form = GraphingUtility.populate_from_instance(format_instance)
         columns, bools = GraphingUtility.splitForm(form)
         basedColumns = GraphingUtility.zeroBaseColumns(columns)
@@ -782,11 +792,12 @@ class GraphingUtility():
 
     @staticmethod
     def atMax(ycords, npXcords, xmax, fitRange):
-        '''
-	    Finds the center of the npXcords that fall within the fitRange
+        """
+        Finds the center of the npXcords that fall within the fitRange
 
-	    Calls centroid to get the actual center while this primarily does the bounding to collect the points to pass to centroid.
-	    '''
+        Calls centroid to get the actual center while this primarily does the bounding to collect the points to
+        pass to centroid.
+        """
         leftBound = (GraphingUtility.find_nearest(npXcords, xmax[1] - (fitRange / 2)))
         rightBound = (GraphingUtility.find_nearest(npXcords, xmax[1] + (fitRange / 2)))
         targetRange = [x for x in npXcords if x >= leftBound]

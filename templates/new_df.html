@@ -231,36 +231,32 @@
                 <div class="row">
                     <div class="col-md-4 center-btn">
                         <div class="btn-group dropup">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Signal
-                    </button>
-                    <div class="dropdown-menu" id="peakSignalDD">
-                        <a class="dropdown-item" onclick="setPeakSignal(event)">Signal</a>
-                        <a class="dropdown-item" onclick="setPeakSignal(event)">Signal Normalized</a>
-                    </div>
-                </div>
+                            <button type="button" id="peakSignalType" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Signal</button>
+                            <div class="dropdown-menu" id="peakSignalDD">
+                                <a class="dropdown-item" onclick="setPeakSignal(event)">Signal</a>
+                                <a class="dropdown-item" onclick="setPeakSignal(event)">Signal Normalized</a>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-4 center-btn">
                         <div class="btn-group dropup">
-                    <button type="button" class="btn btn-default dropdown-toggle" id="peakEnergyType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Energy
-                    </button>
-                    <div class="dropdown-menu" id="peakEnergyDD">
-                        <a class="dropdown-item" onclick="setPeakEnergy(event)">Energy</a>
-                        <a class="dropdown-item" onclick="setPeakEnergy(event)">Energy xtal</a>
-                        <a class="dropdown-item" onclick="setPeakEnergy(event)">Energy xtal w/T</a>
-                    </div>
-                </div>
+                            <button type="button" class="btn btn-default dropdown-toggle" id="peakEnergyType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Energy</button>
+                            <div class="dropdown-menu" id="peakEnergyDD">
+                                <a class="dropdown-item" onclick="setPeakEnergy(event)">Energy</a>
+                                <a class="dropdown-item" onclick="setPeakEnergy(event)">Energy xtal</a>
+                                <a class="dropdown-item" onclick="setPeakEnergy(event)">Energy xtal w/T</a>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-4 center-btn">
                         <div class="btn-group dropup">
-                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="fitMethod" aria-haspopup="true" aria-expanded="false">
-                        Centroid
-                    </button>
-                    <div class="dropdown-menu" id="fitMethodDD">
-                        <a class="dropdown-item">None yet implemented</a>
-                    </div>
-                </div>
+                            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="fitMethod" aria-haspopup="true" aria-expanded="false">
+                                Centroid
+                            </button>
+                            <div class="dropdown-menu" id="fitMethodDD">
+                                <a class="dropdown-item">None yet implemented</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

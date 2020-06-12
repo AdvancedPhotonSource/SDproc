@@ -1,4 +1,4 @@
-'''
+"""
 -    Copyright (c) UChicago Argonne, LLC. All rights reserved.
 -
 -    Copyright UChicago Argonne, LLC. This software was produced
@@ -41,7 +41,7 @@
 -    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
-'''
+"""
 
 import os
 
@@ -118,9 +118,11 @@ def dataFormat():
     else:
         idthis = request.form.get('idnext', type=int)
         file_instance = db.session.query(DataFile).filter(DataFile.id == idthis).first()
-        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
-                                                                    CurrentMeta.file_id == file_instance.id,
-                                                                    CurrentMeta.session == current_user.current_session)).first()
+
+        format_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                        CurrentMeta.file_id == file_instance.id,
+                                                        CurrentMeta.session == current_user.current_session)).first()
+
         if format_instance is not None:
             againstE = format_instance.against_E
             form = GraphingUtility.populate_from_instance(format_instance)
@@ -138,7 +140,7 @@ def dataFormat():
                 data, name, unusedpath = FileUtility.readAscii(path, file_instance.comChar)
             for i in range(len(bools)):
                 if bools[i].data:
-                    if columns[i].data == None:
+                    if columns[i].data is None:
                         if i == 1:
                             energy = GraphingUtility.energy_xtal(data,
                                                                  GraphingUtility.unicode_to_int(basedColumns[3].data),
@@ -270,32 +272,29 @@ def dataFormat():
 @hrmApp.route('/modifyDAT', methods=['GET', 'POST'])
 @login_required
 def modifyDAT():
-    if current_user.badge_number is None:
-        flash('Please update your badge number in order to continue', 'info')
-        return redirect(url_for('users.profile2'))
-    '''
-	Template function for the modifyDAT page.
+    """
+    Template function for the modifyDAT page.
 
-	Essentially just plotting the DAT information stored in the user's CurrentDAT.
+    Essentially just plotting the DAT information stored in the user's CurrentDAT.
 
-	Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
-	:return:
-	'''
+    Must have generated a DAT file via either a DAT session being loaded or summing data on the sum page.
+    :return:
+    """
     try:
         DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
     except Exception, e:
         code = 'No DAT selected'
         return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
-    if DAT == None:
+    if DAT is None:
         code = 'No DAT selected'
         return render_template("new_mdat.html", user=current_user, ses=current_user.current_session, code=code)
     user = db.session.query(User).filter_by(username=current_user.username).first()
     fig = plt.figure(figsize=(10, 7))
     css = """
-	.legend-box{
-		cursor: pointer;
-	}
-	"""
+    .legend-box {
+        cursor: pointer;
+    }
+    """
     xs = []
     ys = []
     labels = []
@@ -342,9 +341,12 @@ def process():
             except AttributeError:
                 flash('Please select a file')
                 return redirect(url_for('waitProc'))
-            format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
-                                                                        CurrentMeta.file_id == file_instance.id,
-                                                                        CurrentMeta.session == current_user.current_session)).first()
+
+            format_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                            CurrentMeta.file_id == file_instance.id,
+                                                            CurrentMeta.session == current_user.current_session)) \
+                .first()
+
             againstE = format_instance.against_E
             form = GraphingUtility.populate_from_instance(format_instance)
             columns, bools = GraphingUtility.splitForm(form)
@@ -356,9 +358,9 @@ def process():
             allFileNames = []
             path = file_path("." + file_instance.type, file_instance.path)
             if str(file_instance.type) == 'mda':
-                data, name, unusedpath = GraphingUtility.readMda(path)
+                data, name, unusedpath = FileUtility.readMda(path)
             else:
-                data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
+                data, name, unusedpath = FileUtility.readAscii(path, file_instance.comChar)
             fitType = format_instance.fit_type
             if fitType == 'Unfit':
                 used.append(GraphingUtility.unicode_to_int(basedColumns[0].data))
@@ -415,9 +417,7 @@ def process():
             endmax.append([format(max[0], '.6f'), format(max[1], '.6f')])
             allFileNames.append(file_instance.name)
             if output == 1:
-                outputData = []
-                outputData.append(ycords[0].tolist())
-                outputData.append(ycords[1])
+                outputData = [ycords[0].tolist(), ycords[1]]
                 outputs = json.dumps(outputData)
             code = GraphingUtility.simple_plot(ycords, xmax, file_instance.name, legendNames, pltLeg, 1)
         if idthis is None:
@@ -450,7 +450,7 @@ def process():
                 if str(file_instance.type) == 'mda':
                     data, name, unusedpath = FileUtility.readMda(path)
                 else:
-                    data, name, unusedpath = GraphingUtility.readAscii(path, file_instance.comChar)
+                    data, name, unusedpath = FileUtility.readAscii(path, file_instance.comChar)
                 if bools[1].data:
                     energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
                                                          GraphingUtility.unicode_to_int(basedColumns[4].data),
@@ -504,7 +504,7 @@ def process():
                 allycords.append(ycords)
                 allagainstE.append(againstE)
                 allFileNames.append(file_instance.name)
-            if binWidth == None:
+            if binWidth is None:
                 code, sumxmax, sumymax, sumX, sumY = GraphingUtility.mergePlots(allycords, allxmax, allagainstE,
                                                                                 alldata,
                                                                                 allLegendNames,
@@ -517,9 +517,7 @@ def process():
                                                                               allFileNames,
                                                                               pltLeg, binWidth)
             if output == 1:
-                outputs = []
-                outputs.append(sumX)
-                outputs.append(sumY)
+                outputs = [sumX, sumY]
                 outputs = json.dumps(outputs)
             endmax.append([format(sumxmax, '.6f'), format(sumymax, '.6f')])
             allFileNames.append('Summed Files')
@@ -527,7 +525,7 @@ def process():
         fig = plt.figure(figsize=(7, 6))
         code = mpld3.fig_to_html(fig)
     procEntry = db.session.query(LogBook).filter_by(name="Process Entry").first()
-    if procEntry != None:
+    if procEntry is not None:
         procEntry.plot = code
         db.session.commit()
     else:
@@ -548,13 +546,15 @@ def process():
 @hrmApp.route('/generateOutput', methods=['GET', 'POST'])
 @login_required
 def generateOutput():
-    '''
-	This pulls data from a request to determine which type of file needs to be generated and redirects the file to output.
+    """
+    This pulls data from a request to determine which type of file needs to be generated and redirects the file to
+    output.
 
-	The outType that is sent from the request data determines which type of output to compile the given data into.
-	If the output is being saved to the server a copy is made in app.config['UPLOAD_DIR'].  Otherwise the file is sent to /sendOut where it is downloaded to the user's computer.
-	:return:
-	'''
+    The outType that is sent from the request data determines which type of output to compile the given data into.
+    If the output is being saved to the server a copy is made in app.config['UPLOAD_DIR'].  Otherwise the file is sent
+    to /sendOut where it is downloaded to the user's computer.
+    :return:
+    """
     form = InputForm(request.form)
     id = request.form.get('idnum', type=str)
     outType = request.form.get('outType', type=int)
@@ -570,9 +570,11 @@ def generateOutput():
         # this means the user clicked the output button on the Scans tab
         # lets the user download the output of mda and save the file
         file_instance = db.session.query(DataFile).filter_by(id=int(id)).first()
-        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
-                                                                    CurrentMeta.file_id == int(id),
-                                                                    CurrentMeta.session == current_user.current_session)).first()
+
+        format_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                        CurrentMeta.file_id == int(id),
+                                                        CurrentMeta.session == current_user.current_session)).first()
+
         if str(file_instance.type) == 'mda':
             path = file_path("." + file_instance.type, file_instance.path)
             data, name, unusedpath = FileUtility.readMda(path)
@@ -583,7 +585,7 @@ def generateOutput():
         basedColumns = GraphingUtility.zeroBaseColumns(columns)
         for i in range(len(bools)):
             if bools[i].data:
-                if columns[i].data == None:
+                if columns[i].data is None:
                     if i == 1:
                         energy = GraphingUtility.energy_xtal(data, GraphingUtility.unicode_to_int(basedColumns[3].data),
                                                              GraphingUtility.unicode_to_int(basedColumns[4].data),
@@ -627,12 +629,8 @@ def generateOutput():
         # same as outType == 3 but with one file (possibly)
         file_instance = db.session.query(DataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
-        output = []
-        output.append(cords[0])
-        output.append(cords[1])
-        colNames = []
-        colNames.append("Energy")
-        colNames.append("Signal")
+        output = [cords[0], cords[1]]
+        colNames = ["Energy", "Signal"]
         if datFName is not None:
             filename = FileUtility.writeOutput(output, colNames, datFName, '')
         else:
@@ -642,23 +640,15 @@ def generateOutput():
         # this is for multiple files
         jidlist = json.loads(id)
         cords = json.loads(cordData)
-        output = []
-        output.append(cords[0])
-        output.append(cords[1])
-        colNames = []
-        colNames.append("Energy")
-        colNames.append("Signal")
+        output = [cords[0], cords[1]]
+        colNames = ["Energy", "Signal"]
         filename = FileUtility.writeOutput(output, colNames, jidlist, datFName)
     elif outType == 4:
         # same as outType == 5 but this is only with one file
         file_instance = db.session.query(DataFile).filter_by(id=int(id)).first()
         cords = json.loads(cordData)
-        output = []
-        output.append(cords[0])
-        output.append(cords[1])
-        colNames = []
-        colNames.append("Energy")
-        colNames.append("Signal")
+        output = [cords[0], cords[1]]
+        colNames = ["Energy", "Signal"]
         filename = FileUtility.writeOutput(output, colNames, datFName, '')
         if DBSave != 0:
             dfile = DataFile()
@@ -689,12 +679,8 @@ def generateOutput():
         # saves the file for the user to look at later
         jidlist = json.loads(id)
         cords = json.loads(cordData)
-        output = []
-        output.append(cords[0])
-        output.append(cords[1])
-        colNames = []
-        colNames.append("Energy")
-        colNames.append("Signal")
+        output = [cords[0], cords[1]]
+        colNames = ["Energy", "Signal"]
         filename = FileUtility.writeOutput(output, colNames, jidlist, datFName)
         if DBSave != 0:
             dfile = DataFile()
@@ -728,9 +714,7 @@ def generateOutput():
         data = json.loads(DAT.DAT)
         output.append(data[0])
         output.append(data[1])
-        colNames = []
-        colNames.append("Energy")
-        colNames.append("Signal")
+        colNames = ["Energy", "Signal"]
         filename = FileUtility.writeOutput(output, colNames, datFName, '')
     elif outType == 7:
         # clicks the "save to server" button the Modify DAT Page
@@ -740,9 +724,7 @@ def generateOutput():
         data = json.loads(DAT.DAT)
         output.append(data[0])
         output.append(data[1])
-        colNames = []
-        colNames.append("Energy")
-        colNames.append("Signal")
+        colNames = ["Energy", "Signal"]
         filename = FileUtility.writeOutput(output, colNames, datFName, '')
         dfile = DataFile()
         dfile.name = datFName + ".dat"
@@ -794,12 +776,13 @@ def sendOut(filename, displayName):
 @hrmApp.route('/peakFit', methods=['GET', 'POST'])
 @login_required
 def peak_at_max():
-    '''
-	Peak fitting function that uses either the file defaults or what the user has done to the file on the format page.
+    """
+    Peak fitting function that uses either the file defaults or what the user has done to the file on the format page.
 
-	Currently peak fitting is done using a centroid analysis.  All files are peak fitted before being summed up on the sum page.
-	:return:
-	'''
+    Currently peak fitting is done using a centroid analysis.  All files are peak fitted before being summed up on the
+    sum page.
+    :return:
+    """
     idthis = request.form.get('idnum', type=int)
     fitType = request.form.get('fitType', type=str)
     inputCord = request.form.get('inputCord', type=float)
@@ -822,18 +805,18 @@ def peak_at_max():
 @hrmApp.route('/setDAT', methods=['GET', 'POST'])
 @login_required
 def setDAT():
-    '''
-	Updates the current DAT file that the user is viewing with a DAT file that was selected.
+    """
+    Updates the current DAT file that the user is viewing with a DAT file that was selected.
 
-	This is usually called from the /select page when choosing a DAT file.
+    This is usually called from the /select page when choosing a DAT file.
 
-	Sets the user's CurrentDAT.
-	:return:
-	'''
+    Sets the user's CurrentDAT.
+    :return:
+    """
     DAT = request.form.get('DAT', type=str)
     DName = request.form.get('DName', type=str)
     meta = db.metadata
-    for table in (meta.sorted_tables):
+    for table in meta.sorted_tables:
         if table.name == 'CurrentDAT':
             db.session.execute(table.delete())
     db.session.commit()
@@ -868,18 +851,18 @@ def setDAT():
 @hrmApp.route('/remBackDAT', methods=['GET', 'POST'])
 @login_required
 def remBackDAT():
-    '''
-	Removes the background data from a DAT file based on user specifications.
+    """
+    Removes the background data from a DAT file based on user specifications.
 
-	Either removes a flat value, a linear value, or a averaged linear value from the DAT data stored in CurrentDAT.
+    Either removes a flat value, a linear value, or a averaged linear value from the DAT data stored in CurrentDAT.
 
-	Updates CurrentDAT with the data for the new line.
-	:return:
-	Calls /modifyDAT as that will plot the altered CurrentDAT.
-	'''
+    Updates CurrentDAT with the data for the new line.
+    :return:
+    Calls /modifyDAT as that will plot the altered CurrentDAT.
+    """
     show = request.form.get('show', type=int)
     flatVal = request.form.get('flatVal', type=int)
-    if flatVal != None:
+    if flatVal is not None:
         if show == 0:
             DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
@@ -897,7 +880,7 @@ def remBackDAT():
     leftY = request.form.get('leftY', type=float)
     rightX = request.form.get('rightX', type=float)
     rightY = request.form.get('rightY', type=float)
-    if leftX != None:
+    if leftX is not None:
         if show == 0:
             DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
             data = json.loads(DAT.DAT)
@@ -907,7 +890,7 @@ def remBackDAT():
             tempX = []
             tempY = []
             for i in range(len(data[0])):
-                if data[0][i] > leftX and data[0][i] < rightX:
+                if leftX < data[0][i] < rightX:
                     tempX.append(data[0][i])
                     tempY.append(data[1][i])
             data[0] = tempX
@@ -924,7 +907,7 @@ def remBackDAT():
             return code
     leftIn = request.form.get('leftIn', type=int)
     rightIn = request.form.get('rightIn', type=int)
-    if leftIn != None:
+    if leftIn is not None:
         if show == 0:
             cords = GraphingUtility.calcAverageBack(leftIn, rightIn)
             leftSlope, leftIntercept = numpy.polyfit(numpy.array([cords[0], cords[4]]),
@@ -938,7 +921,7 @@ def remBackDAT():
             tempX = []
             tempY = []
             for i in range(len(data[0])):
-                if data[0][i] > leftIn and data[0][i] < rightIn:
+                if leftIn < data[0][i] < rightIn:
                     tempX.append(data[0][i])
                     tempY.append(data[1][i])
             data[0] = tempX
@@ -968,7 +951,7 @@ def remBackDAT():
 @hrmApp.route('/resetDAT', methods=['GET', 'POST'])
 @login_required
 def resetDAT():
-    '''Reverts the CurrentDAT back to how it was originally'''
+    """Reverts the CurrentDAT back to how it was originally"""
     DAT = db.session.query(CurrentDAT).filter(CurrentDAT.user == current_user).first()
     DAT.DAT = DAT.originDAT
     db.session.commit()
@@ -978,12 +961,13 @@ def resetDAT():
 @hrmApp.route('/close_plots', methods=['GET', 'POST'])
 @login_required
 def close_plots():
-    '''
-	Closes all existing plots.
+    """
+    Closes all existing plots.
 
-	As the program is generating a large number of plots quite regularly this is a function to easily allow them to be closed.
-	:return:
-	'''
+    As the program is generating a large number of plots quite regularly this is a function to easily allow them to be
+    closed.
+    :return:
+    """
     if request.method == 'POST':
         plt.close("all")
     return 'Closed'
@@ -992,21 +976,22 @@ def close_plots():
 @hrmApp.route('/save_graph', methods=['GET', 'POST'])
 @login_required
 def save_graph():
-    '''
-	Updates the current session with information that the user has supplied on the data page.
+    """
+    Updates the current session with information that the user has supplied on the data page.
 
-	This session is stored temporarily for each file and is updated whenever a change is made on the data page.
-	The data is passed in the InputForm that is defined in forms.py and saved in the CurrentMeta database table.
-	:return:
-	'''
+    This session is stored temporarily for each file and is updated whenever a change is made on the data page.
+    The data is passed in the InputForm that is defined in forms.py and saved in the CurrentMeta database table.
+    :return:
+    """
     form = InputForm(request.form)
     idthis = request.form.get("idnum", type=int)
     if idthis is not None:
         againstE = request.form.get("agaE", type=str)
         file_instance = db.session.query(DataFile).filter_by(id=idthis).first()
-        format_instance = db.session.query(CurrentMeta).filter(and_(CurrentMeta.user_id == current_user.get_id(),
-                                                                    CurrentMeta.file_id == file_instance.id,
-                                                                    CurrentMeta.session == current_user.current_session)).first()
+
+        format_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user.get_id(),
+                                                        CurrentMeta.file_id == file_instance.id,
+                                                        CurrentMeta.session == current_user.current_session)).first()
 
         format_instance.energy = form.energy.data
         format_instance.xtal1A = form.xtal1A.data
