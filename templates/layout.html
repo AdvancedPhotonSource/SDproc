@@ -73,11 +73,11 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
-                        <a class="nav-item nav-link" href="{{ url_for('files.upload_files') }}"><i class="fas fa-file-upload"></i>Manage Files</a>
+                        <a class="nav-item nav-link" href="{{ url_for('files.upload_files') }}">Files</a>
                         <a class="nav-item nav-link" href="{{ url_for('sessions.index2') }}">Sessions</a>
                         <a class="nav-item nav-link" href="{{ url_for('hrm.dataFormat') }}">Scans</a>
                         <a class="nav-item nav-link" href="{{ url_for('hrm.process') }}">Sum</a>
-                        <a class="nav-item nav-link" href="{{ url_for('hrm.modifyDAT') }}">Modify DAT</a>
+                        <a class="nav-item nav-link" href="{{ url_for('hrm.modifyDAT') }}">Spectrum</a>
                         {% if current_user.is_authenticated %}
                             {% if current_user.isAdmin == 1 %}
                                 <a class="nav-item nav-link" href="{{ url_for('admin.admin') }}">Admin</a>

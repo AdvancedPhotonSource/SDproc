@@ -9,7 +9,8 @@
             <p>Upload or delete files to manage your database.</p>
             <div class="row">
                 <div class="col-md-4">
-                    <button class="btn btn-primary btn-md" id="globusConnect" data-toggle="modal" data-target="#dmModal">DM Files</button>
+                    <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#modal_3id">3ID</button>
+                    <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#modal_30id">30ID</button>
                     <p>Open DM Window</p>
                 </div>
                 <div class="col-md-8">
@@ -50,22 +51,44 @@
         </div>
     </div>
 
-    <div class="modal fade" id="dmModal" tabindex="-1" role="dialog" aria-labelledby="globusModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="modal_3id" tabindex="-1" role="dialog" aria-labelledby="globusModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalTitle">Please select a file or files to be downloaded</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" onclick="deselect()" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body" id="globus-modal-body">
                     <div class="scroll">
-                        <div id="dm_tree"></div>
+                        <div id="3id_tree"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="deselect()" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="download()">Download File(s)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal_30id" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="30idModalTitle">Please select a file or files to be downloaded</h5>
+                    <button type="button" class="close" onclick="deselect()" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="30id-modal-body">
+                    <div class="scroll">
+                        <div id="30id_tree"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="deselect()" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="download()">Download File(s)</button>
                 </div>
             </div>

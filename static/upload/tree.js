@@ -59,10 +59,28 @@ $y(document).ready(function() {
                 });
     });
 
-    $y("#dm_tree").jstree({
+    $y("#3id_tree").jstree({
         'core' : {
             'data' : {
-               "url" : "dm_tree",
+               "url" : "3id_tree",
+               "data" : function (node) {
+                    return { "id" :  node.id };
+                },
+                "dataType" : "json"
+            }
+        },
+        'types' : {
+            'Folder' : { "icon" : "/static/images/root.png" },
+            'File' : { "icon" : "jstree-icon jstree-file", "valid_children" : [] },
+            'Root' : { "icon" : "static/images/root.png" }
+        },
+        'plugins' : [ "types", "sort" ]
+    });
+
+    $y("#30id_tree").jstree({
+        'core' : {
+            'data' : {
+               "url" : "30id_tree",
                "data" : function (node) {
                     return { "id" :  node.id };
                 },
@@ -78,22 +96,36 @@ $y(document).ready(function() {
     });
 });
 
+function deselect() {
+    $y("#3id_tree").jstree().deselect_all(true);
+    $y("#30id_tree").jstree().deselect_all(true);
+}
+
 function download() {
-    if ($y("#dm_tree").jstree("get_selected") == false) {
+    if ($y("#3id_tree").jstree("get_selected") == false && $y("#30id_tree").jstree("get_selected") == false) {
         alert("Please select a file.")
     } else {
-        var files = $y('#dm_tree').jstree("get_selected", true);
+        if ($y("#3id_tree").jstree("get_selected") == "") {
+            var files = $y('#30id_tree').jstree("get_selected", true);
+            var station = "30ID";
+        } else if ($y("#30id_tree").jstree("get_selected") == "") {
+            var files = $y('#3id_tree').jstree("get_selected", true);
+            var station = "3ID";
+        }
 
         for(var x = 0; x < files.length; x++) {
             var fileType = files[x].text.substr(files[x].text.length - 3);
             if (files[x].type == 'File' && (fileType == 'mda' || fileType == 'dat' || fileType == 'txt')) {
-                $y.post('/SDproc/get_dm_file', { path: files[x].data.path, exp: files[x].data.expName, type: fileType })
+                $y.post('/SDproc/get_dm_file', { path: files[x].data.path, exp: files[x].data.expName, type: fileType,
+                 parents: String(files[x].parents), station: station })
                 .done(function (d) {
                     $y('#file_tree').jstree(true).refresh();
                 });
             }
         }
-        $x("#dmModal").modal("hide");
+        $x("#modal_3id").modal("hide");
+        $x("#modal_30id").modal("hide");
+        deselect();
     }
 }
 
