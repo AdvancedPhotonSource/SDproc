@@ -215,12 +215,13 @@ class FileUtility:
             f.write('#' + name)
             f.write('\n')
 
+        f.write('#')
         for i in range(len(output)):
             if isinstance(colNames[i], str):
-                f.write(comChar + str(colNames[i]) + '= Column: ' + str(i + 1))
+                f.write(str(colNames[i]) + " ")
             else:
-                f.write(comChar + str(colNames[i].text) + '= Column: ' + str(i + 1))
-            f.write('\n')
+                f.write(str(colNames[i].text) + " ")
+        f.write('\n')
 
         for i in range(len(output[0])):
             for j in range(len(output)):

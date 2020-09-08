@@ -88,7 +88,7 @@ app.register_blueprint(hrms)
 app.register_blueprint(dm)
 
 
-""" REMOVE THIS ON SERVER """
+""" REMOVE THIS ON SERVER - BEGIN """
 
 
 @app.before_request
@@ -98,6 +98,9 @@ def fixURL():
         fixedUrl = url[7:]
         return redirect(fixedUrl, 307)
     return
+
+
+""" END """
 
 
 @login_manager.user_loader
