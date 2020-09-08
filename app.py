@@ -65,11 +65,14 @@ For debugging server use:
         print(str(e))
 '''
 
-# TODO: Ask Nicholas for information on xtrepid UUID and giving permissions to Michael
-# TODO: Subdirectories to file structure and make them searchable within the program
-# TODO: Split comments from fileComments and sessionComments on Scans Tab
-# TODO: Have fileComments searchable on manageFiles and sessionComments searchable on selectSession
-# TODO: Make script to restart server
+# TODO: Fix Output behaviours
+""" 
+Make output button on Scans tab prompt for file name instead of default
+Add a pull down menu or a way to see all the files in the /static/saved_files directory, and select a name,
+then modify or not up to user. User should be able to just type in a file name too
+"""
+# TODO: Fix 'Peak at Point' and 'Fit around Point' options on Scans tab
+
 
 login_manager = LoginManager()
 login_manager.login_view = 'users.login2'

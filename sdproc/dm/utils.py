@@ -5,10 +5,10 @@ from flask_login import current_user
 from db.db_model import db, DataFile
 from sdproc.files.utils import file_type, root_folder, save_user_file, file_path
 
-exApi = ExperimentDsApi(username='user3id', password='j7g$MAC;kG', url='https://xraydtn01.xray.aps.anl.gov:22236')
-fApi = FileCatApi(username='user3id', password='j7g$MAC;kG', url='https://s3iddm.xray.aps.anl.gov:44436')
-exApi30id = ExperimentDsApi(username='user30id', password='xDja3^hjqW.X', url='https://xraydtn02.xray.aps.anl.gov:22236')
-fApi30id = FileCatApi(username='user30id', password='xDja3^hjqW.X', url='https://s30iddm.xray.aps.anl.gov:44436')
+exApi = ExperimentDsApi(username='username', password='password', url='URL')
+fApi = FileCatApi(username='username', password='password', url='URL')
+exApi30id = ExperimentDsApi(username='username', password='password', url='URL')
+fApi30id = FileCatApi(username='username', password='password', url='URL')
 
 
 def get_download(station, path, exp, type):

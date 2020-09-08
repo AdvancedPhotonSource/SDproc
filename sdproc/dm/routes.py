@@ -7,8 +7,8 @@ from sdproc.dm.utils import get_download, add_exp_to_root, lazy_load
 dm = Blueprint('dm', __name__)
 
 
-exApi = ExperimentDsApi(username='user3id', password='j7g$MAC;kG', url='https://xraydtn01.xray.aps.anl.gov:22236')
-fApi = FileCatApi(username='user3id', password='j7g$MAC;kG', url='https://s3iddm.xray.aps.anl.gov:44436')
+exApi = ExperimentDsApi(username='username', password='password', url='URL')
+fApi = FileCatApi(username='username', password='password', url='URL')
 
 
 @dm.route('/get_dm_file', methods=['GET', 'POST'])
