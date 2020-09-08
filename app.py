@@ -43,6 +43,20 @@ __author__ = 'caschmitz'
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
 '''
+from flask import redirect, request
+from flask_login import LoginManager
+from flask_app import app
+from db.api.user_db_api import UserDbApi
+
+from sdproc.hrm import hrmApp
+from sdproc.logbook import logbookApp
+from sdproc.sessions.routes import sessions
+from sdproc.files.routes import files
+from sdproc.users.routes import users
+from sdproc.admin.routes import a
+from sdproc.hrms.routes import hrms
+from sdproc.dm.routes import dm
+
 '''
 For debugging server use:
     try:
@@ -51,48 +65,51 @@ For debugging server use:
         print(str(e))
 '''
 
-# TODO: Ask Nicholas for information on xtrepid UUID and giving permissions to Michael
-# TODO: Subdirectories to file structure and make them searchable within the program
-# TODO: Split comments from fileComments and sessionComments on Scans Tab
-# TODO: Have fileComments searchable on manageFiles and sessionComments searchable on selectSession
-# TODO: Make script to restart server
+# TODO: Fix Output behaviours
+""" 
+Make output button on Scans tab prompt for file name instead of default
+Add a pull down menu or a way to see all the files in the /static/saved_files directory, and select a name,
+then modify or not up to user. User should be able to just type in a file name too
+"""
+# TODO: Fix 'Peak at Point' and 'Fit around Point' options on Scans tab
 
-from flask import redirect,request
-from flask_login import LoginManager
-from flask_app import app
-from db.api.user_db_api import UserDbApi
-
-from sdproc.user import userApp
-from sdproc.hrm import hrmApp
-from sdproc.sdproc import sdprocApp
-from sdproc.logbook import logbookApp
-from sdproc.comment import commentApp
-from sdproc.file import fileApp
 
 login_manager = LoginManager()
+login_manager.login_view = 'users.login2'
+login_manager.login_message_category = 'info'
 login_manager.init_app(app)
 
 userDbApi = UserDbApi()
 
-app.register_blueprint(sdprocApp)
-app.register_blueprint(userApp)
 app.register_blueprint(hrmApp)
 app.register_blueprint(logbookApp)
-app.register_blueprint(fileApp)
-app.register_blueprint(commentApp)
+app.register_blueprint(sessions)
+app.register_blueprint(files)
+app.register_blueprint(users)
+app.register_blueprint(a)
+app.register_blueprint(hrms)
+app.register_blueprint(dm)
 
-""" REMOVE THIS ON SERVER """
+
+""" REMOVE THIS ON SERVER - BEGIN """
+
+
 @app.before_request
 def fixURL():
-	url = request.path
-	if 'SDproc' in url:
-		fixedUrl = url[7:]
-		return redirect(fixedUrl, 307)
-	return
+    url = request.path
+    if 'SDproc' in url:
+        fixedUrl = url[7:]
+        return redirect(fixedUrl, 307)
+    return
+
+
+""" END """
+
 
 @login_manager.user_loader
 def load_user(user_id):
-	return userDbApi.getUserById(user_id)
+    return userDbApi.getUserById(user_id)
+
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)

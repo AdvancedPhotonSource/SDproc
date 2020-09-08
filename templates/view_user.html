@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+
+{% block static %}
+{% endblock static %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row text-center">
+                <div class="col"><a role="button" class="btn btn-outline-primary btn-md" href="{{ url_for('admin.admin') }}"><< Go Back</a></div>
+                <div class="col"><button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button></div>
+                <div class="col">
+                    {% if user.approved == 1 %}
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#freezeModal">Freeze User</button>
+                    {% else %}
+                        <a class="btn btn-primary btn-md active" href="{{ url_for('admin.freeze_user', username=user.username) }}">Unfreeze User</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="content-section">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4">{{ user.username }}'s Profile Info</legend>
+                        <div class="form-group">
+                            {{ form.full_name.label(class="form-control-label") }}
+
+                            {% if form.full_name.errors %}
+                                {{ form.full_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.full_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.full_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.badge_number.label(class="form-control-label") }}
+
+                            {% if form.badge_number.errors %}
+                                {{ form.badge_number(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.badge_number.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.badge_number(class="form-control form-control-lg", maxlength="6") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.username.label(class="form-control-label") }}
+
+                            {% if form.username.errors %}
+                                {{ form.username(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.username(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.email.label(class="form-control-label") }}
+
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.email(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.institution.label(class="form-control-label") }}
+
+                            {% if form.institution.errors %}
+                                {{ form.institution(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.institution.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.institution(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.comment_char.label(class="form-control-label") }}
+
+                            {% if form.comment_char.errors %}
+                                {{ form.comment_char(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.comment_char.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.comment_char(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a class="btn btn-primary btn-md" href="{{ url_for('admin.update_user_password', username=user.username) }}">Change Password</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalTitle">Delete User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="delete-modal-body">Are you sure you want to delete {{ user.username }}?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-danger btn-md" href="{{ url_for('admin.delete_user', username=user.username) }}">Delete User</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="freezeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="freezeModalTitle">Freeze User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="freeze-modal-body">Are you sure you want to freeze {{ user.username }}'s account?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary btn-md" href="{{ url_for('admin.freeze_user', username=user.username) }}">Freeze User</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block scripts %}{% endblock scripts %}

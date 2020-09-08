@@ -1,2 +1,5 @@
+sdproc.wsgi
+test.py
 .idea
 *.pyc
+.DS_Store

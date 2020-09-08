@@ -497,6 +497,7 @@ def EPICS_types(n):
 	else:
 		return ("Unexpected type %d" % n)
 
+
 def readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=None, readQuick=False):
 	"""usage readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=None, readQuick=False)"""
 	global use_numpy
@@ -507,7 +508,7 @@ def readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=
 	use_numpy = useNumpy
 
 	dim = []
-	if (fname == None):
+	if fname is None:
 		if have_Tkinter:
 			fname = tkFileDialog.Open().show()
 		elif have_wx:
@@ -523,14 +524,14 @@ def readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=
 		else:
 			print "No file specified, and no file dialog could be opened"
 			return None
-	if (not os.path.isfile(fname)):
-		if (not fname.endswith('.mda')):
+	if not os.path.isfile(fname):
+		if not fname.endswith('.mda'):
 			fname = fname + '.mda'
-		if (not os.path.isfile(fname)):
+		if not os.path.isfile(fname):
 			print fname, "not found"
 			return None
 
-	if (outFile == None):
+	if outFile == None:
 		out = sys.stdout
 	else:
 		out = open(outFile, 'w')
@@ -821,14 +822,14 @@ def readMDA(fname=None, maxdim=4, verbose=0, showHelp=0, outFile=None, useNumpy=
 
 ################################################################################
 # skim MDA file to get dimensions (planned and actually acquired), and other info
-def skimScan(dataFile):
-	"""usage: skimScan(dataFile)"""
+def skimScan(DataFile):
+	"""usage: skimScan(DataFile)"""
 	scan = scanDim()	# data structure to hold scan info and data
-	buf = dataFile.read(10000) # enough to read scan header
+	buf = DataFile.read(10000) # enough to read scan header
 	u = xdr.Unpacker(buf)
 	scan.rank = u.unpack_int()
 	if (scan.rank > 20) or (scan.rank < 0):
-		print "* * * skimScan('%s'): rank > 20.  probably a corrupt file" % dataFile.name
+		print "* * * skimScan('%s'): rank > 20.  probably a corrupt file" % DataFile.name
 		return None
 	scan.npts = u.unpack_int()
 	scan.curr_pt = u.unpack_int()
@@ -864,12 +865,12 @@ def skimMDA(fname=None, verbose=False):
 			return None
 
 	try:
-		dataFile = open(fname, 'rb')
+		DataFile = open(fname, 'rb')
 	except:
 		print "mda_f:skimMDA: failed to open file '%s'" % fname
 		return None
 
-	buf = dataFile.read(100)		# to read header for scan of up to 5 dimensions
+	buf = DataFile.read(100)		# to read header for scan of up to 5 dimensions
 	u = xdr.Unpacker(buf)
 
 	# read file header
@@ -882,11 +883,11 @@ def skimMDA(fname=None, verbose=False):
 	dimensions = u.unpack_farray(rank, u.unpack_int)
 	isRegular = u.unpack_int()
 	pExtra = u.unpack_int()
-	pmain_scan = dataFile.tell() - (len(buf) - u.get_position())
+	pmain_scan = DataFile.tell() - (len(buf) - u.get_position())
 
 	# collect 1D data
-	dataFile.seek(pmain_scan)
-	scan = skimScan(dataFile)
+	DataFile.seek(pmain_scan)
+	scan = skimScan(DataFile)
 	if (scan == None):
 		if verbose: print fname, "contains no data"
 		return None
@@ -895,8 +896,8 @@ def skimMDA(fname=None, verbose=False):
 	dim[0].dim = 1
 
 	if (rank > 1):
-		dataFile.seek(dim[0].plower_scans[0])
-		dim.append(skimScan(dataFile))
+		DataFile.seek(dim[0].plower_scans[0])
+		dim.append(skimScan(DataFile))
 		if (dim[1]):
 			dim[1].dim = 2
 		else:
@@ -904,8 +905,8 @@ def skimMDA(fname=None, verbose=False):
 			return None
 
 	if (rank > 2):
-		dataFile.seek(dim[1].plower_scans[0])
-		dim.append(skimScan(dataFile))
+		DataFile.seek(dim[1].plower_scans[0])
+		dim.append(skimScan(DataFile))
 		if (dim[2]):
 			dim[2].dim = 3
 		else:
@@ -913,15 +914,15 @@ def skimMDA(fname=None, verbose=False):
 			return None
 
 	if (rank > 3):
-		dataFile.seek(dim[2].plower_scans[0])
-		dim.append(skimScan(dataFile))
+		DataFile.seek(dim[2].plower_scans[0])
+		dim.append(skimScan(DataFile))
 		if (dim[3]):
 			dim[3].dim = 4
 		else:
 			if verbose: print "had a problem reading 4d from ", fname
 			return None
 
-	dataFile.close()
+	DataFile.close()
 	dict = {}
 	dict['filename'] = fname
 	dict['version'] = version

@@ -1323,7 +1323,7 @@
     this.height = this.props.height;
     this.data = this.props.data;
     this.buttons = [];
-    this.root = d3.select("#" + figid).append("div").style("position", "relative");
+    this.root = d3.select("#" + figid).append("div");
     this.axes = [];
     for (var i = 0; i < this.props.axes.length; i++) this.axes.push(new mpld3_Axes(this, this.props.axes[i]));
     this.plugins = [];

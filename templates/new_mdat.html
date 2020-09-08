@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block static %}
+    <link href="/static/modifyDAT/mdat.css" rel="stylesheet">
+{% endblock static %}
+
+{% block content %}
+    <div class="content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="text-center sessionName" id="sesName">{{ ses }}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 center-btn">
+                        <form class="hide" id="output-form" method="post">
+                            <input type="hidden" name="outType" id="outType">
+                            <input type="hidden" name="datFName" id="datFName">
+                        </form>
+                        <div id="outputBtn">
+                            <button onclick="current_data_file()" class="btn btn-primary" data-toggle="modal" data-target="#OutputModal" title="Display or save output file">
+                                Output
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 text-center">
+                <label for="comment">Comment:</label>
+                <textarea class="form-control" rows="4" id="comment" name="comment"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="text-center">
+                    <label>Remove Background</label>
+                </div>
+                        <div class="blue-border">
+                    <label for="flatRad">Flat Value</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="radio" id="flatRad" name="methodRad">
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" id="flatVal" placeholder="Y-Value">
+                    </div>
+                    <label for="calcRad">Calculated Average</label>
+                    <font id="calcLeftYLabel">Left Y</font>
+                    <font id="calcRightYLabel">Right Y</font>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="radio" id="calcRad" name="methodRad">
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" id="calcLeftX" placeholder="Left X">
+                        <input type="text" class="form-control" id="calcRightX" placeholder="Right X">
+                        <font id="calcLeftY" size="3"></font>
+                        <font id="calcRightY" size="3"></font>
+                    </div>
+
+                    <label for="givRad">Given Average</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="radio" id="givRad" name="methodRad" aria-label="...">
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" id="leftX" aria-label="..." placeholder="Left X">
+                        <input type="text" class="form-control" id="leftY" aria-label="..." placeholder="Left Y">
+                        <input type="text" class="form-control" id="rightX" aria-label="..." placeholder="Right X">
+                        <input type="text" class="form-control" id="rightY"  aria-label="..." placeholder="Right Y">
+                    </div>
+                </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 align-btns">
+                        <button type="button" class="btn btn-primary btn-default" onclick="remBackground(0)">Apply</button>
+                        <button type="button" class="btn btn-primary btn-default" onclick="remBackground(1)">Show</button>
+                        <button type="button" class="btn btn-primary btn-default" onclick="resetPlot()">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div id="process_plot">
+                    {{code|safe}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="OutputModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Save Options</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="DATname">Data File Name:</label>
+                    <input type="text" class="form-control" id="DATname" placeholder="Name of DAT file">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" onclick="save_to_server()" class="btn btn-primary">Save to Server</button>
+                        <button type="button" onclick="save_locally()" class="btn btn-primary">Save Locally</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block scripts %}
+    <script type="text/javascript" src="/static/modifyDAT/modifyDAT.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+{% endblock scripts %}

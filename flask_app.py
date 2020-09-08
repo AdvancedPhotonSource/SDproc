@@ -1,4 +1,4 @@
-'''
+"""
 -    Copyright (c) UChicago Argonne, LLC. All rights reserved.
 -
 -    Copyright UChicago Argonne, LLC. This software was produced
@@ -41,7 +41,7 @@
 -    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 -    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 -    POSSIBILITY OF SUCH DAMAGE.
-'''
+"""
 import os
 from flask import Flask
 from data import config
@@ -49,6 +49,6 @@ from data import config
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 app.config['UPLOAD_DIR'] = app.root_path + config.UPLOAD_DIR
-app.config['RECAPTCHA_PUBLIC_KEY'] = config.RECAPTCHA_PUBLIC_KEY
-app.config['RECAPTCHA_PRIVATE_KEY'] = config.RECAPTCHA_PRIVATE_KEY
+app.config['RECAPTCHA_PUBLIC_KEY'] = config.RECAPTCHA_SITE_KEY
+app.config['RECAPTCHA_PRIVATE_KEY'] = config.RECAPTCHA_SECRET_KEY
 app.secret_key = os.urandom(24)

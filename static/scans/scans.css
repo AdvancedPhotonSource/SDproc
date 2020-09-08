@@ -1,0 +1,33 @@
+.border-box {
+    box-sizing: border-box;
+    border: dotted black 1px;
+    padding: 15px;
+}
+.pane{
+    display: inline-block;
+    overflow-y: scroll;
+    max-height: 90px;
+}
+.fileName{
+    font-weight:bold;
+    border:1px dotted;
+    padding:10px;
+    width: 60%;
+    text-align:center;
+    margin:auto;
+}
+.fitGroup{
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3d75c0;
+    border-radius: 5px;
+}
+.fileNameCell{
+    width:300px;
+}
+td {
+padding: 5px;
+}
+.highlight{background-color: #7498c9;}
+
+.lightlight{background-color: #e6f2ff;}

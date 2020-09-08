@@ -50,11 +50,13 @@ import re
 
 db = SQLAlchemy(app)
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
     pwhash = db.Column(db.String())
     email = db.Column(db.String(120), nullable=True)
+    badge_number = db.Column(db.Integer())
     fullName = db.Column(db.String())
     institution = db.Column(db.String())
     reason = db.Column(db.String())
@@ -65,7 +67,7 @@ class User(db.Model):
     isAdmin = db.Column(db.Integer())
 
     def __repr__(self):
-        return '<User %r>' % (self.username)
+        return '<User %r>' % self.username
 
     def check_password(self, pw):
         return check_password_hash(self.pwhash, pw)
@@ -73,19 +75,23 @@ class User(db.Model):
     def set_password(self, pw):
         self.pwhash = generate_password_hash(pw)
 
+    @staticmethod
     def is_authenticated(self):
         return True
 
+    @staticmethod
     def is_active(self):
         return True
 
+    @staticmethod
     def is_anonymous(self):
         return False
 
     def get_id(self):
         return self.id
 
-    def is_strong_pass(self, pw):
+    @staticmethod
+    def is_strong_pass(pw):
         length_error = len(pw) < 8
         digit_error = re.search(r"\d", pw) is None
         uppercase_error = re.search(r"[A-Z]", pw) is None
@@ -93,23 +99,23 @@ class User(db.Model):
         symbol_error = re.search(r"\W", pw) is None
         password_ok = not(length_error or digit_error or uppercase_error or lowercase_error or symbol_error)
         return {
-            'password_ok' : password_ok,
-            'Length at least 8' : length_error,
-            'At least one digit' : digit_error,
-            'At least one uppercase' : uppercase_error,
-            'At least one lowercase' : lowercase_error,
-            'At least one symbol' : symbol_error,
+            'password_ok': password_ok,
+            'Length at least 8': length_error,
+            'At least one digit': digit_error,
+            'At least one uppercase': uppercase_error,
+            'At least one lowercase': lowercase_error,
+            'At least one symbol': symbol_error,
         }
 
-class notification(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
 
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     originUser = db.Column(db.String())
     type = db.Column(db.String())
     timestamp = db.Column(db.DateTime())
 
 
-class logBook(db.Model):
+class LogBook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     name = db.Column(db.String())
@@ -150,7 +156,7 @@ class logBook(db.Model):
     xbool = db.Column(db.Boolean())
 
 
-class dataFile(db.Model):
+class DataFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String())
     path = db.Column(db.String())
@@ -162,7 +168,7 @@ class dataFile(db.Model):
     treeType = db.Column(db.String(), nullable=True)
 
 
-class currentMeta(db.Model):
+class CurrentMeta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     name = db.Column(db.String())
@@ -210,8 +216,8 @@ class currentMeta(db.Model):
     xbool = db.Column(db.Boolean())
 
 
-class currentDAT(db.Model):
-    __tablename__ = 'currentDAT'
+class CurrentDAT(db.Model):
+    __tablename__ = 'CurrentDAT'
     id = db.Column(db.Integer, primary_key=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -222,8 +228,8 @@ class currentDAT(db.Model):
     originDAT = db.Column(db.String())
 
 
-class sessionMeta(db.Model):
-    __tablename__ = 'sessionMeta'
+class SessionMeta(db.Model):
+    __tablename__ = 'SessionMeta'
     id = db.Column(db.Integer, primary_key=True)
 
     fileName = db.Column(db.String())
@@ -268,36 +274,32 @@ class sessionMeta(db.Model):
     xbool = db.Column(db.Boolean())
 
 
-class sessionFiles(db.Model):
-    __tablename__ = 'sessionFiles'
+class SessionFiles(db.Model):
+    __tablename__ = 'SessionFiles'
     id = db.Column(db.Integer, primary_key=True)
-    #sessionMeta_id = db.Column(db.ForeignKey('sessionMeta.id'))
-    #sessionMeta = relationship("sessionMeta")
-
     name = db.Column(db.String())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('oldUser', lazy='dynamic'))
     comment = db.Column(db.String())
     authed = db.Column(db.String())
     last_used = db.Column(db.DateTime())
-    #sessionMeta_ids = db.Column(db.String())
 
 
-class sessionFilesMeta(db.Model):
-    __tablename__ = 'sessionFilesMeta'
+class SessionFilesMeta(db.Model):
+    __tablename__ = 'SessionFilesMeta'
 
     sessionFilesMeta_id = db.Column(db.Integer, primary_key=True)
-    sessionFiles_id = db.Column(db.ForeignKey('sessionFiles.id'))
-    sessionMeta_id = db.Column(db.ForeignKey('sessionMeta.id'))
+    sessionFiles_id = db.Column(db.ForeignKey('SessionFiles.id'))
+    sessionMeta_id = db.Column(db.ForeignKey('SessionMeta.id'))
 
 
-class userFiles(db.Model):
+class UserFiles(db.Model):
     userFiles_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.ForeignKey('user.id'))
     file_id = db.Column(db.ForeignKey('data_file.id'))
 
 
-class loginAttempts(db.Model):
+class LoginAttempts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
 
@@ -313,4 +315,3 @@ class HRM(db.Model):
     hrm_alpha2 = db.Column(db.Float())
     hrm_theta1_sign = db.Column(db.Integer())
     hrm_theta2_sign = db.Column(db.Integer())
-

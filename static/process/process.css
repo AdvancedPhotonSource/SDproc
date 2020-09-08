@@ -1,0 +1,34 @@
+.sessionName{
+    font-weight:bold;
+    border:1px dotted;
+    padding:10px;
+}
+
+td {
+padding: 10px;
+}
+
+
+
+
+
+
+.pane{
+    display: inline-block;
+    overflow-y: scroll;
+    max-height: 500px;
+}
+
+.sel1{
+    width: 100%;
+}
+
+.fileNameCell{
+    width:300px;
+}
+
+
+
+.highlight{background-color: #7498c9;}
+
+.lightlight{background-color: #e6f2ff;}

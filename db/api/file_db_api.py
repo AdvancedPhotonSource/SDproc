@@ -46,25 +46,25 @@
 from sqlalchemy import and_
 
 from db.api.sd_proc_base_db_api import SdProcBaseDbApi
-from db.db_model import db, dataFile, currentMeta
+from db.db_model import db, DataFile, CurrentMeta
 
 
 class FileDbApi(SdProcBaseDbApi):
 
-	def __init__(self):
-		self.usedArgs = []
+    def __init__(self):
+        self.usedArgs = []
 
-	def setBaseComment(self, idnext, current_user_id, current_user_session):
-		if (idnext == -1):
-			self.usedArgs = []
-		else:
-			if idnext not in self.usedArgs:
-				self.usedArgs.append(idnext)
+    def setBaseComment(self, idnext, current_user_id, current_user_session):
+        if (idnext == -1):
+            self.usedArgs = []
+        else:
+            if idnext not in self.usedArgs:
+                self.usedArgs.append(idnext)
 
-				file_instance = db.session.query(dataFile).filter_by(id=idnext).first()
-				format_instance = db.session.query(currentMeta).filter(and_(currentMeta.user_id == current_user_id,
-				                                                            currentMeta.file_id == file_instance.id,
-				                                                            currentMeta.session == current_user_session)).first()
-				if format_instance is not None:
-					format_instance.comment = file_instance.comment
-					db.session.commit()
+                file_instance = db.session.query(DataFile).filter_by(id=idnext).first()
+                format_instance = CurrentMeta.query.filter(and_(CurrentMeta.user_id == current_user_id,
+                                                                CurrentMeta.file_id == file_instance.id,
+                                                                CurrentMeta.session == current_user_session)).first()
+                if format_instance is not None:
+                    format_instance.comment = file_instance.comment
+                    db.session.commit()

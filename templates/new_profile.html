@@ -1,0 +1,152 @@
+{% extends "layout.html" %}
+
+{% block static %}
+{% endblock static %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="content-section">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4">Profile Info</legend>
+                        <div class="form-group">
+                            {{ form.full_name.label(class="form-control-label") }}
+
+                            {% if form.full_name.errors %}
+                                {{ form.full_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.full_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.full_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.badge_number.label(class="form-control-label") }}
+
+                            {% if form.badge_number.errors %}
+                                {{ form.badge_number(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.badge_number.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {% if user.isAdmin == 1 %}
+                                    {{ form.badge_number(class="form-control form-control-lg", maxlength="6") }}
+                                {% else %}
+                                    {{ form.badge_number(class="form-control form-control-lg", maxlength="6", readonly="readonly") }}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.username.label(class="form-control-label") }}
+
+                            {% if form.username.errors %}
+                                {{ form.username(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {% if user.isAdmin == 1 %}
+                                    {{ form.username(class="form-control form-control-lg") }}
+                                {% else %}
+                                    {{ form.username(class="form-control form-control-lg", readonly="readonly") }}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.email.label(class="form-control-label") }}
+
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.email(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.institution.label(class="form-control-label") }}
+
+                            {% if form.institution.errors %}
+                                {{ form.institution(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.institution.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.institution(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.comment_char.label(class="form-control-label") }}
+
+                            {% if form.comment_char.errors %}
+                                {{ form.comment_char(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.comment_char.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.comment_char(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a class="btn btn-primary btn-md" href="{{ url_for('users.update_password') }}">Change Password</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="notifications text-center" id="notifications">
+                <h3>Notifications:</h3>
+                <table>
+                    <tbody>
+                        {% if notifications %}
+                            {% for task in notifications %}
+                                <tr class="item notifTR">
+                                    <td class="name" colspan="2" id="{{ task.id }}">
+                                        {{ task.type }}
+                                    </td>
+                                    <td>
+                                        {{ task.name }}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-default" onclick="showInfo({{ task.id }})">Info</button>
+                                    </td>
+                                    <td>
+                                        {{ task.time }}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success" onclick="approve({{ task.id }})">Approve</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" onclick="decline({{ task.id }})">Decline</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            No Notifications
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block scripts %}{% endblock scripts %}
