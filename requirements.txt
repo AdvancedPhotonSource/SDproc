@@ -34,7 +34,7 @@ mkl-random==1.0.1
 mpld3==0.3
 numpy==1.15.2
 pycparser==2.19
-PyJWT==1.6.4
+PyJWT==2.4.0
 pyparsing==2.2.1
 python-dateutil==2.7.3
 python2-secrets==1.0.5
