@@ -32,7 +32,7 @@ matplotlib==2.2.3
 mkl-fft==1.0.6
 mkl-random==1.0.1
 mpld3==0.3
-numpy==1.15.2
+numpy==1.22.0
 pycparser==2.19
 PyJWT==1.6.4
 pyparsing==2.2.1
